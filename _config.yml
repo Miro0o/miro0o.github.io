@@ -16,7 +16,11 @@
 # theme: jekyll-theme-so-simple
 remote_theme: mmistakes/so-simple-theme
 skin: "/assets/css/skins/default.css"
+
+# Language supports. Related configs in _data/text.yml - by liquid templating system
+# Supported Languages: English (default), German, Spanish, French, Italy, Turkish
 locale: en-US
+
 title: "Mir0 Son"
 description: "Hi there! This is mir0."
 baseurl: "" # the subpath of your site, e.g. "/blog"
@@ -25,20 +29,26 @@ logo: "/images/site-logo.jpeg" # path of site logo, e.g. "/assets/images/logo.pn
 date_format: "%B %-d, %Y"
 read_time: true
 words_per_minute: 200
+twitter:
+  username: mir0sun # site's Twitter username
+
+# Some third services...
 mathjax:
   enable: true
   combo: "tex-mml-chtml"
   tags: "ams"
+
 google_fonts:
   - name: "Source Sans Pro"
     weights: "400,400i,700,700i"
   - name: "Lora"
     weights: "400,400i,700,700i"
 google_analytics: # Google Analytics id, e.g. "UA-NNNNNNNN-N"
-disqus:
-  shortname: comments-micro # Disqus shortname, e.g. "my_disqus_shortname"
-twitter:
-  username: mir0sun # site's Twitter username
+
+# disqus:
+  # shortname: comments-micro # Disqus shortname, e.g. "my_disqus_shortname"
+giscus:
+  enable: true
 
 # Liquid
 liquid:
@@ -84,6 +94,10 @@ collections:
     output: true
     permalink: /:collection/:path/
 
+# Head Scripts:
+# head_scripts:
+
+
 # Front Matter Defaults
 defaults:
   # Post defaults
@@ -106,7 +120,7 @@ defaults:
 # Site Author
 author:
   name: Mir0 Son
-  picture: /images/miro-son-photo.jpeg
+  picture: /images/miro-son-photo.JPG
   email:
   twitter: mir0sun
   links:
@@ -143,8 +157,16 @@ footer_links:
     # icon: fab fa-github-square
     icon: fa-brands fa-square-github
     # icon: fa-brands fa-github
+  - title: Stackoverflow
+    url: https://stackoverflow.com/users/16542494/sun-mir0
+    icon:
   - title: Feed
     url: atom.xml
     # icon: fas fa-rss-square
     icon: fa-solid fa-square-rss
     # icon: fa-solid fa-rss
+
+
+# Custommed Footer Scripts. This will override the default foot_scripts
+# footer_scripts
+# ...

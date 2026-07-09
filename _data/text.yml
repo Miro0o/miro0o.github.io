@@ -19,14 +19,18 @@ en: &DEFAULT_EN
   table_of_contents: "Table of Contents"
   results_found: "Result(s) found"
   share: "Share"
-  tweet: "Tweet"
+  tweet: "x-tweet"
   next: "Next"
-  previous: "Previous"
+  # previous: "Previous"
+  previous: "Past posts"
   newer: "Newer"
   older: "Older"
   back_to_top: "Back to Top"
-  search_placeholder_text: "Enter your search term..."
-  powered_by: "Powered by"
+  # search_placeholder_text: "Enter your search term..."
+  search_placeholder_text: "What do you have in mind today?"
+  # powered_by: "Powered by"
+  powered_by: "💛 💙 💜 Proudly powered by"
+
 en-US:
   <<: *DEFAULT_EN
 en-CA:
@@ -36,6 +40,9 @@ en-GB:
 en-AU:
   <<: *DEFAULT_EN
 
+
+# ------------------------------------------------------------------------
+# Not maintained by miro... below are defaults contents.
 
 # German
 # -----------------
