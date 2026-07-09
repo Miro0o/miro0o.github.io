@@ -21,15 +21,17 @@ en: &DEFAULT_EN
   share: "Share"
   tweet: "x-tweet"
   next: "Next"
+  next_homepage: "Next"
   # previous: "Previous"
   previous: "Past posts"
+  previous_homepage: "Previous"
   newer: "Newer"
   older: "Older"
   back_to_top: "Back to Top"
   # search_placeholder_text: "Enter your search term..."
   search_placeholder_text: "What do you have in mind today?"
   # powered_by: "Powered by"
-  powered_by: "💛 💙 💜 Proudly powered by"
+  powered_by: "💛 💙 💜 Powered by"
 
 en-US:
   <<: *DEFAULT_EN
