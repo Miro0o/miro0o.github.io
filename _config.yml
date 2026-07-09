@@ -16,6 +16,7 @@
 # theme: jekyll-theme-so-simple
 remote_theme: mmistakes/so-simple-theme
 skin: "/assets/css/skins/default.css"
+# skin: "/assets/css/skin_control.css"
 
 # Language supports. Related configs in _data/text.yml - by liquid templating system
 # Supported Languages: English (default), German, Spanish, French, Italy, Turkish
@@ -157,9 +158,6 @@ footer_links:
     # icon: fab fa-github-square
     icon: fa-brands fa-square-github
     # icon: fa-brands fa-github
-  - title: Stackoverflow
-    url: https://stackoverflow.com/users/16542494/sun-mir0
-    icon:
   - title: Feed
     url: atom.xml
     # icon: fas fa-rss-square

@@ -23,7 +23,10 @@
     }
   </script>
 
+  <!-- the main css, where our own so-simple theme css is imported -->
   <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+
+  <!-- the skin css, controls different color schemes -->
   <link rel="stylesheet" href="{{ site.skin | default: '/assets/css/skins/default.css' | relative_url }}">
 
   {% if site.google_fonts %}
