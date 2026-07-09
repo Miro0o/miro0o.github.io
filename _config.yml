@@ -110,27 +110,41 @@ author:
   email:
   twitter: mir0sun
   links:
-    - title: Twitter
+    - title: x-twitter
       url: https://twitter.com/mir0sun
-      icon: fab fa-x-twitter
+      # icon: fab fa-twitter-square
+      # icon: fa-brands fa-square-x-twitter
+      icon: fa-brands fa-x-twitter
     - title: Instagram
       url: https://instagram.com/miro0ooo0
-      icon: fab fa-instagram
+      # icon: fab fa-instagram
+      # icon: fa-brands fa-square-instagram
+      icon: fa-brands fa-instagram
     - title: GitHub
       url: https://github.com/Miro0o
-      icon: fab fa-github-square
+      # icon: fab fa-github-square
+      # icon: fa-brands fa-square-github
+      icon: fa-brands fa-github
 
 # Footer Links
 footer_links:
-  - title: Twitter
+  - title: x-twitter
     url: https://twitter.com/mir0sun
-    icon: fab fa-x-twitter
+    # icon: fab fa-twitter-square
+    icon: fa-brands fa-square-x-twitter
+    # icon: fa-brands fa-x-twitter
   - title: Instagram
     url: https://instagram.com/miro0ooo0
-    icon: fab fa-instagram
+    # icon: fab fa-instagram
+    icon: fa-brands fa-square-instagram
+    # icon: fa-brands fa-instagram
   - title: GitHub
     url: https://github.com/Miro0o
-    icon: fab fa-github-square
+    # icon: fab fa-github-square
+    icon: fa-brands fa-square-github
+    # icon: fa-brands fa-github
   - title: Feed
     url: atom.xml
-    icon: fas fa-rss-square
+    # icon: fas fa-rss-square
+    icon: fa-solid fa-square-rss
+    # icon: fa-solid fa-rss

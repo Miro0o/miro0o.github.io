@@ -10,7 +10,9 @@
 {%- else -%}
   <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <script src="{{ '/assets/js/main.min.js' | relative_url }}"></script>
-  <script src="https://use.fontawesome.com/releases/v5.0.12/js/all.js"></script>
+  <!-- <script src="https://use.fontawesome.com/releases/v5.0.12/js/all.js"></script> -->
+  <!-- here i changed it to use font awesome v6 instead of v5. miro. 2024.2 -->
+  <script src="https://use.fontawesome.com/releases/v6.5.1/js/all.js"></script>
 {%- endif -%}
 
 {%- if jekyll.environment == 'production' and site.google_analytics -%}
