@@ -651,6 +651,215 @@ h1 {
   color: var(--ink);
 }
 
+/* Academic profile: a modernized, responsive take on the classic text-first lab page. */
+.academic-page {
+  background:
+    linear-gradient(180deg, rgba(255, 254, 250, 0.96), rgba(241, 240, 235, 0.92)),
+    var(--paper);
+}
+
+.academic-main {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding-top: 64px;
+}
+
+.academic-profile {
+  color: #30322f;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.96rem;
+  line-height: 1.58;
+}
+
+.academic-profile a {
+  color: var(--blue);
+  text-decoration: underline;
+  text-decoration-color: rgba(30, 96, 118, 0.3);
+  text-underline-offset: 0.16em;
+}
+
+.academic-profile a:hover {
+  color: #17495a;
+  text-decoration-color: currentColor;
+}
+
+.academic-intro {
+  display: grid;
+  grid-template-columns: 228px minmax(0, 1fr);
+  gap: clamp(36px, 7vw, 78px);
+  align-items: center;
+  margin-bottom: 46px;
+}
+
+.academic-photo-wrap {
+  margin: 0;
+}
+
+.academic-photo {
+  display: block;
+  width: 228px;
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  object-fit: cover;
+  box-shadow: 0 12px 35px rgba(33, 28, 19, 0.08);
+}
+
+.academic-photo-wrap figcaption {
+  margin-top: 7px;
+  color: #868680;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.academic-kicker {
+  margin: 0 0 8px;
+  color: var(--red);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.academic-identity h1 {
+  max-width: none;
+  margin: 0 0 18px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(2.3rem, 5vw, 3.65rem);
+  line-height: 1.02;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.academic-identity h1 span {
+  color: #7a7b75;
+  font-size: 0.56em;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.academic-role,
+.academic-affiliation {
+  margin: 3px 0;
+  color: #40423e;
+}
+
+.academic-role {
+  font-weight: 700;
+}
+
+.academic-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 18px;
+  color: #85857f;
+  font-size: 0.9rem;
+  font-style: normal;
+}
+
+.academic-bio {
+  padding-bottom: 8px;
+}
+
+.academic-bio p {
+  margin: 0 0 17px;
+}
+
+.academic-section {
+  margin-top: 42px;
+}
+
+.academic-section > h2 {
+  margin: 0 0 18px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.18rem;
+  line-height: 1.2;
+}
+
+.interest-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.interest-list li {
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  color: #555650;
+  background: rgba(255, 253, 248, 0.52);
+  font-size: 0.84rem;
+}
+
+.academic-list {
+  display: grid;
+}
+
+.academic-item {
+  position: relative;
+  padding: 4px 0 23px 18px;
+  border-left: 5px solid #e2aa79;
+}
+
+.academic-item + .academic-item {
+  padding-top: 15px;
+}
+
+.academic-item:last-child {
+  padding-bottom: 4px;
+}
+
+.academic-item-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: baseline;
+}
+
+.academic-item h3 {
+  margin: 0;
+  color: #282a27;
+  font-size: 1.02rem;
+  line-height: 1.35;
+}
+
+.academic-item h3 a {
+  color: inherit;
+}
+
+.academic-item time {
+  color: #777872;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.academic-item p {
+  margin: 8px 0 0;
+}
+
+.academic-item .academic-meta {
+  margin-top: 4px;
+  color: #71726c;
+  font-size: 0.84rem;
+}
+
+.academic-item.compact {
+  padding-bottom: 17px;
+}
+
+.academic-item.compact p:last-child {
+  margin-top: 6px;
+}
+
 body.worldmodel-page {
   height: 100dvh;
   min-height: 100dvh;
@@ -1115,6 +1324,46 @@ body.meta-home {
   .lede {
     font-size: 1.06rem;
   }
+
+  .academic-main {
+    padding-top: 48px;
+  }
+}
+
+@media (max-width: 680px) {
+  .academic-intro {
+    grid-template-columns: 116px minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 35px;
+  }
+
+  .academic-photo {
+    width: 116px;
+  }
+
+  .academic-photo-wrap figcaption {
+    font-size: 0.65rem;
+  }
+
+  .academic-kicker {
+    margin-top: 2px;
+  }
+
+  .academic-identity h1 {
+    margin-bottom: 11px;
+    font-size: clamp(1.8rem, 8vw, 2.55rem);
+  }
+
+  .academic-role,
+  .academic-affiliation {
+    font-size: 0.88rem;
+  }
+
+  .academic-contact {
+    margin-top: 12px;
+    font-size: 0.8rem;
+  }
 }
 
 @media (max-width: 420px) {
@@ -1141,6 +1390,61 @@ body.meta-home {
 
   .worldmodel-caption {
     width: calc(100% - 28px);
+  }
+
+  .academic-main {
+    padding-top: 38px;
+  }
+
+  .academic-intro {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 15px;
+  }
+
+  .academic-photo {
+    width: 88px;
+  }
+
+  .academic-photo-wrap figcaption {
+    display: none;
+  }
+
+  .academic-kicker {
+    font-size: 0.62rem;
+  }
+
+  .academic-identity h1 {
+    font-size: 1.67rem;
+  }
+
+  .academic-identity h1 span {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.48em;
+  }
+
+  .academic-role,
+  .academic-affiliation {
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  .academic-contact {
+    gap: 2px 7px;
+    font-size: 0.74rem;
+  }
+
+  .academic-item {
+    padding-left: 13px;
+  }
+
+  .academic-item-heading {
+    display: block;
+  }
+
+  .academic-item time {
+    display: block;
+    margin-top: 3px;
   }
 }
 

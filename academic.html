@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Academic placeholder page for Miro Son.">
-  <title>Miro Son - Academic</title>
+  <meta name="description" content="Academic profile of Yiqing (Miro) Sun, an MSc student in Computer Science and Engineering at DTU.">
+  <title>Yiqing Sun - Academic</title>
   <link rel="stylesheet" href="styles.css">
   <script src="assets/nav-menu.js" defer></script>
 </head>
-<body>
+<body class="academic-page">
   <div class="page">
     <header class="masthead">
       <a class="brand" href="https://miro0o.github.io/" aria-label="Miro0o home">
@@ -28,23 +28,165 @@
       </nav>
     </header>
 
-    <main class="content-main">
-      <section class="placeholder" aria-labelledby="academic-title">
-        <p class="eyebrow">academic slice</p>
-        <h1 id="academic-title">Academic</h1>
-        <p class="lede">
-          Placeholder for research interests, projects, publications, teaching material,
-          and CV-shaped records.
-        </p>
-        <p class="note">
-          This page is a public slice of the larger personal site. The deeper map lives
-          in the worldmodel.
-        </p>
-        <div class="text-links">
-          <a href="index.html">Back to meta home</a>
-          <a href="https://github.com/Miro0o">GitHub</a>
-        </div>
-      </section>
+    <main class="content-main academic-main">
+      <article class="academic-profile">
+        <header class="academic-intro">
+          <figure class="academic-photo-wrap">
+            <img class="academic-photo" src="images/academic-placeholder.png" alt="Fictional placeholder portrait; a real photograph will be added later.">
+            <figcaption>Placeholder portrait</figcaption>
+          </figure>
+
+          <div class="academic-identity">
+            <p class="academic-kicker">Academic profile</p>
+            <h1>Yiqing Sun <span>(Miro)</span></h1>
+            <p class="academic-role">MSc Eng. in Computer Science and Engineering</p>
+            <p class="academic-affiliation">Technical University of Denmark (DTU)</p>
+            <address class="academic-contact">
+              <a href="mailto:m1rooo0.son@gmail.com">m1rooo0.son@gmail.com</a>
+              <span aria-hidden="true">·</span>
+              <a href="https://github.com/Miro0o">GitHub</a>
+              <span aria-hidden="true">·</span>
+              <a href="CV-Sun-2601.pdf">CV</a>
+            </address>
+          </div>
+        </header>
+
+        <section class="academic-bio" aria-labelledby="about-heading">
+          <h2 id="about-heading" class="sr-only">About</h2>
+          <p>
+            I am an MSc student in Computer Science and Engineering at
+            <a href="https://www.dtu.dk/english/">DTU</a>. My interests sit at the intersection of
+            <strong>software and systems security</strong>, <strong>program analysis</strong>, and
+            <strong>LLM-based developer tools</strong>. I am especially interested in using language
+            models to make security analysis and testing more adaptable across programming languages.
+          </p>
+          <p>
+            Before DTU, I studied cybersecurity at Sichuan University and spent a semester as a
+            visiting student at UC Berkeley. I have worked on eBPF monitoring, cloud and network
+            performance, penetration testing, static malware analysis, and multi-language fuzzing.
+          </p>
+        </section>
+
+        <section class="academic-section" aria-labelledby="interests-heading">
+          <h2 id="interests-heading">Research interests</h2>
+          <ul class="interest-list">
+            <li>Software and systems security</li>
+            <li>Program analysis and model checking</li>
+            <li>LLM agents for code analysis</li>
+            <li>Fuzzing and automated testing</li>
+            <li>Network and cloud security</li>
+          </ul>
+        </section>
+
+        <section class="academic-section" aria-labelledby="projects-heading">
+          <h2 id="projects-heading">Selected projects</h2>
+          <div class="academic-list">
+            <article class="academic-item">
+              <div class="academic-item-heading">
+                <h3>Large Language Model Based Multi-Language Fuzzing</h3>
+                <time datetime="2024-10">2024–2025</time>
+              </div>
+              <p class="academic-meta">Bachelor's thesis · Supervisor: <a href="http://deepimaging.group">Prof. Yi Zhang</a></p>
+              <p>
+                A universal fuzzing framework that uses prompt engineering to generate diverse test
+                cases for systems implemented in different languages, with the goal of improving code
+                coverage and language support over conventional fuzzing workflows.
+              </p>
+            </article>
+
+            <article class="academic-item">
+              <div class="academic-item-heading">
+                <h3>LLM Agents for Static Malware Analysis</h3>
+                <time datetime="2024-02">2024</time>
+              </div>
+              <p class="academic-meta">Course project · Supervisor: <a href="https://ccs.scu.edu.cn/info/1053/2578.htm">Prof. Zhiyang Fang</a></p>
+              <p>
+                A static-analysis workflow using agentic language models to support malware detection
+                for ArkTS and HarmonyOS applications, combining signature-based analysis with semantic
+                reasoning over code.
+              </p>
+            </article>
+
+            <article class="academic-item">
+              <div class="academic-item-heading">
+                <h3>DPDK Test Suites</h3>
+                <time datetime="2024-05">2024</time>
+              </div>
+              <p class="academic-meta">Intern project · NSFOCUS systems group</p>
+              <p>
+                Performance benchmarking tools for DPDK network drivers and applications, including
+                automated packet-processing measurements and latency reporting.
+              </p>
+            </article>
+
+            <article class="academic-item">
+              <div class="academic-item-heading">
+                <h3>OpenFlow SDN Controller for Security Policy Management</h3>
+                <time datetime="2022-09">2022–2023</time>
+              </div>
+              <p class="academic-meta">Course project · <a href="https://gitee.com/Mir0/sdn-final-proj">code</a></p>
+              <p>
+                An OpenFlow 1.0 controller built with RYU and Mininet, using EAPoL, access-control lists,
+                and role-based access control to simplify network security policy management.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="academic-section" aria-labelledby="experience-heading">
+          <h2 id="experience-heading">Experience</h2>
+          <div class="academic-list">
+            <article class="academic-item compact">
+              <div class="academic-item-heading">
+                <h3><a href="https://nsfocusglobal.com">NSFOCUS Technology</a></h3>
+                <time datetime="2024-03">Mar.–Jul. 2024</time>
+              </div>
+              <p class="academic-meta">Security Service Engineer Intern · Chengdu, China</p>
+              <p>Enterprise penetration testing, vulnerability analysis, and contributions to DPDK test suites.</p>
+            </article>
+
+            <article class="academic-item compact">
+              <div class="academic-item-heading">
+                <h3><a href="https://csri.scu.edu.cn">Cyber Science Research Institute, Sichuan University</a></h3>
+                <time datetime="2023-10">2023–2024</time>
+              </div>
+              <p class="academic-meta">Undergraduate Researcher Intern · Chengdu, China</p>
+              <p>eBPF-based kernel event monitoring and performance evaluation of OpenStack and Kubernetes environments.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="academic-section" aria-labelledby="education-heading">
+          <h2 id="education-heading">Education</h2>
+          <div class="academic-list">
+            <article class="academic-item compact">
+              <div class="academic-item-heading">
+                <h3>Technical University of Denmark</h3>
+                <time datetime="2025-09">2025–2027</time>
+              </div>
+              <p class="academic-meta">MSc Eng., Computer Science and Engineering · Kongens Lyngby, Denmark</p>
+              <p>Coursework includes program analysis, model checking, and logic for security.</p>
+            </article>
+
+            <article class="academic-item compact">
+              <div class="academic-item-heading">
+                <h3>University of California, Berkeley</h3>
+                <time datetime="2024-08">Fall 2024</time>
+              </div>
+              <p class="academic-meta">Berkeley Global Access visiting student · Berkeley, USA</p>
+              <p>Coursework in computer security, computability and complexity, and LLM agents.</p>
+            </article>
+
+            <article class="academic-item compact">
+              <div class="academic-item-heading">
+                <h3>Sichuan University</h3>
+                <time datetime="2021-09">2021–2025</time>
+              </div>
+              <p class="academic-meta">B.Eng., Cybersecurity · Chengdu, China</p>
+            </article>
+          </div>
+        </section>
+      </article>
     </main>
 
     <footer>
