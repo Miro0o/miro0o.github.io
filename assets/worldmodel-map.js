@@ -433,10 +433,10 @@
     if (index >= 0) {
       const node = nodes[index];
       const detail = node.type === "folder" ? `${format.format(node.noteCount)} notes in this branch` : `${format.format(node.linkCount)} connections`;
-      setStatus(`${node.title}. ${detail}.${frozenIndex === index ? " Locked — click elsewhere to release." : ""}`);
+      setStatus(`${node.title}. ${detail}.`);
       showTooltip(node, clientX, clientY);
     } else {
-      setStatus("Drag to pan. Scroll to zoom. Hover or click a node to reveal its branch.");
+      setStatus("");
       tooltip.hidden = true;
     }
   }

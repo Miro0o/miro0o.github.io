@@ -894,7 +894,7 @@ body.worldmodel-page {
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
-.worldmodel-caption::before {
+.worldmodel-caption:has([data-map-status]:not(:empty))::before {
   color: #6a6b66;
   content: "> ";
 }
