@@ -342,6 +342,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-inline: clamp(6px, 0.5vw, 10px);
   overflow: hidden;
 }
 
@@ -353,6 +354,7 @@ main {
 }
 
 .ascii-map {
+  flex: 0 0 auto;
   width: max-content;
   min-width: 0;
   margin: 0;
@@ -552,97 +554,50 @@ main {
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth {
   opacity: 1;
   color: #8ba1a7;
-  text-shadow:
-    0 0 8px rgba(139, 161, 167, 0.2),
-    0 0 24px rgba(70, 132, 155, 0.12);
 }
 
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-deep-sea {
   color: #2d6f99;
-  text-shadow:
-    0 0 8px rgba(45, 111, 153, 0.26),
-    0 0 24px rgba(45, 111, 153, 0.16);
 }
 
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-shallow-sea {
   color: #4aa7c2;
-  text-shadow:
-    0 0 8px rgba(74, 167, 194, 0.26),
-    0 0 24px rgba(74, 167, 194, 0.16);
 }
 
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-coast {
   color: #b9c4c5;
-  text-shadow:
-    0 0 8px rgba(185, 196, 197, 0.24),
-    0 0 24px rgba(74, 167, 194, 0.12);
 }
 
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-rainforest {
   color: #a6b5b8;
-  text-shadow:
-    0 0 8px rgba(166, 181, 184, 0.22),
-    0 0 24px rgba(74, 167, 194, 0.1);
 }
 
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-forest {
   color: #9faeb1;
-  text-shadow:
-    0 0 8px rgba(159, 174, 177, 0.22),
-    0 0 24px rgba(74, 167, 194, 0.1);
 }
 
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-grass {
   color: #adb7b7;
-  text-shadow:
-    0 0 8px rgba(173, 183, 183, 0.22),
-    0 0 24px rgba(74, 167, 194, 0.1);
 }
 
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-dry {
   color: #a8a29a;
-  text-shadow:
-    0 0 8px rgba(168, 162, 154, 0.22),
-    0 0 24px rgba(168, 162, 154, 0.12);
 }
 
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-mountain {
   color: #c2c5c2;
-  text-shadow:
-    0 0 8px rgba(194, 197, 194, 0.24),
-    0 0 24px rgba(194, 197, 194, 0.12);
 }
 
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-tundra {
   color: #b8c8c7;
-  text-shadow:
-    0 0 8px rgba(184, 200, 199, 0.22),
-    0 0 24px rgba(184, 200, 199, 0.12);
 }
 
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-ice {
   color: #e5f4f6;
-  text-shadow:
-    0 0 8px rgba(229, 244, 246, 0.26),
-    0 0 24px rgba(229, 244, 246, 0.14);
 }
 
 .worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-rim {
   color: rgba(114, 130, 134, 0.82);
-  text-shadow: none;
-}
-
-.worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth,
-.worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-deep-sea,
-.worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-shallow-sea,
-.worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-coast,
-.worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-rainforest,
-.worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-forest,
-.worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-grass,
-.worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-dry,
-.worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-mountain,
-.worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-tundra,
-.worldmodel-diagram[data-active-region="earth"] .ascii-cell.is-earth.tone-earth-ice {
   text-shadow: none;
 }
 
@@ -1403,6 +1358,56 @@ body.meta-home {
   .meta-home .masthead,
   .worldmodel-page .masthead {
     align-items: center;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .meta-home .masthead nav,
+  .worldmodel-page .masthead nav {
+    width: auto;
+    min-width: 0;
+    justify-content: flex-end;
+    overflow: visible;
+  }
+
+  .worldmodel-header-title {
+    display: none;
+  }
+
+  .meta-home footer,
+  .worldmodel-page footer {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 5px;
+  }
+
+  .meta-home footer > span:first-child,
+  .worldmodel-page footer > span:first-child {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .meta-home footer .elsewhere,
+  .worldmodel-page footer .elsewhere {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .diagram-readout,
+  .worldmodel-caption {
+    position: static;
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: 100%;
+    min-height: 1.55em;
+    transform: translateY(4px);
+  }
+
+  .diagram-readout.is-visible {
+    transform: none;
+  }
+
+  .worldmodel-caption {
+    transform: none;
   }
 
   .meta-home .meta-main {
@@ -1440,10 +1445,6 @@ body.meta-home {
 }
 
 @media (max-width: 700px) {
-  .worldmodel-header-title {
-    display: none;
-  }
-
   .meta-home footer,
   .worldmodel-page footer {
     column-gap: 12px;

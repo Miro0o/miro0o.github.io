@@ -81,6 +81,8 @@
   let relatedNodes = null;
   let ancestorNodes = null;
   let tooltipNodeIndex = -1;
+  let tooltipWidth = 0;
+  let tooltipHeight = 0;
   const showActiveLinks = true;
   let view = { x: 0, y: 0, scale: 1 };
   let drag = null;
@@ -260,6 +262,7 @@
     if (isCompact) {
       payload.nodes = null;
       payload.links = null;
+      if (window.WORLDMODEL_MAP_DATA === payload) window.WORLDMODEL_MAP_DATA = null;
     }
     fitMap();
     reveal = 1;
@@ -315,6 +318,8 @@
     pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(width * pixelRatio);
     canvas.height = Math.round(height * pixelRatio);
+    tooltipWidth = 0;
+    tooltipHeight = 0;
     invalidateProjection();
     requestDraw();
   }
@@ -423,13 +428,10 @@
   function drawHierarchy(activePass) {
     context.save();
     context.beginPath();
-    const indexes = activePass ? relatedNodes : nodes;
-    for (const item of indexes) {
-      const node = activePass ? nodes[item] : item;
+    for (const node of nodes) {
       if (node.parentIndex < 0 || !visibleAtReveal(node)) continue;
       const isActive = hoveredIndex >= 0 && relatedNodes.has(node.index) && relatedNodes.has(node.parentIndex);
-      if (!activePass && isActive) continue;
-      if (activePass && !relatedNodes.has(node.parentIndex)) continue;
+      if (activePass !== isActive) continue;
       const parent = nodes[node.parentIndex];
       const fromX = screenX[parent.index];
       const fromY = screenY[parent.index];
@@ -507,9 +509,9 @@
       if (hoveredIndex >= 0) {
         context.save();
         context.beginPath();
-        for (const nodeIndex of relatedNodes) {
+        for (const nodeIndex of typeIndexes) {
           const node = nodes[nodeIndex];
-          if (node.type !== type || node.index === hoveredIndex || !visibleAtReveal(node)) continue;
+          if (node.index === hoveredIndex || !relatedNodes.has(node.index) || !visibleAtReveal(node)) continue;
           const pointX = screenX[nodeIndex];
           const pointY = screenY[nodeIndex];
           if (pointX < -10 || pointY < -10 || pointX > width + 10 || pointY > height + 10) continue;
@@ -711,11 +713,17 @@
         <small>${escapeHtml(nodePath(node) || "Vault root")}</small>
       `;
       tooltipNodeIndex = node.index;
+      tooltipWidth = 0;
+      tooltipHeight = 0;
     }
-    tooltip.hidden = false;
+    if (tooltip.hidden) tooltip.hidden = false;
+    if (!tooltipWidth || !tooltipHeight) {
+      tooltipWidth = tooltip.offsetWidth;
+      tooltipHeight = tooltip.offsetHeight;
+    }
     const bounds = root.getBoundingClientRect();
-    const left = clamp(clientX - bounds.left + 14, 10, Math.max(10, bounds.width - tooltip.offsetWidth - 10));
-    const top = clamp(clientY - bounds.top + 14, 10, Math.max(10, bounds.height - tooltip.offsetHeight - 10));
+    const left = clamp(clientX - bounds.left + 14, 10, Math.max(10, bounds.width - tooltipWidth - 10));
+    const top = clamp(clientY - bounds.top + 14, 10, Math.max(10, bounds.height - tooltipHeight - 10));
     tooltip.style.transform = `translate(${left}px, ${top}px)`;
   }
 

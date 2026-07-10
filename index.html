@@ -91,10 +91,10 @@
       const cells = [];
       const renderedChars = new Uint16Array(cellCount);
       const renderedRegions = new Uint8Array(cellCount);
-      const renderedTones = new Uint8Array(cellCount);
+      const renderedClasses = new Uint16Array(cellCount);
       renderedChars.fill(0xffff);
       renderedRegions.fill(0xff);
-      renderedTones.fill(0xff);
+      renderedClasses.fill(0xffff);
       const frame = {
         chars: new Uint16Array(cellCount),
         regions: new Uint8Array(cellCount),
@@ -144,6 +144,7 @@
       };
       const terrainRows = window.EARTH_TERRAIN_ROWS || [];
       const shadeRows = window.EARTH_SHADE_ROWS || [];
+      const hasTerrainData = Boolean(terrainRows.length && shadeRows.length);
       const terrainToneByCode = {
         r: "earth-rainforest",
         f: "earth-forest",
@@ -209,7 +210,7 @@
       };
 
       const terrainCodeAt = (lon, lat) => {
-        if (!terrainRows.length) return ".";
+        if (!hasTerrainData) return ".";
         const wrappedLon = ((((lon + 180) % 360) + 360) % 360) - 180;
         const x = clamp(Math.floor((wrappedLon + 180) / 360 * terrainRows[0].length), 0, terrainRows[0].length - 1);
         const y = clamp(Math.floor((90 - lat) / 180 * terrainRows.length), 0, terrainRows.length - 1);
@@ -217,7 +218,7 @@
       };
 
       const terrainShadeAt = (lon, lat) => {
-        if (!shadeRows.length) return 0;
+        if (!hasTerrainData) return 0;
         const wrappedLon = ((((lon + 180) % 360) + 360) % 360) - 180;
         const x = clamp(Math.floor((wrappedLon + 180) / 360 * shadeRows[0].length), 0, shadeRows[0].length - 1);
         const y = clamp(Math.floor((90 - lat) / 180 * shadeRows.length), 0, shadeRows.length - 1);
@@ -309,8 +310,8 @@
         }
       ];
 
-      const nightLightRows = window.NIGHT_LIGHT_ROWS || [];
-      const nightLightSamples = nightLightRows.flatMap((row, rowIndex) => [...row].map((char, colIndex) => {
+      let nightLightRows = window.NIGHT_LIGHT_ROWS || [];
+      let nightLightSamples = nightLightRows.flatMap((row, rowIndex) => [...row].map((char, colIndex) => {
         const level = Number(char);
         if (!level) return null;
         return {
@@ -337,7 +338,11 @@
       ];
 
       const cityLightPoints = (() => {
-        const points = [];
+        const longitudes = [];
+        const cosLatitudes = [];
+        const projectedY = [];
+        const chars = [];
+        const tones = [];
         nightLightSamples.forEach(({ lon, lat, intensity }) => {
           const spread = 0.22 + intensity * 0.54;
           const count = intensity > 0.74 ? nightLightPatchOffsets.length : intensity > 0.46 ? 5 : 1;
@@ -350,23 +355,33 @@
             if (!nearLand) continue;
             const pointIntensity = intensity * weight;
             const latitude = toRadians(pointLat);
-            points.push({
-              longitude: toRadians(pointLon),
-              cosLatitude: Math.cos(latitude),
-              y: earth.cy - earth.ry * Math.sin(latitude),
-              char: pointIntensity > 0.78 ? "*" : pointIntensity > 0.48 ? "+" : pointIntensity > 0.24 ? ":" : ".",
-              tone: pointIntensity > 0.78
-                ? "earth-city-hot"
-                : pointIntensity > 0.52
-                  ? "earth-city-dense"
-                  : pointIntensity > 0.28
-                    ? "earth-city-light"
-                    : "earth-city-glow"
-            });
+            const char = pointIntensity > 0.78 ? "*" : pointIntensity > 0.48 ? "+" : pointIntensity > 0.24 ? ":" : ".";
+            const tone = pointIntensity > 0.78
+              ? "earth-city-hot"
+              : pointIntensity > 0.52
+                ? "earth-city-dense"
+                : pointIntensity > 0.28
+                  ? "earth-city-light"
+                  : "earth-city-glow";
+            longitudes.push(toRadians(pointLon));
+            cosLatitudes.push(Math.cos(latitude));
+            projectedY.push(earth.cy - earth.ry * Math.sin(latitude));
+            chars.push(char.charCodeAt(0));
+            tones.push(toneIdFor(tone));
           }
         });
-        return points;
+        return {
+          length: longitudes.length,
+          longitude: new Float64Array(longitudes),
+          cosLatitude: new Float64Array(cosLatitudes),
+          y: new Float64Array(projectedY),
+          char: new Uint16Array(chars),
+          tone: new Uint8Array(tones)
+        };
       })();
+      nightLightSamples = null;
+      nightLightRows = null;
+      window.NIGHT_LIGHT_ROWS = null;
 
       const buildCells = () => {
         const fragment = document.createDocumentFragment();
@@ -387,14 +402,17 @@
         map.style.fontSize = "";
         map.style.transform = "";
         const { clientWidth, clientHeight } = diagram;
+        const diagramStyle = window.getComputedStyle(diagram);
+        const inlinePadding = parseFloat(diagramStyle.paddingLeft) + parseFloat(diagramStyle.paddingRight);
+        const availableWidth = Math.max(0, clientWidth - inlinePadding);
         const mapWidth = map.scrollWidth;
         const mapHeight = map.scrollHeight;
-        if (!clientWidth || !clientHeight || !mapWidth || !mapHeight) return;
+        if (!availableWidth || !clientHeight || !mapWidth || !mapHeight) return;
 
         const baseFontSize = parseFloat(window.getComputedStyle(map).fontSize);
         if (!baseFontSize) return;
 
-        const scaleX = Math.min(1.12, (clientWidth * 0.99) / mapWidth);
+        const scaleX = Math.min(1.12, (availableWidth * 0.998) / mapWidth);
         const scaleY = Math.min(1.12, (clientHeight * 0.96) / mapHeight);
         map.style.transform = `scale(${scaleX}, ${scaleY})`;
       };
@@ -606,24 +624,27 @@
 
       const drawCityLights = (frame) => {
         const angle = earthRotation();
-        for (const point of cityLightPoints) {
-          const localLon = wrapRadians(point.longitude - angle);
-          const z = point.cosLatitude * Math.cos(localLon);
+        for (let pointIndex = 0; pointIndex < cityLightPoints.length; pointIndex += 1) {
+          const localLon = wrapRadians(cityLightPoints.longitude[pointIndex] - angle);
+          const cosLatitude = cityLightPoints.cosLatitude[pointIndex];
+          const z = cosLatitude * Math.cos(localLon);
           if (z <= 0.22) continue;
-          const x = Math.round(earth.cx + earth.rx * point.cosLatitude * Math.sin(localLon));
-          const y = Math.round(point.y);
-          const currentIndex = x >= 0 && x < width && y >= 0 && y < height ? y * width + x : -1;
-          const currentTone = currentIndex >= 0 ? toneNames[frame.tones[currentIndex]] : "";
+          const x = Math.round(earth.cx + earth.rx * cosLatitude * Math.sin(localLon));
+          const y = Math.round(cityLightPoints.y[pointIndex]);
+          if (x < 0 || x >= width || y < 0 || y >= height) continue;
+          const index = y * width + x;
+          const currentTone = toneNames[frame.tones[index]];
           if (
             currentTone.startsWith("earth-city")
-            && lightRanks[frame.chars[currentIndex]] > lightRanks[point.char.charCodeAt(0)]
+            && lightRanks[frame.chars[index]] > lightRanks[cityLightPoints.char[pointIndex]]
           ) continue;
-          setCell(frame, x, y, point.char, "earth", point.tone);
+          frame.chars[index] = cityLightPoints.char[pointIndex];
+          frame.regions[index] = regionIds.earth;
+          frame.tones[index] = cityLightPoints.tone[pointIndex];
         }
       };
 
-      const drawAuthorPin = (frame) => {
-        const projection = projectEarthPoint(authorSite.lon, authorSite.lat, earthRotation());
+      const drawAuthorPin = (frame, projection) => {
         if (!projection) return null;
 
         putProjectedSprite(frame, projection, authorPin, "author", "author-pin");
@@ -637,7 +658,7 @@
         drawShootingStars(frame, time);
         drawEarth(frame, time);
         drawCityLights(frame);
-        drawAuthorPin(frame);
+        drawAuthorPin(frame, authorProjection);
         drawFireworks(frame, time, authorProjection);
         return frame;
       };
@@ -649,7 +670,9 @@
           const regionId = frame.regions[index];
           const toneId = frame.tones[index];
           const regionChanged = renderedRegions[index] !== regionId;
-          const toneChanged = renderedTones[index] !== toneId;
+          const classRegionId = charCode === spaceCode ? 0 : regionId;
+          const classToneId = charCode === spaceCode ? 0 : toneId;
+          const classKey = classRegionId << 8 | classToneId;
           if (renderedChars[index] !== charCode) {
             renderedChars[index] = charCode;
             cell.firstChild.data = String.fromCharCode(charCode);
@@ -658,15 +681,14 @@
             renderedRegions[index] = regionId;
             cell.dataset.region = regionNames[regionId];
           }
-          if (toneChanged || regionChanged) {
-            renderedTones[index] = toneId;
-            const key = regionId << 8 | toneId;
-            let nextClass = classNameCache.get(key);
+          if (renderedClasses[index] !== classKey) {
+            renderedClasses[index] = classKey;
+            let nextClass = classNameCache.get(classKey);
             if (!nextClass) {
-              const region = regionNames[regionId];
-              const tone = toneNames[toneId];
+              const region = regionNames[classRegionId];
+              const tone = toneNames[classToneId];
               nextClass = `ascii-cell${region ? ` ${regionClass[region]}` : ""}${tone ? ` tone-${tone}` : ""}`;
-              classNameCache.set(key, nextClass);
+              classNameCache.set(classKey, nextClass);
             }
             cell.className = nextClass;
           }
