@@ -24,6 +24,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100svh;
   color: var(--ink);
   background:
     linear-gradient(180deg, rgba(255, 254, 250, 0.9), rgba(241, 240, 235, 0.96)),
@@ -209,11 +210,12 @@ main {
   user-select: none;
   white-space: pre;
   cursor: crosshair;
+  transform-origin: center;
 }
 
 .ascii-cell {
   display: inline-block;
-  width: 1ch;
+  width: 0.61em;
   min-height: 1em;
   color: rgba(31, 33, 30, 0.1);
   transition: none;
@@ -652,7 +654,9 @@ h1 {
 }
 
 body.worldmodel-page {
+  height: 100vh;
   height: 100dvh;
+  min-height: 100vh;
   min-height: 100dvh;
   overflow: hidden;
 }
@@ -660,6 +664,7 @@ body.worldmodel-page {
 .worldmodel-page .page {
   width: 100%;
   max-width: none;
+  height: 100vh;
   height: 100dvh;
   min-height: 0;
   padding: 28px 0 32px;
@@ -712,6 +717,7 @@ body.worldmodel-page {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  min-width: 0;
   min-height: 0;
   padding: clamp(8px, 1.5vh, 16px) 0;
 }
@@ -719,6 +725,7 @@ body.worldmodel-page {
 .knowledge-map {
   position: relative;
   flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
   margin: 0;
   overflow: hidden;
@@ -728,6 +735,7 @@ body.worldmodel-page {
   position: relative;
   width: 100%;
   height: 100%;
+  min-width: 0;
   min-height: 0;
   overflow: hidden;
 }
@@ -894,7 +902,7 @@ body.worldmodel-page {
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
-.worldmodel-caption:has([data-map-status]:not(:empty))::before {
+.worldmodel-caption.has-status::before {
   color: #6a6b66;
   content: "> ";
 }
@@ -982,7 +990,9 @@ footer {
 }
 
 body.meta-home {
+  height: 100vh;
   height: 100dvh;
+  min-height: 100vh;
   min-height: 100dvh;
   overflow: hidden;
 }
@@ -990,6 +1000,7 @@ body.meta-home {
 .meta-home .page {
   width: 100%;
   max-width: none;
+  height: 100vh;
   height: 100dvh;
   min-height: 0;
   padding: 28px 0 32px;
@@ -1009,12 +1020,15 @@ body.meta-home {
 .meta-home .meta-stage,
 .meta-home .cosmos-frame,
 .meta-home .cosmos-shell {
+  min-width: 0;
   min-height: 0;
 }
 
 .meta-home .meta-main {
   flex: 1 1 auto;
   align-items: stretch;
+  width: 100%;
+  overflow: hidden;
   padding: clamp(8px, 1.4vh, 18px) 0 clamp(6px, 1vh, 12px);
 }
 
@@ -1033,8 +1047,28 @@ body.meta-home {
 
 .meta-home footer {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
   margin-top: 0;
   padding-top: 22px;
+}
+
+.meta-home footer > span:first-child,
+.worldmodel-page footer > span:first-child {
+  grid-column: 1;
+}
+
+.meta-home footer .elsewhere,
+.worldmodel-page footer .elsewhere {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.worldmodel-page footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
 }
 
 @media (max-width: 900px) {
@@ -1043,8 +1077,8 @@ body.meta-home {
     padding-top: 18px;
   }
 
-  .masthead,
-  footer {
+  body:not(.meta-home):not(.worldmodel-page) .masthead,
+  body:not(.meta-home):not(.worldmodel-page) footer {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -1083,6 +1117,11 @@ body.meta-home {
     gap: 10px;
   }
 
+  .meta-home .masthead,
+  .worldmodel-page .masthead {
+    align-items: center;
+  }
+
   .meta-home .meta-main {
     padding: 8px 0;
   }
@@ -1117,7 +1156,69 @@ body.meta-home {
   }
 }
 
+@media (max-width: 700px) {
+  .worldmodel-header-title {
+    display: none;
+  }
+
+  .meta-home footer,
+  .worldmodel-page footer {
+    column-gap: 12px;
+    font-size: 0.82rem;
+  }
+
+  .meta-home footer .elsewhere,
+  .worldmodel-page footer .elsewhere {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand {
+    gap: 8px;
+  }
+
+  .brand img {
+    width: 36px;
+    height: 36px;
+  }
+
+  nav {
+    width: auto;
+    gap: 12px;
+    overflow: visible;
+    font-size: 0.82rem;
+  }
+
+  .meta-home footer,
+  .worldmodel-page footer {
+    font-size: 0.75rem;
+  }
+
+  .meta-home footer .elsewhere,
+  .worldmodel-page footer .elsewhere {
+    gap: 9px;
+  }
+}
+
 @media (max-width: 420px) {
+  .meta-home .brand span,
+  .worldmodel-page .brand span,
+  .meta-home footer .footer-credit,
+  .worldmodel-page footer .footer-credit {
+    display: none;
+  }
+
+  .meta-home footer,
+  .worldmodel-page footer {
+    font-size: 0.72rem;
+  }
+
+  .meta-home footer .elsewhere,
+  .worldmodel-page footer .elsewhere {
+    gap: 7px;
+  }
+
   h1 {
     font-size: 2.24rem;
   }

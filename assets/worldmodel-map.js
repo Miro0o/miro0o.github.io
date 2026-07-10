@@ -9,7 +9,6 @@
   const tooltip = root.querySelector("[data-map-tooltip]");
   const status = document.querySelector("[data-map-status]");
   const count = document.querySelector("[data-map-count]");
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const palette = {
     ring: "#9aa7b5",
     hierarchy: "#8c9daf",
@@ -34,17 +33,18 @@
   let hoveredIndex = -1;
   let frozenIndex = -1;
   let relatedNodes = null;
-  const showLinks = true;
+  const showActiveLinks = true;
   let view = { x: 0, y: 0, scale: 1 };
   let drag = null;
   let animationFrame = 0;
-  let reveal = reducedMotion ? 1 : 0;
+  let reveal = 1;
 
   const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
   const format = new Intl.NumberFormat("en");
 
   function setStatus(message) {
     status.textContent = message;
+    status.parentElement.classList.toggle("has-status", Boolean(message));
   }
 
   function requestDraw() {
@@ -57,25 +57,59 @@
 
   function prepareMap(payload) {
     data = payload;
-    nodes = payload.nodes.map((node, index) => ({
-      ...node,
-      index,
-      parentIndex: -1,
-      children: [],
-      angle: -Math.PI / 2,
-      x: 0,
-      y: 0,
-      weight: node.type === "note" ? 1 : 0
-    }));
+    const isCompact = payload.version >= 2 && Array.isArray(payload.nodes[0]);
+    if (isCompact) {
+      const decodedNodes = [];
+      payload.nodes.forEach((source, index) => {
+        const [segment, folderFlag, parentIndex, noteCount, linkCount] = source;
+        const parent = parentIndex >= 0 ? decodedNodes[parentIndex] : null;
+        const id = parent ? (parent.id ? `${parent.id}/${segment}` : segment) : "";
+        const type = folderFlag ? "folder" : "note";
+        decodedNodes.push({
+          id,
+          title: type === "note" ? segment.replace(/\.md$/i, "") : segment || "miniWorldModel",
+          type,
+          parent: parent ? parent.id : null,
+          depth: parent ? parent.depth + 1 : 0,
+          noteCount,
+          linkCount,
+          index,
+          parentIndex,
+          children: [],
+          angle: -Math.PI / 2,
+          x: 0,
+          y: 0,
+          weight: type === "note" ? 1 : 0
+        });
+      });
+      nodes = decodedNodes;
+    } else {
+      nodes = payload.nodes.map((source, index) => ({
+          ...source,
+          index,
+          parentIndex: -1,
+          children: [],
+          angle: -Math.PI / 2,
+          x: 0,
+          y: 0,
+          weight: source.type === "note" ? 1 : 0
+        }));
+    }
     links = payload.links;
 
-    const nodeById = new Map(nodes.map((node) => [node.id, node]));
-    for (const node of nodes) {
-      if (node.parent === null) continue;
-      const parent = nodeById.get(node.parent);
-      if (!parent) continue;
-      node.parentIndex = parent.index;
-      parent.children.push(node.index);
+    if (isCompact) {
+      for (const node of nodes) {
+        if (node.parentIndex >= 0) nodes[node.parentIndex].children.push(node.index);
+      }
+    } else {
+      const nodeById = new Map(nodes.map((node) => [node.id, node]));
+      for (const node of nodes) {
+        if (node.parent === null) continue;
+        const parent = nodeById.get(node.parent);
+        if (!parent) continue;
+        node.parentIndex = parent.index;
+        parent.children.push(node.index);
+      }
     }
     for (const node of nodes) {
       node.children.sort((left, right) => {
@@ -112,9 +146,12 @@
     }
 
     count.textContent = `${format.format(payload.counts.notes)} notes · ${format.format(payload.counts.folders)} folders · ${format.format(payload.counts.links)} links`;
-    root.classList.add("is-ready");
     fitMap();
-    startReveal();
+    reveal = 1;
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    animationFrame = 0;
+    draw();
+    root.classList.add("is-ready");
   }
 
   function assignAngles(parentIndex, startAngle, endAngle) {
@@ -178,12 +215,11 @@
     if (!data) return;
 
     drawRings();
-    if (showLinks) drawNoteLinks(false);
     drawHierarchy(false);
     drawNodes();
     if (hoveredIndex >= 0) {
       drawHierarchy(true);
-      if (showLinks) drawNoteLinks(true);
+      if (showActiveLinks) drawNoteLinks(true);
     }
     drawLabels();
   }
@@ -218,10 +254,7 @@
       const to = worldToScreen(node);
       if (!segmentMightBeVisible(from, to)) continue;
       context.moveTo(from.x, from.y);
-      const center = { x: width / 2 - view.x * view.scale, y: height / 2 - view.y * view.scale };
-      const controlX = (from.x + to.x + center.x) / 3;
-      const controlY = (from.y + to.y + center.y) / 3;
-      context.quadraticCurveTo(controlX, controlY, to.x, to.y);
+      context.lineTo(to.x, to.y);
     }
     context.strokeStyle = activePass ? palette.active : palette.hierarchy;
     context.globalAlpha = activePass ? 0.88 : hoveredIndex >= 0 ? 0.035 : 0.19;
@@ -243,7 +276,7 @@
       const to = worldToScreen(target);
       if (!segmentMightBeVisible(from, to)) continue;
       context.moveTo(from.x, from.y);
-      context.quadraticCurveTo(width / 2 - view.x * view.scale, height / 2 - view.y * view.scale, to.x, to.y);
+      context.lineTo(to.x, to.y);
     }
     context.strokeStyle = activePass ? palette.linkActive : palette.link;
     context.globalAlpha = activePass ? 0.78 : hoveredIndex >= 0 ? 0.018 : 0.045;
@@ -484,22 +517,6 @@
     requestDraw();
   }
 
-  function startReveal() {
-    if (reducedMotion) {
-      reveal = 1;
-      requestDraw();
-      return;
-    }
-    const start = performance.now();
-    const duration = 1450;
-    const step = (now) => {
-      reveal = clamp((now - start) / duration, 0, 1);
-      requestDraw();
-      if (reveal < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }
-
   canvas.addEventListener("pointerdown", (event) => {
     if (event.button !== 0) return;
     drag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, viewX: view.x, viewY: view.y, moved: false };
@@ -555,7 +572,11 @@
     event.preventDefault();
   });
 
-  new ResizeObserver(resize).observe(canvas);
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(resize).observe(canvas);
+  } else {
+    window.addEventListener("resize", resize);
+  }
   resize();
   if (window.WORLDMODEL_MAP_DATA) {
     prepareMap(window.WORLDMODEL_MAP_DATA);

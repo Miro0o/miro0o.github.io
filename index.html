@@ -47,7 +47,7 @@
     </main>
 
     <footer>
-      <span>© 2022–2026 · Made with Codex</span>
+      <span>© 2022–2026 <span class="footer-credit">· Made with Codex</span></span>
       <button class="footer-companions" type="button" aria-label="Show the inner worldmodel caption">
         <img class="footer-boy" src="boy-footer.png" alt="" aria-hidden="true">
       </button>
@@ -310,6 +310,7 @@
 
       const fitAsciiMap = () => {
         map.style.fontSize = "";
+        map.style.transform = "";
         const { clientWidth, clientHeight } = diagram;
         const mapWidth = map.scrollWidth;
         const mapHeight = map.scrollHeight;
@@ -318,8 +319,9 @@
         const baseFontSize = parseFloat(window.getComputedStyle(map).fontSize);
         if (!baseFontSize) return;
 
-        const scale = Math.min(1.12, (clientWidth * 0.99) / mapWidth, (clientHeight * 0.96) / mapHeight);
-        map.style.fontSize = `${baseFontSize * scale}px`;
+        const scaleX = Math.min(1.12, (clientWidth * 0.99) / mapWidth);
+        const scaleY = Math.min(1.12, (clientHeight * 0.96) / mapHeight);
+        map.style.transform = `scale(${scaleX}, ${scaleY})`;
       };
 
       const drawSky = (frame, time) => {
@@ -612,7 +614,11 @@
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") clear();
       });
-      window.addEventListener("resize", fitAsciiMap);
+      if ("ResizeObserver" in window) {
+        new ResizeObserver(fitAsciiMap).observe(diagram);
+      } else {
+        window.addEventListener("resize", fitAsciiMap);
+      }
 
       const animate = (time) => {
         if (!previousTime) previousTime = time;
@@ -627,13 +633,19 @@
           syncFrame(drawScene(time));
           lastFrame = time;
         }
-        window.requestAnimationFrame(animate);
+        if (!document.hidden) window.requestAnimationFrame(animate);
       };
 
       buildCells();
       syncFrame(drawScene(0));
       fitAsciiMap();
       window.requestAnimationFrame(animate);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          previousTime = 0;
+          window.requestAnimationFrame(animate);
+        }
+      });
     })();
   </script>
 </body>
