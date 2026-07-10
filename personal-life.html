@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Miro Son's life page is coming soon.">
   <title>Miro Son - Life</title>
+  <script src="assets/theme-switcher.js"></script>
   <link rel="stylesheet" href="styles.css">
   <script src="assets/nav-menu.js" defer></script>
 </head>
@@ -12,7 +13,7 @@
   <div class="page">
     <header class="masthead">
       <a class="brand" href="https://miro0o.github.io/" aria-label="Miro0o home">
-        <img src="images/site-logo.jpeg" alt="">
+        <img src="images/site-logo.webp" width="42" height="42" alt="">
         <span>Miro0o</span>
       </a>
       <nav aria-label="Primary">
@@ -23,6 +24,14 @@
           <div class="nav-submenu">
             <a href="academic.html">Academic</a>
             <a href="personal-life.html" aria-current="page">Life</a>
+          </div>
+        </details>
+        <details class="theme-switcher" data-theme-switcher>
+          <summary aria-label="Theme: System theme"><span class="theme-icon" aria-hidden="true"></span></summary>
+          <div class="theme-options" role="radiogroup" aria-label="Theme">
+            <button type="button" role="radio" data-theme-option="day">Day theme</button>
+            <button type="button" role="radio" data-theme-option="night">Night theme</button>
+            <button type="button" role="radio" data-theme-option="system">System theme</button>
           </div>
         </details>
       </nav>
@@ -36,7 +45,7 @@
     </main>
 
     <footer>
-      <span>© 2022–2026 · Made with Codex</span>
+      <span>© 2022–2026 · Made with <a class="footer-codex-link" href="https://openai.com/codex/">Codex</a></span>
       <div class="elsewhere" aria-label="Elsewhere">
         <a href="https://github.com/Miro0o">GitHub</a>
         <a href="https://twitter.com/mir0sun">X</a>

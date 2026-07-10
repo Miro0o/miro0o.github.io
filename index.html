@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Miro Son's meta homepage: a diagram of self, society, Earth, universe, and an inner worldmodel.">
-  <title>Miro Son - Meta Home</title>
+  <meta name="description" content="Miro0o's meta homepage: a diagram of self, society, Earth, universe, and an inner worldmodel.">
+  <title>Miro0o</title>
+  <script src="assets/theme-switcher.js"></script>
   <link rel="stylesheet" href="styles.css">
   <script src="assets/nav-menu.js" defer></script>
 </head>
@@ -12,7 +13,7 @@
   <div class="page">
     <header class="masthead">
       <a class="brand" href="https://miro0o.github.io/" aria-label="Miro0o home">
-        <img src="images/site-logo.jpeg" alt="">
+        <img src="images/site-logo.webp" width="42" height="42" alt="">
         <span>Miro0o</span>
       </a>
       <nav aria-label="Primary">
@@ -23,6 +24,14 @@
           <div class="nav-submenu">
             <a href="academic.html">Academic</a>
             <a href="personal-life.html">Life</a>
+          </div>
+        </details>
+        <details class="theme-switcher" data-theme-switcher>
+          <summary aria-label="Theme: System theme"><span class="theme-icon" aria-hidden="true"></span></summary>
+          <div class="theme-options" role="radiogroup" aria-label="Theme">
+            <button type="button" role="radio" data-theme-option="day">Day theme</button>
+            <button type="button" role="radio" data-theme-option="night">Night theme</button>
+            <button type="button" role="radio" data-theme-option="system">System theme</button>
           </div>
         </details>
       </nav>
@@ -47,9 +56,9 @@
     </main>
 
     <footer>
-      <span>© 2022–2026 <span class="footer-credit">· Made with Codex</span></span>
+      <span>© 2022–2026 <span class="footer-credit">· Made with <a class="footer-codex-link" href="https://openai.com/codex/">Codex</a></span></span>
       <button class="footer-companions" type="button" aria-label="Show the inner worldmodel caption">
-        <img class="footer-boy" src="boy-footer.png" alt="" aria-hidden="true">
+        <img class="footer-boy" src="boy-footer.webp" width="68" height="71" alt="" aria-hidden="true">
       </button>
       <div class="diagram-readout" aria-live="polite"></div>
       <div class="elsewhere" aria-label="Elsewhere">
@@ -77,17 +86,45 @@
         rx: 212,
         ry: 58
       };
+      const cellCount = width * height;
+      const spaceCode = " ".charCodeAt(0);
       const cells = [];
+      const renderedChars = new Uint16Array(cellCount);
+      const renderedRegions = new Uint8Array(cellCount);
+      const renderedTones = new Uint8Array(cellCount);
+      renderedChars.fill(0xffff);
+      renderedRegions.fill(0xff);
+      renderedTones.fill(0xff);
+      const frame = {
+        chars: new Uint16Array(cellCount),
+        regions: new Uint8Array(cellCount),
+        tones: new Uint8Array(cellCount)
+      };
+      const regionNames = ["", "universe", "firework", "earth", "author", "self", "worldmodel"];
+      const regionIds = Object.fromEntries(regionNames.map((name, index) => [name, index]));
+      const toneNames = [""];
+      const toneIds = new Map([["", 0]]);
+      const toneIdFor = (tone) => {
+        if (!tone) return 0;
+        let id = toneIds.get(tone);
+        if (id !== undefined) return id;
+        id = toneNames.length;
+        toneIds.set(tone, id);
+        toneNames.push(tone);
+        return id;
+      };
+      const classNameCache = new Map();
       let rotationAngle = 0;
       let previousTime = 0;
       let isAuthorHovered = false;
+      let hoverClearTimer = 0;
       const labels = {
-        universe: "the wider universe around the scene",
-        firework: "fireworks over Copenhagen",
-        earth: "Earth: ocean, coasts, rainforest, forest, grassland, desert, mountains, tundra, and ice",
-        author: "Copenhagen: where the author is looking out from",
-        self: "me, a local self looking outward from one body",
-        worldmodel: "my thought bubble: an inner model of self, society, Earth, and universe"
+        universe: "The wider universe.",
+        firework: "Fireworks over Copenhagen.",
+        earth: "Planet earth. The home of all known life.",
+        author: "Copenhagen: where the author is.",
+        self: "where am I?",
+        worldmodel: "Us, the humans, thinking about the universe."
       };
       const related = {
         universe: ["universe"],
@@ -119,26 +156,30 @@
       let activeRegion = null;
       let lastFrame = 0;
 
-      const createCell = () => ({ char: " ", region: "", tone: "" });
-
-      const createFrame = () => Array.from({ length: height }, () => Array.from({ length: width }, createCell));
-
-      const setCell = (frame, x, y, char, region, options = {}) => {
-        if (x < 0 || x >= width || y < 0 || y >= height) return;
-        if (char !== " " || options.paintSpaces) frame[y][x].char = char;
-        if (region) frame[y][x].region = region;
-        if (options.tone) frame[y][x].tone = options.tone;
+      const createFrame = () => {
+        frame.chars.fill(spaceCode);
+        frame.regions.fill(0);
+        frame.tones.fill(0);
+        return frame;
       };
 
-      const put = (frame, x, y, text, region, options = {}) => {
+      const setCell = (target, x, y, char, region, tone = "", paintSpaces = false) => {
+        if (x < 0 || x >= width || y < 0 || y >= height) return;
+        const index = y * width + x;
+        if (char !== " " || paintSpaces) target.chars[index] = char.charCodeAt(0);
+        if (region) target.regions[index] = regionIds[region];
+        if (tone) target.tones[index] = toneIdFor(tone);
+      };
+
+      const put = (target, x, y, text, region, tone = "", paintSpaces = false) => {
         [...text].forEach((char, index) => {
-          if (char === " " && !options.paintSpaces) return;
-          setCell(frame, x + index, y, char, region, options);
+          if (char === " " && !paintSpaces) return;
+          setCell(target, x + index, y, char, region, tone, paintSpaces);
         });
       };
 
-      const putSprite = (frame, x, y, lines, region, options = {}) => {
-        lines.forEach((line, index) => put(frame, x, y + index, line, region, options));
+      const putSprite = (target, x, y, lines, region, tone = "", paintSpaces = false) => {
+        lines.forEach((line, index) => put(target, x, y + index, line, region, tone, paintSpaces));
       };
 
       const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -167,19 +208,23 @@
         };
       };
 
-      const terrainAt = (lon, lat) => {
-        if (!terrainRows.length || !shadeRows.length) return { code: ".", shade: 0 };
+      const terrainCodeAt = (lon, lat) => {
+        if (!terrainRows.length) return ".";
         const wrappedLon = ((((lon + 180) % 360) + 360) % 360) - 180;
         const x = clamp(Math.floor((wrappedLon + 180) / 360 * terrainRows[0].length), 0, terrainRows[0].length - 1);
         const y = clamp(Math.floor((90 - lat) / 180 * terrainRows.length), 0, terrainRows.length - 1);
-
-        return {
-          code: terrainRows[y]?.[x] || ".",
-          shade: Number(shadeRows[y]?.[x] || 0)
-        };
+        return terrainRows[y]?.[x] || ".";
       };
 
-      const landAt = (lon, lat) => terrainAt(lon, lat).code !== ".";
+      const terrainShadeAt = (lon, lat) => {
+        if (!shadeRows.length) return 0;
+        const wrappedLon = ((((lon + 180) % 360) + 360) % 360) - 180;
+        const x = clamp(Math.floor((wrappedLon + 180) / 360 * shadeRows[0].length), 0, shadeRows[0].length - 1);
+        const y = clamp(Math.floor((90 - lat) / 180 * shadeRows.length), 0, shadeRows.length - 1);
+        return Number(shadeRows[y]?.[x] || 0);
+      };
+
+      const landAt = (lon, lat) => terrainCodeAt(lon, lat) !== ".";
 
       const coastSamples = [
         [-1.8, 0],
@@ -291,19 +336,49 @@
         [0.7, -0.28, 0.3]
       ];
 
+      const cityLightPoints = (() => {
+        const points = [];
+        nightLightSamples.forEach(({ lon, lat, intensity }) => {
+          const spread = 0.22 + intensity * 0.54;
+          const count = intensity > 0.74 ? nightLightPatchOffsets.length : intensity > 0.46 ? 5 : 1;
+          for (let index = 0; index < count; index += 1) {
+            const [lonOffset, latOffset, weight] = nightLightPatchOffsets[index];
+            const pointLon = lon + lonOffset * spread;
+            const pointLat = lat + latOffset * spread;
+            const nearLand = landAt(pointLon, pointLat)
+              || coastSamples.some(([coastLon, coastLat]) => landAt(pointLon + coastLon, pointLat + coastLat));
+            if (!nearLand) continue;
+            const pointIntensity = intensity * weight;
+            const latitude = toRadians(pointLat);
+            points.push({
+              longitude: toRadians(pointLon),
+              cosLatitude: Math.cos(latitude),
+              y: earth.cy - earth.ry * Math.sin(latitude),
+              char: pointIntensity > 0.78 ? "*" : pointIntensity > 0.48 ? "+" : pointIntensity > 0.24 ? ":" : ".",
+              tone: pointIntensity > 0.78
+                ? "earth-city-hot"
+                : pointIntensity > 0.52
+                  ? "earth-city-dense"
+                  : pointIntensity > 0.28
+                    ? "earth-city-light"
+                    : "earth-city-glow"
+            });
+          }
+        });
+        return points;
+      })();
+
       const buildCells = () => {
         const fragment = document.createDocumentFragment();
         for (let y = 0; y < height; y += 1) {
-          const row = [];
           for (let x = 0; x < width; x += 1) {
             const cell = document.createElement("span");
             cell.className = "ascii-cell";
-            cell.textContent = " ";
-            row.push(cell);
+            cell.appendChild(document.createTextNode(" "));
+            cells.push(cell);
             fragment.appendChild(cell);
           }
           fragment.appendChild(document.createTextNode("\n"));
-          cells.push(row);
         }
         map.appendChild(fragment);
       };
@@ -325,10 +400,10 @@
       };
 
       const drawSky = (frame, time) => {
-        skySwirls.forEach((swirl) => putSprite(frame, swirl.x, swirl.y, swirl.lines, "universe", { tone: swirl.tone }));
+        skySwirls.forEach((swirl) => putSprite(frame, swirl.x, swirl.y, swirl.lines, "universe", swirl.tone));
         stars.forEach((star) => {
           const bright = Math.sin(time / 900 + star.phase) > 0.55;
-          setCell(frame, star.x, star.y, bright ? "*" : star.char, "universe", { tone: star.tone });
+          setCell(frame, star.x, star.y, bright ? "*" : star.char, "universe", star.tone);
         });
       };
 
@@ -343,9 +418,7 @@
         const trail = ["*", "+", "-", "-", "."];
 
         trail.forEach((char, index) => {
-          setCell(frame, headX + index * 2, headY - index, char, "universe", {
-            tone: index < 2 ? "sky-gold" : "sky-silver"
-          });
+          setCell(frame, headX + index * 2, headY - index, char, "universe", index < 2 ? "sky-gold" : "sky-silver");
         });
       };
 
@@ -373,21 +446,31 @@
         ];
 
         points.forEach(([x, y, char], index) => {
-          setCell(frame, centerX + x, centerY + y, char, "firework", {
-            tone: ["firework-gold", "firework-red", "firework-blue", "firework-violet"][index % 4]
-          });
+          setCell(
+            frame,
+            centerX + x,
+            centerY + y,
+            char,
+            "firework",
+            ["firework-gold", "firework-red", "firework-blue", "firework-violet"][index % 4]
+          );
         });
       };
 
-      const terrainTone = (lon, lat, sample) => {
-        const nearLand = coastSamples.some(([lonOffset, latOffset]) => landAt(lon + lonOffset, lat + latOffset));
-        const nearSea = coastSamples.some(([lonOffset, latOffset]) => !landAt(lon + lonOffset, lat + latOffset));
-        const isLand = sample.code !== ".";
+      const terrainTone = (lon, lat, code) => {
+        let nearLand = false;
+        let nearSea = false;
+        for (const [lonOffset, latOffset] of coastSamples) {
+          if (landAt(lon + lonOffset, lat + latOffset)) nearLand = true;
+          else nearSea = true;
+          if (nearLand && nearSea) break;
+        }
+        const isLand = code !== ".";
 
         if (!isLand) return nearLand ? "earth-shallow-sea" : "earth-deep-sea";
-        if (sample.code === "i") return "earth-ice";
+        if (code === "i") return "earth-ice";
         if (nearSea) return "earth-coast";
-        return terrainToneByCode[sample.code] || "earth-forest";
+        return terrainToneByCode[code] || "earth-forest";
       };
 
       const terrainNoise = (lon, lat, salt) => {
@@ -423,63 +506,90 @@
         }
       };
 
-      const drawEarth = (frame, time) => {
-        // Project a rotating sphere, then sample compact Natural Earth-derived
-        // land/terrain rasters so continents do not collapse into latitude bands.
-        const palettes = {
-          "earth-coast": ".,:+",
-          "earth-rainforest": ";=++",
-          "earth-forest": ",;=+",
-          "earth-grass": ".,;:",
-          "earth-dry": ".,:+",
-          "earth-mountain": ".:^/",
-          "earth-tundra": ".,:-",
-          "earth-ice": ".:-^"
-        };
-        const angle = earthRotation();
-        const earthTop = Math.max(0, Math.floor(earth.cy - earth.ry) - 1);
+      const terrainPalettes = {
+        "earth-coast": ".,:+",
+        "earth-rainforest": ";=++",
+        "earth-forest": ",;=+",
+        "earth-grass": ".,;:",
+        "earth-dry": ".,:+",
+        "earth-mountain": ".:^/",
+        "earth-tundra": ".,:-",
+        "earth-ice": ".:-^"
+      };
 
+      const earthSurfaceCells = (() => {
+        const earthTop = Math.max(0, Math.floor(earth.cy - earth.ry) - 1);
+        let length = 0;
+        for (let y = earthTop; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            const dx = (x - earth.cx) / earth.rx;
+            const dy = (y - earth.cy) / earth.ry;
+            if (dx * dx + dy * dy <= 1) length += 1;
+          }
+        }
+
+        const surface = {
+          length,
+          x: new Uint16Array(length),
+          y: new Uint8Array(length),
+          longitude: new Float64Array(length),
+          latitude: new Float64Array(length),
+          rim: new Uint8Array(length)
+        };
+        let index = 0;
         for (let y = earthTop; y < height; y += 1) {
           for (let x = 0; x < width; x += 1) {
             const dx = (x - earth.cx) / earth.rx;
             const dy = (y - earth.cy) / earth.ry;
             const sphere = dx * dx + dy * dy;
             if (sphere > 1) continue;
-
             const z = Math.sqrt(1 - sphere);
-            const lon = Math.atan2(dx, z) + angle;
-            const lat = Math.asin(clamp(-dy, -1, 1));
-            const lonDegrees = lon * 180 / Math.PI;
-            const latDegrees = lat * 180 / Math.PI;
             const top = earth.cy - earth.ry * Math.sqrt(Math.max(0, 1 - dx * dx));
-            const terrainSample = terrainAt(lonDegrees, latDegrees);
-            const maskIsLand = terrainSample.code !== ".";
-            let tone = terrainTone(lonDegrees, latDegrees, terrainSample);
-            let char = " ";
-
-            if (maskIsLand) {
-              const palette = palettes[tone];
-              const texture = terrainTexture(tone, lonDegrees, latDegrees, terrainSample.shade);
-              const index = Math.floor(texture * (palette.length - 1));
-              char = palette[clamp(index, 0, palette.length - 1)];
-            }
-
-            if (Math.abs(y - top) < 0.62) {
-              char = "-";
-              tone = "earth-rim";
-            }
-            setCell(frame, x, y, char, "earth", { paintSpaces: true, tone });
+            surface.x[index] = x;
+            surface.y[index] = y;
+            surface.longitude[index] = Math.atan2(dx, z);
+            surface.latitude[index] = Math.asin(clamp(-dy, -1, 1));
+            surface.rim[index] = Number(Math.abs(y - top) < 0.62);
+            index += 1;
           }
+        }
+        return surface;
+      })();
+
+      const drawEarth = (frame, time) => {
+        // Project a rotating sphere, then sample compact Natural Earth-derived
+        // land/terrain rasters so continents do not collapse into latitude bands.
+        const angle = earthRotation();
+        for (let surfaceIndex = 0; surfaceIndex < earthSurfaceCells.length; surfaceIndex += 1) {
+          const lonDegrees = (earthSurfaceCells.longitude[surfaceIndex] + angle) * 180 / Math.PI;
+          const latDegrees = earthSurfaceCells.latitude[surfaceIndex] * 180 / Math.PI;
+          const terrainCode = terrainCodeAt(lonDegrees, latDegrees);
+          const maskIsLand = terrainCode !== ".";
+          let tone = terrainTone(lonDegrees, latDegrees, terrainCode);
+          let char = " ";
+
+          if (maskIsLand) {
+            const palette = terrainPalettes[tone];
+            const texture = terrainTexture(tone, lonDegrees, latDegrees, terrainShadeAt(lonDegrees, latDegrees));
+            const index = Math.floor(texture * (palette.length - 1));
+            char = palette[clamp(index, 0, palette.length - 1)];
+          }
+
+          if (earthSurfaceCells.rim[surfaceIndex]) {
+            char = "-";
+            tone = "earth-rim";
+          }
+          setCell(frame, earthSurfaceCells.x[surfaceIndex], earthSurfaceCells.y[surfaceIndex], char, "earth", tone, true);
         }
       };
 
-      const putProjectedSprite = (frame, projection, lines, region, options = {}) => {
+      const putProjectedSprite = (frame, projection, lines, region, tone = "", paintSpaces = false) => {
         const x = Math.round(projection.x - spriteWidth(lines) / 2);
         const y = Math.round(projection.y - lines.length + 1);
 
         lines.forEach((line, row) => {
           [...line].forEach((char, col) => {
-            if (char === " " && !options.paintSpaces) return;
+            if (char === " " && !paintSpaces) return;
 
             const cellX = x + col;
             const cellY = y + row;
@@ -487,48 +597,36 @@
             const dy = (cellY - earth.cy) / earth.ry;
             if (dx * dx + dy * dy > 1) return;
 
-            setCell(frame, cellX, cellY, char, region, options);
+            setCell(frame, cellX, cellY, char, region, tone, paintSpaces);
           });
         });
       };
 
-      const lightRank = (char) => ({ ".": 1, ":": 2, "+": 3, "*": 4 })[char] || 0;
-
-      const drawNightLightPoint = (frame, lon, lat, intensity, angle) => {
-        const nearLand = landAt(lon, lat) || coastSamples.some(([lonOffset, latOffset]) => landAt(lon + lonOffset, lat + latOffset));
-        if (!nearLand) return;
-
-        const projection = projectEarthPoint(lon, lat, angle);
-        if (!projection) return;
-
-        const x = Math.round(projection.x);
-        const y = Math.round(projection.y);
-        const char = intensity > 0.78 ? "*" : intensity > 0.48 ? "+" : intensity > 0.24 ? ":" : ".";
-        const tone = intensity > 0.78 ? "earth-city-hot" : intensity > 0.52 ? "earth-city-dense" : intensity > 0.28 ? "earth-city-light" : "earth-city-glow";
-        const current = frame[y]?.[x];
-        if (current && current.tone?.startsWith("earth-city") && lightRank(current.char) > lightRank(char)) return;
-
-        setCell(frame, x, y, char, "earth", { tone });
-      };
-
-      const drawNightLightPatch = (frame, lon, lat, intensity, angle) => {
-        const spread = 0.22 + intensity * 0.54;
-        const count = intensity > 0.74 ? nightLightPatchOffsets.length : intensity > 0.46 ? 5 : 1;
-        nightLightPatchOffsets.slice(0, count).forEach(([lonOffset, latOffset, weight]) => {
-          drawNightLightPoint(frame, lon + lonOffset * spread, lat + latOffset * spread, intensity * weight, angle);
-        });
-      };
+      const lightRanks = { 42: 4, 43: 3, 46: 1, 58: 2 };
 
       const drawCityLights = (frame) => {
         const angle = earthRotation();
-        nightLightSamples.forEach(({ lon, lat, intensity }) => drawNightLightPatch(frame, lon, lat, intensity, angle));
+        for (const point of cityLightPoints) {
+          const localLon = wrapRadians(point.longitude - angle);
+          const z = point.cosLatitude * Math.cos(localLon);
+          if (z <= 0.22) continue;
+          const x = Math.round(earth.cx + earth.rx * point.cosLatitude * Math.sin(localLon));
+          const y = Math.round(point.y);
+          const currentIndex = x >= 0 && x < width && y >= 0 && y < height ? y * width + x : -1;
+          const currentTone = currentIndex >= 0 ? toneNames[frame.tones[currentIndex]] : "";
+          if (
+            currentTone.startsWith("earth-city")
+            && lightRanks[frame.chars[currentIndex]] > lightRanks[point.char.charCodeAt(0)]
+          ) continue;
+          setCell(frame, x, y, point.char, "earth", point.tone);
+        }
       };
 
       const drawAuthorPin = (frame) => {
         const projection = projectEarthPoint(authorSite.lon, authorSite.lat, earthRotation());
         if (!projection) return null;
 
-        putProjectedSprite(frame, projection, authorPin, "author", { tone: "author-pin" });
+        putProjectedSprite(frame, projection, authorPin, "author", "author-pin");
         return projection;
       };
 
@@ -545,18 +643,32 @@
       };
 
       const syncFrame = (frame) => {
-        for (let y = 0; y < height; y += 1) {
-          for (let x = 0; x < width; x += 1) {
-            const data = frame[y][x];
-            const cell = cells[y][x];
-            if (cell.textContent !== data.char) cell.textContent = data.char;
-            if (cell.dataset.region !== data.region) cell.dataset.region = data.region;
-            const nextClass = [
-              "ascii-cell",
-              data.region ? regionClass[data.region] : "",
-              data.tone ? `tone-${data.tone}` : ""
-            ].filter(Boolean).join(" ");
-            if (cell.className !== nextClass) cell.className = nextClass;
+        for (let index = 0; index < cellCount; index += 1) {
+          const cell = cells[index];
+          const charCode = frame.chars[index];
+          const regionId = frame.regions[index];
+          const toneId = frame.tones[index];
+          const regionChanged = renderedRegions[index] !== regionId;
+          const toneChanged = renderedTones[index] !== toneId;
+          if (renderedChars[index] !== charCode) {
+            renderedChars[index] = charCode;
+            cell.firstChild.data = String.fromCharCode(charCode);
+          }
+          if (regionChanged) {
+            renderedRegions[index] = regionId;
+            cell.dataset.region = regionNames[regionId];
+          }
+          if (toneChanged || regionChanged) {
+            renderedTones[index] = toneId;
+            const key = regionId << 8 | toneId;
+            let nextClass = classNameCache.get(key);
+            if (!nextClass) {
+              const region = regionNames[regionId];
+              const tone = toneNames[toneId];
+              nextClass = `ascii-cell${region ? ` ${regionClass[region]}` : ""}${tone ? ` tone-${tone}` : ""}`;
+              classNameCache.set(key, nextClass);
+            }
+            cell.className = nextClass;
           }
         }
       };
@@ -592,13 +704,20 @@
 
       map.addEventListener("pointermove", (event) => {
         const cell = event.target.closest(".ascii-cell");
-        if (!cell || !map.contains(cell)) {
-          clear();
+        const region = cell && map.contains(cell) ? cell.dataset.region : "";
+        window.clearTimeout(hoverClearTimer);
+        if (!region) {
+          hoverClearTimer = activeRegion ? window.setTimeout(clear, 80) : 0;
           return;
         }
-        activate(cell.dataset.region);
+        hoverClearTimer = 0;
+        activate(region);
       });
-      map.addEventListener("pointerleave", clear);
+      map.addEventListener("pointerleave", () => {
+        window.clearTimeout(hoverClearTimer);
+        hoverClearTimer = 0;
+        clear();
+      });
       map.addEventListener("focus", () => activate("self"));
       map.addEventListener("blur", clear);
       map.addEventListener("click", (event) => {

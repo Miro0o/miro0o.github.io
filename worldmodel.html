@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Explore a two-dimensional map of Miro Son's public miniWorldModel knowledge base.">
   <title>Miro Son - Worldmodel</title>
+  <script src="assets/theme-switcher.js"></script>
   <link rel="stylesheet" href="styles.css">
   <script src="assets/nav-menu.js" defer></script>
   <script src="assets/worldmodel-map-data.js" defer></script>
@@ -14,7 +15,7 @@
   <div class="page">
     <header class="masthead worldmodel-header">
       <a class="brand" href="https://miro0o.github.io/" aria-label="Miro0o home">
-        <img src="images/site-logo.jpeg" alt="">
+        <img src="images/site-logo.webp" width="42" height="42" alt="">
         <span>Miro0o</span>
       </a>
       <a class="worldmodel-header-title" href="https://github.com/Miro0o/miniWorldModel">
@@ -31,6 +32,14 @@
           <div class="nav-submenu">
             <a href="academic.html">Academic</a>
             <a href="personal-life.html">Life</a>
+          </div>
+        </details>
+        <details class="theme-switcher" data-theme-switcher>
+          <summary aria-label="Theme: System theme"><span class="theme-icon" aria-hidden="true"></span></summary>
+          <div class="theme-options" role="radiogroup" aria-label="Theme">
+            <button type="button" role="radio" data-theme-option="day">Day theme</button>
+            <button type="button" role="radio" data-theme-option="night">Night theme</button>
+            <button type="button" role="radio" data-theme-option="system">System theme</button>
           </div>
         </details>
       </nav>
@@ -59,7 +68,7 @@
     </main>
 
     <footer class="worldmodel-footer">
-      <span>© 2022–2026 <span class="footer-credit">· Made with Codex</span></span>
+      <span>© 2022–2026 <span class="footer-credit">· Made with <a class="footer-codex-link" href="https://openai.com/codex/">Codex</a></span></span>
       <div class="worldmodel-caption" aria-live="polite">
         <span data-map-status></span>
       </div>
