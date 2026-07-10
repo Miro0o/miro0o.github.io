@@ -355,6 +355,7 @@
     for (const node of nodes) {
       if (!visibleAtReveal(node)) continue;
       const forced = node.index === hoveredIndex || node.parent === null || isAncestorOfHovered(node.index);
+      const related = hoveredIndex < 0 || relatedNodes.has(node.index);
       const folderEligible = node.type === "folder" && (
         node.depth <= 2
         || view.scale > 0.055 && node.depth <= 4
@@ -368,7 +369,11 @@
         node,
         point,
         forced,
-        priority: forced ? 1e9 - node.depth : node.type === "folder" ? node.noteCount * 30 - node.depth : node.linkCount
+        related,
+        priority: forced
+          ? 1e9 - node.depth
+          : (hoveredIndex >= 0 && related ? 5e8 : 0)
+            + (node.type === "folder" ? node.noteCount * 30 - node.depth : node.linkCount)
       });
     }
     candidates.sort((left, right) => right.priority - left.priority);
@@ -391,11 +396,11 @@
       };
       if (!candidate.forced && occupied.some((other) => boxesOverlap(box, other))) continue;
       occupied.push(box);
+      context.globalAlpha = candidate.related ? (candidate.forced ? 1 : 0.88) : 0.1;
       context.strokeStyle = "rgba(251,250,246,.92)";
       context.lineWidth = 3;
       context.strokeText(text, box.x + 2, candidate.point.y);
       context.fillStyle = candidate.forced ? palette.text : palette.mutedText;
-      context.globalAlpha = candidate.forced ? 1 : 0.88;
       context.fillText(text, box.x + 2, candidate.point.y);
       drawn += 1;
     }
