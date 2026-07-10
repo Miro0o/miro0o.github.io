@@ -1,7 +1,639 @@
----
-layout: home
-excerpt: "A simple and clean responsive Jekyll theme for words and photos."
-show_excerpts: true
-paginate: true
-entries_layout: list
----
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Miro Son's meta homepage: a diagram of self, society, Earth, universe, and an inner worldmodel.">
+  <title>Miro Son - Meta Home</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="meta-home">
+  <div class="page">
+    <header class="masthead">
+      <a class="brand" href="index.html" aria-label="Miro Son meta home">
+        <span class="brand-mark" aria-hidden="true">[M]</span>
+        <span>Miro Son</span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="index.html" aria-current="page">Home</a>
+        <a href="worldmodel.html">Worldmodel</a>
+        <details class="nav-menu">
+          <summary>About Me</summary>
+          <div class="nav-submenu">
+            <a href="academic.html">Academic</a>
+            <a href="personal-life.html">Personal Life</a>
+          </div>
+        </details>
+      </nav>
+    </header>
+
+    <main class="meta-main">
+      <section class="meta-stage" aria-labelledby="meta-title">
+        <h1 id="meta-title" class="sr-only">Miro Son meta homepage diagram</h1>
+
+        <figure class="cosmos-frame">
+          <div class="cosmos-shell">
+            <div id="worldmodel-diagram" class="worldmodel-diagram ascii-stage" role="group" aria-labelledby="diagram-title diagram-desc">
+              <h2 id="diagram-title" class="sr-only">Self, society, Earth, universe, and inner worldmodel</h2>
+              <p id="diagram-desc" class="sr-only">
+                An interactive ASCII-style scene. Hovering a region reveals its meaning and changes that region's color.
+              </p>
+              <pre id="ascii-map" class="ascii-map" tabindex="0" role="img" aria-label="Interactive ASCII scene; hover visible regions to read their meaning."></pre>
+            </div>
+          </div>
+        </figure>
+      </section>
+    </main>
+
+    <footer>
+      <span>Meta home. Static page, no build step.</span>
+      <button class="footer-companions" type="button" aria-label="Show the inner worldmodel caption">
+        <img class="footer-boy" src="boy-footer.png" alt="" aria-hidden="true">
+      </button>
+      <div class="diagram-readout" aria-live="polite"></div>
+      <div class="elsewhere" aria-label="Elsewhere">
+        <a href="https://github.com/Miro0o">GitHub</a>
+        <a href="https://twitter.com/mir0sun">X</a>
+        <a href="https://instagram.com/miro0ooo0">Instagram</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="assets/earth-terrain-1deg.js"></script>
+  <script src="assets/night-lights-2012.js"></script>
+  <script>
+    (() => {
+      const shell = document.querySelector(".cosmos-shell");
+      const readout = document.querySelector(".diagram-readout");
+      const diagram = document.getElementById("worldmodel-diagram");
+      const map = document.getElementById("ascii-map");
+      const footerCompanions = document.querySelector(".footer-companions");
+      const width = 220;
+      const height = 64;
+      const earth = {
+        cx: width / 2,
+        cy: height + 16,
+        rx: 212,
+        ry: 58
+      };
+      const cells = [];
+      let rotationAngle = 0;
+      let previousTime = 0;
+      let isAuthorHovered = false;
+      const labels = {
+        universe: "the wider universe around the scene",
+        firework: "fireworks over Copenhagen",
+        earth: "Earth: ocean, coasts, rainforest, forest, grassland, desert, mountains, tundra, and ice",
+        author: "Copenhagen: where the author is looking out from",
+        self: "me, a local self looking outward from one body",
+        worldmodel: "my thought bubble: an inner model of self, society, Earth, and universe"
+      };
+      const related = {
+        universe: ["universe"],
+        firework: ["firework"],
+        earth: ["earth"],
+        author: ["author", "earth"],
+        self: ["self", "worldmodel"],
+        worldmodel: ["worldmodel", "self"]
+      };
+      const regionClass = {
+        universe: "is-universe",
+        firework: "is-firework",
+        earth: "is-earth",
+        author: "is-author",
+        self: "is-self",
+        worldmodel: "is-worldmodel"
+      };
+      const terrainRows = window.EARTH_TERRAIN_ROWS || [];
+      const shadeRows = window.EARTH_SHADE_ROWS || [];
+      const terrainToneByCode = {
+        r: "earth-rainforest",
+        f: "earth-forest",
+        g: "earth-grass",
+        d: "earth-dry",
+        m: "earth-mountain",
+        t: "earth-tundra",
+        i: "earth-ice"
+      };
+      let activeRegion = null;
+      let lastFrame = 0;
+
+      const createCell = () => ({ char: " ", region: "", tone: "" });
+
+      const createFrame = () => Array.from({ length: height }, () => Array.from({ length: width }, createCell));
+
+      const setCell = (frame, x, y, char, region, options = {}) => {
+        if (x < 0 || x >= width || y < 0 || y >= height) return;
+        if (char !== " " || options.paintSpaces) frame[y][x].char = char;
+        if (region) frame[y][x].region = region;
+        if (options.tone) frame[y][x].tone = options.tone;
+      };
+
+      const put = (frame, x, y, text, region, options = {}) => {
+        [...text].forEach((char, index) => {
+          if (char === " " && !options.paintSpaces) return;
+          setCell(frame, x + index, y, char, region, options);
+        });
+      };
+
+      const putSprite = (frame, x, y, lines, region, options = {}) => {
+        lines.forEach((line, index) => put(frame, x, y + index, line, region, options));
+      };
+
+      const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+      const toRadians = (degrees) => degrees * Math.PI / 180;
+
+      const wrapRadians = (radians) => {
+        const fullTurn = Math.PI * 2;
+        return ((((radians + Math.PI) % fullTurn) + fullTurn) % fullTurn) - Math.PI;
+      };
+
+      const earthRotation = () => rotationAngle;
+
+      const projectEarthPoint = (lon, lat, angle) => {
+        const latRadians = toRadians(lat);
+        const localLon = wrapRadians(toRadians(lon) - angle);
+        const cosLat = Math.cos(latRadians);
+        const z = cosLat * Math.cos(localLon);
+
+        if (z <= 0.22) return null;
+
+        return {
+          x: earth.cx + earth.rx * cosLat * Math.sin(localLon),
+          y: earth.cy - earth.ry * Math.sin(latRadians),
+          z
+        };
+      };
+
+      const terrainAt = (lon, lat) => {
+        if (!terrainRows.length || !shadeRows.length) return { code: ".", shade: 0 };
+        const wrappedLon = ((((lon + 180) % 360) + 360) % 360) - 180;
+        const x = clamp(Math.floor((wrappedLon + 180) / 360 * terrainRows[0].length), 0, terrainRows[0].length - 1);
+        const y = clamp(Math.floor((90 - lat) / 180 * terrainRows.length), 0, terrainRows.length - 1);
+
+        return {
+          code: terrainRows[y]?.[x] || ".",
+          shade: Number(shadeRows[y]?.[x] || 0)
+        };
+      };
+
+      const landAt = (lon, lat) => terrainAt(lon, lat).code !== ".";
+
+      const coastSamples = [
+        [-1.8, 0],
+        [1.8, 0],
+        [0, -1.8],
+        [0, 1.8],
+        [-2.4, -2.4],
+        [2.4, -2.4],
+        [-2.4, 2.4],
+        [2.4, 2.4]
+      ];
+
+      const spriteWidth = (lines) => Math.max(...lines.map((line) => [...line].length));
+
+      const stars = (() => {
+        let seed = 9;
+        const random = () => {
+          seed = (seed * 1664525 + 1013904223) % 4294967296;
+          return seed / 4294967296;
+        };
+        return Array.from({ length: 58 }, () => ({
+          x: Math.floor(random() * width),
+          y: Math.floor(random() * 34),
+          char: [".", ".", "'", "*", "`", "+"][Math.floor(random() * 6)],
+          tone: ["sky-star", "sky-star", "sky-blue", "sky-gold", "sky-violet"][Math.floor(random() * 5)],
+          phase: random() * Math.PI * 2
+        }));
+      })();
+
+      const skySwirls = [
+        {
+          x: 13,
+          y: 11,
+          tone: "sky-blue",
+          lines: [
+            "      .        `-._          .        .",
+            "  .      _..-'      `-.   '      _.-'",
+            "     .-'        .      '-.  _.-'     .",
+            "  .-'      .        .      `"
+          ]
+        },
+        {
+          x: 44,
+          y: 25,
+          tone: "sky-silver",
+          lines: [
+            "   .      - .      .        .-",
+            "      '      .-  '      .-'",
+            "  .      _.-'        .-"
+          ]
+        },
+        {
+          x: 112,
+          y: 12,
+          tone: "sky-gold",
+          lines: [
+            "    .",
+            "  --*--       .",
+            "    '      --+--",
+            "              '"
+          ]
+        },
+        {
+          x: 154,
+          y: 9,
+          tone: "sky-violet",
+          lines: [
+            "       .-.       .",
+            " .  .-'   '-.       .",
+            "     '-._.-'   ."
+          ]
+        },
+        {
+          x: 174,
+          y: 25,
+          tone: "sky-blue",
+          lines: [
+            " .       _..-._       .",
+            "    _.-'       '-._",
+            " .-'       .       '-."
+          ]
+        }
+      ];
+
+      const nightLightRows = window.NIGHT_LIGHT_ROWS || [];
+      const nightLightSamples = nightLightRows.flatMap((row, rowIndex) => [...row].map((char, colIndex) => {
+        const level = Number(char);
+        if (!level) return null;
+        return {
+          lon: -180 + (colIndex + 0.5) * 2,
+          lat: 90 - (rowIndex + 0.5) * 2,
+          intensity: level / 9
+        };
+      }).filter(Boolean));
+
+      const authorSite = { lon: 12.5683, lat: 55.6761 };
+      const authorPin = [
+        " . ",
+        "/o\\",
+        " v "
+      ];
+      const nightLightPatchOffsets = [
+        [0, 0, 1],
+        [-0.46, 0, 0.6],
+        [0.46, 0, 0.6],
+        [0, -0.36, 0.48],
+        [0, 0.36, 0.48],
+        [-0.7, 0.28, 0.3],
+        [0.7, -0.28, 0.3]
+      ];
+
+      const buildCells = () => {
+        const fragment = document.createDocumentFragment();
+        for (let y = 0; y < height; y += 1) {
+          const row = [];
+          for (let x = 0; x < width; x += 1) {
+            const cell = document.createElement("span");
+            cell.className = "ascii-cell";
+            cell.textContent = " ";
+            row.push(cell);
+            fragment.appendChild(cell);
+          }
+          fragment.appendChild(document.createTextNode("\n"));
+          cells.push(row);
+        }
+        map.appendChild(fragment);
+      };
+
+      const fitAsciiMap = () => {
+        map.style.fontSize = "";
+        const { clientWidth, clientHeight } = diagram;
+        const mapWidth = map.scrollWidth;
+        const mapHeight = map.scrollHeight;
+        if (!clientWidth || !clientHeight || !mapWidth || !mapHeight) return;
+
+        const baseFontSize = parseFloat(window.getComputedStyle(map).fontSize);
+        if (!baseFontSize) return;
+
+        const scale = Math.min(1.12, (clientWidth * 0.99) / mapWidth, (clientHeight * 0.96) / mapHeight);
+        map.style.fontSize = `${baseFontSize * scale}px`;
+      };
+
+      const drawSky = (frame, time) => {
+        skySwirls.forEach((swirl) => putSprite(frame, swirl.x, swirl.y, swirl.lines, "universe", { tone: swirl.tone }));
+        stars.forEach((star) => {
+          const bright = Math.sin(time / 900 + star.phase) > 0.55;
+          setCell(frame, star.x, star.y, bright ? "*" : star.char, "universe", { tone: star.tone });
+        });
+      };
+
+      const drawShootingStars = (frame, time) => {
+        const cycle = 13000;
+        const phase = (time + 2600) % cycle;
+        if (phase > 1500) return;
+
+        const progress = phase / 1500;
+        const headX = Math.round(width - 20 - progress * 92);
+        const headY = Math.round(10 + progress * 14);
+        const trail = ["*", "+", "-", "-", "."];
+
+        trail.forEach((char, index) => {
+          setCell(frame, headX + index * 2, headY - index, char, "universe", {
+            tone: index < 2 ? "sky-gold" : "sky-silver"
+          });
+        });
+      };
+
+      const drawFireworks = (frame, time, projection) => {
+        if (!projection) return;
+
+        const cycle = 9000;
+        const phase = (time + 1200) % cycle;
+        if (phase > 2100) return;
+
+        const centerX = Math.round(clamp(projection.x, 24, width - 24));
+        const centerY = Math.round(clamp(projection.y - 20, 18, 20));
+        const radius = 1 + Math.floor(phase / 520);
+        const sparkle = phase % 520 < 260 ? "*" : "+";
+        const points = [
+          [0, 0, sparkle],
+          [radius * 2, 0, "*"],
+          [-radius * 2, 0, "*"],
+          [0, radius, "+"],
+          [0, -radius, "+"],
+          [radius, radius, "."],
+          [-radius, radius, "."],
+          [radius, -radius, "."],
+          [-radius, -radius, "."]
+        ];
+
+        points.forEach(([x, y, char], index) => {
+          setCell(frame, centerX + x, centerY + y, char, "firework", {
+            tone: ["firework-gold", "firework-red", "firework-blue", "firework-violet"][index % 4]
+          });
+        });
+      };
+
+      const terrainTone = (lon, lat, sample) => {
+        const nearLand = coastSamples.some(([lonOffset, latOffset]) => landAt(lon + lonOffset, lat + latOffset));
+        const nearSea = coastSamples.some(([lonOffset, latOffset]) => !landAt(lon + lonOffset, lat + latOffset));
+        const isLand = sample.code !== ".";
+
+        if (!isLand) return nearLand ? "earth-shallow-sea" : "earth-deep-sea";
+        if (sample.code === "i") return "earth-ice";
+        if (nearSea) return "earth-coast";
+        return terrainToneByCode[sample.code] || "earth-forest";
+      };
+
+      const terrainNoise = (lon, lat, salt) => {
+        const value = Math.sin(lon * 12.9898 + lat * 78.233 + salt * 37.719) * 43758.5453;
+        return value - Math.floor(value);
+      };
+
+      const terrainTexture = (tone, lon, lat, shade) => {
+        const rasterShade = clamp((shade || 1) / 9, 0, 1);
+        const fineGrain = terrainNoise(Math.round(lon * 3) / 3, Math.round(lat * 3) / 3, 5) - 0.5;
+        const broadGrain = terrainNoise(Math.round(lon * 0.9) / 0.9, Math.round(lat * 0.9) / 0.9, 11) - 0.5;
+        const detail = fineGrain * 0.22 + broadGrain * 0.12;
+
+        switch (tone) {
+          case "earth-coast":
+            return clamp(0.46 + rasterShade * 0.36 + detail, 0, 1);
+          case "earth-rainforest":
+            return clamp(0.48 + rasterShade * 0.42 + detail, 0, 1);
+          case "earth-forest":
+            return clamp(0.38 + rasterShade * 0.44 + detail, 0, 1);
+          case "earth-grass":
+            return clamp(0.34 + rasterShade * 0.42 + detail, 0, 1);
+          case "earth-dry":
+            return clamp(0.30 + rasterShade * 0.46 + detail, 0, 1);
+          case "earth-mountain":
+            return clamp(0.42 + rasterShade * 0.44 + detail, 0, 1);
+          case "earth-tundra":
+            return clamp(0.30 + rasterShade * 0.42 + detail, 0, 1);
+          case "earth-ice":
+            return clamp(0.45 + rasterShade * 0.44 + detail, 0, 1);
+          default:
+            return clamp(0.34 + rasterShade * 0.44 + detail, 0, 1);
+        }
+      };
+
+      const drawEarth = (frame, time) => {
+        // Project a rotating sphere, then sample compact Natural Earth-derived
+        // land/terrain rasters so continents do not collapse into latitude bands.
+        const palettes = {
+          "earth-coast": ".,:+",
+          "earth-rainforest": ";=++",
+          "earth-forest": ",;=+",
+          "earth-grass": ".,;:",
+          "earth-dry": ".,:+",
+          "earth-mountain": ".:^/",
+          "earth-tundra": ".,:-",
+          "earth-ice": ".:-^"
+        };
+        const angle = earthRotation();
+        const earthTop = Math.max(0, Math.floor(earth.cy - earth.ry) - 1);
+
+        for (let y = earthTop; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            const dx = (x - earth.cx) / earth.rx;
+            const dy = (y - earth.cy) / earth.ry;
+            const sphere = dx * dx + dy * dy;
+            if (sphere > 1) continue;
+
+            const z = Math.sqrt(1 - sphere);
+            const lon = Math.atan2(dx, z) + angle;
+            const lat = Math.asin(clamp(-dy, -1, 1));
+            const lonDegrees = lon * 180 / Math.PI;
+            const latDegrees = lat * 180 / Math.PI;
+            const top = earth.cy - earth.ry * Math.sqrt(Math.max(0, 1 - dx * dx));
+            const terrainSample = terrainAt(lonDegrees, latDegrees);
+            const maskIsLand = terrainSample.code !== ".";
+            let tone = terrainTone(lonDegrees, latDegrees, terrainSample);
+            let char = " ";
+
+            if (maskIsLand) {
+              const palette = palettes[tone];
+              const texture = terrainTexture(tone, lonDegrees, latDegrees, terrainSample.shade);
+              const index = Math.floor(texture * (palette.length - 1));
+              char = palette[clamp(index, 0, palette.length - 1)];
+            }
+
+            if (Math.abs(y - top) < 0.62) {
+              char = "-";
+              tone = "earth-rim";
+            }
+            setCell(frame, x, y, char, "earth", { paintSpaces: true, tone });
+          }
+        }
+      };
+
+      const putProjectedSprite = (frame, projection, lines, region, options = {}) => {
+        const x = Math.round(projection.x - spriteWidth(lines) / 2);
+        const y = Math.round(projection.y - lines.length + 1);
+
+        lines.forEach((line, row) => {
+          [...line].forEach((char, col) => {
+            if (char === " " && !options.paintSpaces) return;
+
+            const cellX = x + col;
+            const cellY = y + row;
+            const dx = (cellX - earth.cx) / earth.rx;
+            const dy = (cellY - earth.cy) / earth.ry;
+            if (dx * dx + dy * dy > 1) return;
+
+            setCell(frame, cellX, cellY, char, region, options);
+          });
+        });
+      };
+
+      const lightRank = (char) => ({ ".": 1, ":": 2, "+": 3, "*": 4 })[char] || 0;
+
+      const drawNightLightPoint = (frame, lon, lat, intensity, angle) => {
+        const nearLand = landAt(lon, lat) || coastSamples.some(([lonOffset, latOffset]) => landAt(lon + lonOffset, lat + latOffset));
+        if (!nearLand) return;
+
+        const projection = projectEarthPoint(lon, lat, angle);
+        if (!projection) return;
+
+        const x = Math.round(projection.x);
+        const y = Math.round(projection.y);
+        const char = intensity > 0.78 ? "*" : intensity > 0.48 ? "+" : intensity > 0.24 ? ":" : ".";
+        const tone = intensity > 0.78 ? "earth-city-hot" : intensity > 0.52 ? "earth-city-dense" : intensity > 0.28 ? "earth-city-light" : "earth-city-glow";
+        const current = frame[y]?.[x];
+        if (current && current.tone?.startsWith("earth-city") && lightRank(current.char) > lightRank(char)) return;
+
+        setCell(frame, x, y, char, "earth", { tone });
+      };
+
+      const drawNightLightPatch = (frame, lon, lat, intensity, angle) => {
+        const spread = 0.22 + intensity * 0.54;
+        const count = intensity > 0.74 ? nightLightPatchOffsets.length : intensity > 0.46 ? 5 : 1;
+        nightLightPatchOffsets.slice(0, count).forEach(([lonOffset, latOffset, weight]) => {
+          drawNightLightPoint(frame, lon + lonOffset * spread, lat + latOffset * spread, intensity * weight, angle);
+        });
+      };
+
+      const drawCityLights = (frame) => {
+        const angle = earthRotation();
+        nightLightSamples.forEach(({ lon, lat, intensity }) => drawNightLightPatch(frame, lon, lat, intensity, angle));
+      };
+
+      const drawAuthorPin = (frame) => {
+        const projection = projectEarthPoint(authorSite.lon, authorSite.lat, earthRotation());
+        if (!projection) return null;
+
+        putProjectedSprite(frame, projection, authorPin, "author", { tone: "author-pin" });
+        return projection;
+      };
+
+      const drawScene = (time) => {
+        const frame = createFrame();
+        const authorProjection = projectEarthPoint(authorSite.lon, authorSite.lat, earthRotation());
+        drawSky(frame, time);
+        drawShootingStars(frame, time);
+        drawEarth(frame, time);
+        drawCityLights(frame);
+        drawAuthorPin(frame);
+        drawFireworks(frame, time, authorProjection);
+        return frame;
+      };
+
+      const syncFrame = (frame) => {
+        for (let y = 0; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            const data = frame[y][x];
+            const cell = cells[y][x];
+            if (cell.textContent !== data.char) cell.textContent = data.char;
+            if (cell.dataset.region !== data.region) cell.dataset.region = data.region;
+            const nextClass = [
+              "ascii-cell",
+              data.region ? regionClass[data.region] : "",
+              data.tone ? `tone-${data.tone}` : ""
+            ].filter(Boolean).join(" ");
+            if (cell.className !== nextClass) cell.className = nextClass;
+          }
+        }
+      };
+
+      const clear = () => {
+        activeRegion = null;
+        isAuthorHovered = false;
+        shell.classList.remove("is-reading");
+        delete diagram.dataset.activeRegion;
+        delete shell.dataset.activeRegion;
+        delete shell.dataset.active;
+        delete readout.dataset.activeRegion;
+        readout.classList.remove("is-visible");
+        readout.textContent = "";
+      };
+
+      const activate = (region) => {
+        if (!region || !labels[region]) {
+          clear();
+          return;
+        }
+        if (activeRegion === region) return;
+        activeRegion = region;
+        isAuthorHovered = region === "author";
+        readout.textContent = labels[region];
+        readout.dataset.activeRegion = region;
+        readout.classList.add("is-visible");
+        diagram.dataset.activeRegion = region;
+        shell.dataset.activeRegion = region;
+        shell.dataset.active = related[region].join(" ");
+        shell.classList.add("is-reading");
+      };
+
+      map.addEventListener("pointermove", (event) => {
+        const cell = event.target.closest(".ascii-cell");
+        if (!cell || !map.contains(cell)) {
+          clear();
+          return;
+        }
+        activate(cell.dataset.region);
+      });
+      map.addEventListener("pointerleave", clear);
+      map.addEventListener("focus", () => activate("self"));
+      map.addEventListener("blur", clear);
+      map.addEventListener("click", (event) => {
+        const cell = event.target.closest(".ascii-cell");
+        if (cell) activate(cell.dataset.region);
+      });
+      footerCompanions.addEventListener("pointerenter", () => activate("worldmodel"));
+      footerCompanions.addEventListener("pointerleave", clear);
+      footerCompanions.addEventListener("focus", () => activate("worldmodel"));
+      footerCompanions.addEventListener("blur", clear);
+      footerCompanions.addEventListener("click", () => activate("worldmodel"));
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") clear();
+      });
+      window.addEventListener("resize", fitAsciiMap);
+
+      const animate = (time) => {
+        if (!previousTime) previousTime = time;
+        const delta = Math.min(time - previousTime, 600);
+        previousTime = time;
+
+        if (!isAuthorHovered) {
+          rotationAngle += delta / 42000;
+        }
+
+        if (time - lastFrame > 130) {
+          syncFrame(drawScene(time));
+          lastFrame = time;
+        }
+        window.requestAnimationFrame(animate);
+      };
+
+      buildCells();
+      syncFrame(drawScene(0));
+      fitAsciiMap();
+      window.requestAnimationFrame(animate);
+    })();
+  </script>
+</body>
+</html>
