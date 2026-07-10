@@ -121,6 +121,7 @@ button:focus-visible,
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  font-size: 0.92rem;
 }
 
 .brand {
@@ -1260,7 +1261,7 @@ body.meta-home {
   color: rgba(232, 231, 224, 0.84);
 }
 
-:where(:root[data-theme="night"]) .ascii-cell.is-author {
+:root[data-theme="night"] .ascii-cell.is-author {
   color: rgba(235, 142, 102, 0.92);
 }
 
@@ -1315,10 +1316,13 @@ body.meta-home {
     padding-top: 18px;
   }
 
-  body:not(.meta-home):not(.worldmodel-page) .masthead,
   body:not(.meta-home):not(.worldmodel-page) footer {
-    align-items: flex-start;
+    align-items: center;
     flex-direction: column;
+  }
+
+  footer {
+    text-align: center;
   }
 
   nav {
@@ -1355,15 +1359,13 @@ body.meta-home {
     gap: 10px;
   }
 
-  .meta-home .masthead,
-  .worldmodel-page .masthead {
+  .masthead {
     align-items: center;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .meta-home .masthead nav,
-  .worldmodel-page .masthead nav {
+  .masthead nav {
     width: auto;
     min-width: 0;
     justify-content: flex-end;
@@ -1376,8 +1378,9 @@ body.meta-home {
 
   .meta-home footer,
   .worldmodel-page footer {
-    grid-template-columns: minmax(0, 1fr) auto;
-    row-gap: 5px;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 24px;
+    font-size: 0.92rem;
   }
 
   .meta-home footer > span:first-child,
@@ -1388,8 +1391,9 @@ body.meta-home {
 
   .meta-home footer .elsewhere,
   .worldmodel-page footer .elsewhere {
-    grid-column: 2;
-    grid-row: 2;
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: center;
   }
 
   .diagram-readout,
@@ -1399,6 +1403,7 @@ body.meta-home {
     grid-row: 1;
     width: 100%;
     min-height: 1.55em;
+    text-align: center;
     transform: translateY(4px);
   }
 
@@ -1444,19 +1449,6 @@ body.meta-home {
   }
 }
 
-@media (max-width: 700px) {
-  .meta-home footer,
-  .worldmodel-page footer {
-    column-gap: 12px;
-    font-size: 0.82rem;
-  }
-
-  .meta-home footer .elsewhere,
-  .worldmodel-page footer .elsewhere {
-    gap: 12px;
-  }
-}
-
 @media (max-width: 520px) {
   .brand {
     gap: 8px;
@@ -1471,36 +1463,12 @@ body.meta-home {
     width: auto;
     gap: 12px;
     overflow: visible;
-    font-size: 0.82rem;
-  }
-
-  .meta-home footer,
-  .worldmodel-page footer {
-    font-size: 0.75rem;
-  }
-
-  .meta-home footer .elsewhere,
-  .worldmodel-page footer .elsewhere {
-    gap: 9px;
   }
 }
 
 @media (max-width: 420px) {
-  .meta-home .brand span,
-  .worldmodel-page .brand span,
-  .meta-home footer .footer-credit,
-  .worldmodel-page footer .footer-credit {
+  .masthead .brand span {
     display: none;
-  }
-
-  .meta-home footer,
-  .worldmodel-page footer {
-    font-size: 0.72rem;
-  }
-
-  .meta-home footer .elsewhere,
-  .worldmodel-page footer .elsewhere {
-    gap: 7px;
   }
 
   h1 {
@@ -1525,7 +1493,7 @@ body.meta-home {
   }
 
   .worldmodel-caption {
-    width: calc(100% - 28px);
+    width: 100%;
   }
 }
 

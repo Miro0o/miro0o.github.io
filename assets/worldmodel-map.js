@@ -86,6 +86,8 @@
   const showActiveLinks = true;
   let view = { x: 0, y: 0, scale: 1 };
   let drag = null;
+  const touchPointers = new Map();
+  let pinch = null;
   let animationFrame = 0;
   let drawPending = false;
   let pointerMovePending = false;
@@ -759,16 +761,62 @@
     requestDraw();
   }
 
+  function startPinch() {
+    const pointers = Array.from(touchPointers.values());
+    if (pointers.length < 2) return;
+    const [first, second] = pointers;
+    const bounds = canvas.getBoundingClientRect();
+    const screenX = (first.x + second.x) / 2 - bounds.left;
+    const screenY = (first.y + second.y) / 2 - bounds.top;
+    pinch = {
+      distance: Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)),
+      scale: view.scale,
+      worldX: view.x + (screenX - width / 2) / view.scale,
+      worldY: view.y + (screenY - height / 2) / view.scale
+    };
+    drag = null;
+    cancelPointerMove();
+    setHovered(-1);
+    tooltip.hidden = true;
+  }
+
+  function updatePinch() {
+    const pointers = Array.from(touchPointers.values());
+    if (!pinch || pointers.length < 2) return;
+    const [first, second] = pointers;
+    const bounds = canvas.getBoundingClientRect();
+    const screenX = (first.x + second.x) / 2 - bounds.left;
+    const screenY = (first.y + second.y) / 2 - bounds.top;
+    const distance = Math.max(1, Math.hypot(second.x - first.x, second.y - first.y));
+    const nextScale = clamp(pinch.scale * distance / pinch.distance, 0.0015, 2.4);
+    view.x = pinch.worldX - (screenX - width / 2) / nextScale;
+    view.y = pinch.worldY - (screenY - height / 2) / nextScale;
+    view.scale = nextScale;
+    invalidateProjection();
+    requestDraw();
+  }
+
   canvas.addEventListener("pointerdown", (event) => {
     if (event.button !== 0) return;
     cancelPointerMove();
+    if (event.pointerType === "touch") {
+      touchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    }
     drag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, viewX: view.x, viewY: view.y, moved: false };
     canvas.setPointerCapture(event.pointerId);
     canvas.classList.add("is-dragging");
     tooltip.hidden = true;
+    if (touchPointers.size >= 2) startPinch();
   });
 
   canvas.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "touch" && touchPointers.has(event.pointerId)) {
+      touchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (pinch) {
+        updatePinch();
+        return;
+      }
+    }
     if (drag && drag.pointerId === event.pointerId) {
       const deltaX = event.clientX - drag.x;
       const deltaY = event.clientY - drag.y;
@@ -783,20 +831,39 @@
     requestPointerMove(event.clientX, event.clientY);
   });
 
-  const endDrag = (event) => {
+  const endDrag = (event, cancelled = false) => {
+    const wasPinching = Boolean(pinch);
+    touchPointers.delete(event.pointerId);
+    if (wasPinching) {
+      pinch = null;
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      if (touchPointers.size >= 2) {
+        startPinch();
+        return;
+      }
+      const remaining = touchPointers.entries().next().value;
+      if (remaining) {
+        const [pointerId, point] = remaining;
+        drag = { pointerId, x: point.x, y: point.y, viewX: view.x, viewY: view.y, moved: true };
+      } else {
+        drag = null;
+        canvas.classList.remove("is-dragging");
+      }
+      return;
+    }
     if (!drag || drag.pointerId !== event.pointerId) return;
     const completedDrag = drag;
     drag = null;
     canvas.classList.remove("is-dragging");
     if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
-    if (!completedDrag.moved) {
+    if (!cancelled && !completedDrag.moved) {
       const clickedIndex = findNodeAt(event.clientX, event.clientY);
       if (clickedIndex >= 0) freezeNode(clickedIndex, event.clientX, event.clientY);
       else releaseFrozen();
     }
   };
   canvas.addEventListener("pointerup", endDrag);
-  canvas.addEventListener("pointercancel", endDrag);
+  canvas.addEventListener("pointercancel", (event) => endDrag(event, true));
   canvas.addEventListener("pointerleave", (event) => {
     if (!drag) {
       cancelPointerMove();
