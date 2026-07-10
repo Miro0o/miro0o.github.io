@@ -3,50 +3,66 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Worldmodel placeholder page for Miro Son's personal knowledge base.">
+  <meta name="description" content="Explore a two-dimensional map of Miro Son's public miniWorldModel knowledge base.">
   <title>Miro Son - Worldmodel</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="assets/nav-menu.js" defer></script>
+  <script src="assets/worldmodel-map-data.js" defer></script>
+  <script src="assets/worldmodel-map.js" defer></script>
 </head>
-<body>
+<body class="worldmodel-page">
   <div class="page">
-    <header class="masthead">
-      <a class="brand" href="index.html" aria-label="Miro Son meta home">
+    <header class="masthead worldmodel-header">
+      <a class="brand" href="https://miro0o.github.io/" aria-label="Miro0o home">
         <img src="images/site-logo.jpeg" alt="">
-        <span>Miro Son</span>
+        <span>Miro0o</span>
+      </a>
+      <a class="worldmodel-header-title" href="https://github.com/Miro0o/miniWorldModel">
+        <span>miniWorldModel</span>
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38l-.01-1.49c-2.23.49-2.7-1.08-2.7-1.08-.36-.93-.89-1.18-.89-1.18-.73-.5.05-.49.05-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.88 2.34.67.07-.52.28-.88.51-1.08-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 3.72 7.65 7.65 0 0 1 10 4c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.74.54 1.5l-.01 2.22c0 .21.14.46.55.38A8 8 0 0 0 8 0Z"/>
+        </svg>
       </a>
       <nav aria-label="Primary">
         <a href="index.html">Home</a>
-        <a href="worldmodel.html" aria-current="page">Worldmodel</a>
+        <a href="worldmodel.html" aria-current="page">Knowledge</a>
         <details class="nav-menu">
           <summary>About Me</summary>
           <div class="nav-submenu">
             <a href="academic.html">Academic</a>
-            <a href="personal-life.html">Personal Life</a>
+            <a href="personal-life.html">Life</a>
           </div>
         </details>
       </nav>
     </header>
 
-    <main class="content-main">
-      <section class="placeholder" aria-labelledby="worldmodel-title">
-        <p class="eyebrow">personal knowledge base</p>
-        <h1 id="worldmodel-title">Worldmodel</h1>
-        <p class="lede">
-          Placeholder for the living model: notes, maps, beliefs, memories, questions,
-          plans, and the structure of how I understand the world.
-        </p>
-        <p class="note">
-          The academic and personal pages are public slices. This is the page for the
-          thing underneath them.
-        </p>
-        <div class="text-links">
-          <a href="index.html">Back to meta home</a>
+    <main class="worldmodel-main">
+      <figure class="knowledge-map" data-worldmodel-map aria-label="Interactive 2D atlas of miniWorldModel">
+        <div class="map-viewport">
+          <canvas tabindex="0" aria-label="Interactive radial map of the miniWorldModel knowledge base. Drag to pan, scroll to zoom, hover nodes to highlight their hierarchy, and click a node to keep its branch highlighted."></canvas>
+          <div class="map-key">
+            <div class="map-legend" aria-label="Map legend">
+              <span><i class="is-folder"></i>Folder</span>
+              <span><i class="is-note"></i>Note</span>
+              <span><i class="is-hierarchy-link"></i>Hierarchy link</span>
+              <span><i class="is-note-link"></i>Note link</span>
+            </div>
+            <span data-map-count>Loading map…</span>
+          </div>
+          <div class="map-loading" aria-hidden="true">
+            <span></span>
+          </div>
+          <div class="map-tooltip" data-map-tooltip hidden></div>
         </div>
-      </section>
+        <noscript>This interactive map requires JavaScript.</noscript>
+      </figure>
     </main>
 
-    <footer>
-      <span>Meta home. Static page, no build step.</span>
+    <footer class="worldmodel-footer">
+      <span>© 2022–2026 · Made with Codex</span>
+      <div class="worldmodel-caption" aria-live="polite">
+        <span data-map-status>Drag to pan. Scroll to zoom. Hover or click a node to reveal its branch.</span>
+      </div>
       <div class="elsewhere" aria-label="Elsewhere">
         <a href="https://github.com/Miro0o">GitHub</a>
         <a href="https://twitter.com/mir0sun">X</a>
