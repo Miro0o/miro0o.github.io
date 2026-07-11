@@ -9,7 +9,6 @@
   const tooltip = root.querySelector("[data-map-tooltip]");
   const status = document.querySelector("[data-map-status]");
   const count = document.querySelector("[data-map-count]");
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const palette = {
     ring: "#9aa7b5",
     hierarchy: "#8c9daf",
@@ -20,62 +19,204 @@
     root: "#2e6f9f",
     active: "#245f8a",
     text: "#263238",
-    mutedText: "#66727a"
+    mutedText: "#66727a",
+    nodeStroke: "rgba(255,255,255,.92)",
+    labelHalo: "rgba(251,250,246,.92)"
   };
 
-  let data = null;
+  function updatePalette() {
+    const styles = getComputedStyle(document.documentElement);
+    const themeColors = {
+      ring: "--map-ring",
+      hierarchy: "--map-hierarchy",
+      link: "--map-link",
+      linkActive: "--map-link",
+      folder: "--map-folder",
+      note: "--map-note",
+      root: "--map-root",
+      active: "--map-active",
+      text: "--map-text",
+      mutedText: "--map-muted-text",
+      nodeStroke: "--map-node-stroke",
+      labelHalo: "--label-halo"
+    };
+
+    Object.entries(themeColors).forEach(([name, property]) => {
+      const color = styles.getPropertyValue(property).trim();
+      if (color) palette[name] = color;
+    });
+  }
+
+  updatePalette();
+
+  let prepared = false;
+  let compactNodes = false;
   let nodes = [];
-  let links = [];
+  let noteIndexes = [];
+  let folderIndexes = [];
+  let linkSources = new Uint32Array(0);
+  let linkTargets = new Uint32Array(0);
+  let incidentLinkOffsets = new Uint32Array(0);
+  let incidentLinkIndexes = new Uint32Array(0);
   let radii = [];
   let maxRadius = 1;
+  let maxHitRadius = 6;
+  let rootIndex = 0;
   let width = 1;
   let height = 1;
   let pixelRatio = 1;
+  let screenX = new Float64Array(0);
+  let screenY = new Float64Array(0);
+  let projectionDirty = true;
+  let hitGridDirty = true;
+  let hitGridHeads = new Int32Array(0);
+  let hitGridNext = new Int32Array(0);
+  let hitGridColumns = 1;
+  let hitGridRows = 1;
+  let hitGridCellSize = 18;
+  let hitGridMargin = 6;
+  let hitGridReveal = -1;
   let hoveredIndex = -1;
   let frozenIndex = -1;
   let relatedNodes = null;
-  const showLinks = true;
+  let ancestorNodes = null;
+  let tooltipNodeIndex = -1;
+  let tooltipWidth = 0;
+  let tooltipHeight = 0;
+  const showActiveLinks = true;
   let view = { x: 0, y: 0, scale: 1 };
   let drag = null;
+  const touchPointers = new Map();
+  let pinch = null;
   let animationFrame = 0;
-  let reveal = reducedMotion ? 1 : 0;
+  let drawPending = false;
+  let pointerMovePending = false;
+  let pendingPointerX = 0;
+  let pendingPointerY = 0;
+  let reveal = 1;
 
   const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
   const format = new Intl.NumberFormat("en");
 
   function setStatus(message) {
     status.textContent = message;
+    status.parentElement.classList.toggle("has-status", Boolean(message));
   }
 
   function requestDraw() {
+    drawPending = true;
+    requestFrame();
+  }
+
+  function requestFrame() {
     if (animationFrame) return;
     animationFrame = requestAnimationFrame(() => {
+      if (pointerMovePending) {
+        const clientX = pendingPointerX;
+        const clientY = pendingPointerY;
+        pointerMovePending = false;
+        if (!drag && frozenIndex < 0) {
+          setHovered(findNodeAt(clientX, clientY), clientX, clientY);
+        }
+      }
+      if (drawPending) {
+        drawPending = false;
+        draw();
+      }
       animationFrame = 0;
-      draw();
     });
   }
 
-  function prepareMap(payload) {
-    data = payload;
-    nodes = payload.nodes.map((node, index) => ({
-      ...node,
-      index,
-      parentIndex: -1,
-      children: [],
-      angle: -Math.PI / 2,
-      x: 0,
-      y: 0,
-      weight: node.type === "note" ? 1 : 0
-    }));
-    links = payload.links;
+  function requestPointerMove(clientX, clientY) {
+    pendingPointerX = clientX;
+    pendingPointerY = clientY;
+    pointerMovePending = true;
+    requestFrame();
+  }
 
-    const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  function cancelPointerMove() {
+    pointerMovePending = false;
+  }
+
+  document.addEventListener("themechange", () => {
+    updatePalette();
+    requestDraw();
+  });
+
+  function prepareMap(payload) {
+    const isCompact = payload.version >= 2 && Array.isArray(payload.nodes[0]);
+    compactNodes = isCompact;
+    if (isCompact) {
+      const decodedNodes = [];
+      payload.nodes.forEach((source, index) => {
+        const [segment, folderFlag, parentIndex, noteCount, linkCount] = source;
+        const parent = parentIndex >= 0 ? decodedNodes[parentIndex] : null;
+        const type = folderFlag ? "folder" : "note";
+        decodedNodes.push({
+          segment,
+          title: type === "note" ? segment.replace(/\.md$/i, "") : segment || "miniWorldModel",
+          type,
+          depth: parent ? parent.depth + 1 : 0,
+          noteCount,
+          linkCount,
+          index,
+          parentIndex,
+          children: [],
+          angle: -Math.PI / 2,
+          x: 0,
+          y: 0,
+          weight: type === "note" ? 1 : 0
+        });
+      });
+      nodes = decodedNodes;
+    } else {
+      nodes = payload.nodes.map((source, index) => ({
+          ...source,
+          index,
+          parentIndex: -1,
+          children: [],
+          angle: -Math.PI / 2,
+          x: 0,
+          y: 0,
+          weight: source.type === "note" ? 1 : 0
+      }));
+    }
+
+    noteIndexes = [];
+    folderIndexes = [];
     for (const node of nodes) {
-      if (node.parent === null) continue;
-      const parent = nodeById.get(node.parent);
-      if (!parent) continue;
-      node.parentIndex = parent.index;
-      parent.children.push(node.index);
+      (node.type === "folder" ? folderIndexes : noteIndexes).push(node.index);
+      const importance = node.type === "folder"
+        ? 2.2 + Math.log2(node.noteCount + 1) * 0.28
+        : 1.15 + Math.log2(node.linkCount + 1) * 0.12;
+      node.radius = clamp(importance, node.type === "folder" ? 2.1 : 1.05, 5.8);
+      node.activeRadius = clamp(importance + 1.7, node.type === "folder" ? 2.1 : 1.05, 8);
+      node.hitRadius = Math.max(6, node.radius + 3);
+      maxHitRadius = Math.max(maxHitRadius, node.hitRadius);
+    }
+
+    const sourceLinks = payload.links;
+    linkSources = new Uint32Array(sourceLinks.length);
+    linkTargets = new Uint32Array(sourceLinks.length);
+    for (let linkIndex = 0; linkIndex < sourceLinks.length; linkIndex += 1) {
+      linkSources[linkIndex] = sourceLinks[linkIndex][0];
+      linkTargets[linkIndex] = sourceLinks[linkIndex][1];
+    }
+    buildIncidentLinkIndex();
+
+    if (isCompact) {
+      for (const node of nodes) {
+        if (node.parentIndex >= 0) nodes[node.parentIndex].children.push(node.index);
+      }
+    } else {
+      const nodeById = new Map(nodes.map((node) => [node.id, node]));
+      for (const node of nodes) {
+        if (node.parent === null) continue;
+        const parent = nodeById.get(node.parent);
+        if (!parent) continue;
+        node.parentIndex = parent.index;
+        parent.children.push(node.index);
+      }
     }
     for (const node of nodes) {
       node.children.sort((left, right) => {
@@ -91,7 +232,10 @@
       }
     }
 
-    const rootNode = nodes.find((node) => node.parent === null) || nodes[0];
+    const rootNode = isCompact
+      ? nodes.find((node) => node.parentIndex < 0) || nodes[0]
+      : nodes.find((node) => node.parent === null) || nodes[0];
+    rootIndex = rootNode.index;
     assignAngles(rootNode.index, -Math.PI / 2, Math.PI * 1.5);
 
     const maxDepth = Math.max(0, ...nodes.map((node) => node.depth));
@@ -111,10 +255,48 @@
       node.y = Math.sin(angle) * radius;
     }
 
+    screenX = new Float64Array(nodes.length);
+    screenY = new Float64Array(nodes.length);
+    hitGridNext = new Int32Array(nodes.length);
+    invalidateProjection();
+
     count.textContent = `${format.format(payload.counts.notes)} notes · ${format.format(payload.counts.folders)} folders · ${format.format(payload.counts.links)} links`;
-    root.classList.add("is-ready");
+    if (isCompact) {
+      payload.nodes = null;
+      payload.links = null;
+      if (window.WORLDMODEL_MAP_DATA === payload) window.WORLDMODEL_MAP_DATA = null;
+    }
     fitMap();
-    startReveal();
+    reveal = 1;
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    animationFrame = 0;
+    drawPending = false;
+    pointerMovePending = false;
+    prepared = true;
+    draw();
+    root.classList.add("is-ready");
+  }
+
+  function buildIncidentLinkIndex() {
+    incidentLinkOffsets = new Uint32Array(nodes.length + 1);
+    for (let linkIndex = 0; linkIndex < linkSources.length; linkIndex += 1) {
+      const sourceIndex = linkSources[linkIndex];
+      const targetIndex = linkTargets[linkIndex];
+      if (sourceIndex < nodes.length) incidentLinkOffsets[sourceIndex + 1] += 1;
+      if (targetIndex < nodes.length && targetIndex !== sourceIndex) incidentLinkOffsets[targetIndex + 1] += 1;
+    }
+    for (let index = 1; index < incidentLinkOffsets.length; index += 1) {
+      incidentLinkOffsets[index] += incidentLinkOffsets[index - 1];
+    }
+
+    incidentLinkIndexes = new Uint32Array(incidentLinkOffsets[incidentLinkOffsets.length - 1]);
+    const cursors = incidentLinkOffsets.slice(0, -1);
+    for (let linkIndex = 0; linkIndex < linkSources.length; linkIndex += 1) {
+      const sourceIndex = linkSources[linkIndex];
+      const targetIndex = linkTargets[linkIndex];
+      if (sourceIndex < nodes.length) incidentLinkIndexes[cursors[sourceIndex]++] = linkIndex;
+      if (targetIndex < nodes.length && targetIndex !== sourceIndex) incidentLinkIndexes[cursors[targetIndex]++] = linkIndex;
+    }
   }
 
   function assignAngles(parentIndex, startAngle, endAngle) {
@@ -138,10 +320,14 @@
     pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(width * pixelRatio);
     canvas.height = Math.round(height * pixelRatio);
+    tooltipWidth = 0;
+    tooltipHeight = 0;
+    invalidateProjection();
     requestDraw();
   }
 
   function fitMap() {
+    cancelPointerMove();
     const padding = width < 600 ? 32 : 58;
     const diameter = maxRadius * 2 + 900;
     view = {
@@ -149,21 +335,56 @@
       y: 0,
       scale: clamp(Math.min((width - padding * 2) / diameter, (height - padding * 2) / diameter), 0.002, 1.6)
     };
+    invalidateProjection();
     requestDraw();
   }
 
-  function worldToScreen(node) {
-    return {
-      x: (node.x - view.x) * view.scale + width / 2,
-      y: (node.y - view.y) * view.scale + height / 2
-    };
+  function invalidateProjection() {
+    projectionDirty = true;
+    hitGridDirty = true;
   }
 
-  function nodeRadius(node, active = false) {
-    const importance = node.type === "folder"
-      ? 2.2 + Math.log2(node.noteCount + 1) * 0.28
-      : 1.15 + Math.log2(node.linkCount + 1) * 0.12;
-    return clamp(importance + (active ? 1.7 : 0), node.type === "folder" ? 2.1 : 1.05, active ? 8 : 5.8);
+  function ensureProjection() {
+    if (!projectionDirty) return;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const scale = view.scale;
+    const viewX = view.x;
+    const viewY = view.y;
+    for (const node of nodes) {
+      screenX[node.index] = (node.x - viewX) * scale + centerX;
+      screenY[node.index] = (node.y - viewY) * scale + centerY;
+    }
+    projectionDirty = false;
+    hitGridDirty = true;
+  }
+
+  function ensureHitGrid() {
+    ensureProjection();
+    if (!hitGridDirty && hitGridReveal === reveal) return;
+
+    hitGridMargin = maxHitRadius;
+    hitGridCellSize = Math.max(16, Math.ceil(maxHitRadius * 2));
+    hitGridColumns = Math.max(1, Math.ceil((width + hitGridMargin * 2) / hitGridCellSize));
+    hitGridRows = Math.max(1, Math.ceil((height + hitGridMargin * 2) / hitGridCellSize));
+    const bucketCount = hitGridColumns * hitGridRows;
+    if (hitGridHeads.length !== bucketCount) hitGridHeads = new Int32Array(bucketCount);
+    hitGridHeads.fill(-1);
+
+    for (const node of nodes) {
+      if (!visibleAtReveal(node)) continue;
+      const x = screenX[node.index];
+      const y = screenY[node.index];
+      if (x < -hitGridMargin || y < -hitGridMargin || x > width + hitGridMargin || y > height + hitGridMargin) continue;
+      const column = Math.min(hitGridColumns - 1, Math.floor((x + hitGridMargin) / hitGridCellSize));
+      const row = Math.min(hitGridRows - 1, Math.floor((y + hitGridMargin) / hitGridCellSize));
+      const bucket = row * hitGridColumns + column;
+      hitGridNext[node.index] = hitGridHeads[bucket];
+      hitGridHeads[bucket] = node.index;
+    }
+
+    hitGridReveal = reveal;
+    hitGridDirty = false;
   }
 
   function visibleAtReveal(node) {
@@ -175,15 +396,15 @@
   function draw() {
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     context.clearRect(0, 0, width, height);
-    if (!data) return;
+    if (!prepared) return;
+    ensureProjection();
 
     drawRings();
-    if (showLinks) drawNoteLinks(false);
     drawHierarchy(false);
     drawNodes();
     if (hoveredIndex >= 0) {
       drawHierarchy(true);
-      if (showLinks) drawNoteLinks(true);
+      if (showActiveLinks) drawNoteLinks(true);
     }
     drawLabels();
   }
@@ -214,14 +435,13 @@
       const isActive = hoveredIndex >= 0 && relatedNodes.has(node.index) && relatedNodes.has(node.parentIndex);
       if (activePass !== isActive) continue;
       const parent = nodes[node.parentIndex];
-      const from = worldToScreen(parent);
-      const to = worldToScreen(node);
-      if (!segmentMightBeVisible(from, to)) continue;
-      context.moveTo(from.x, from.y);
-      const center = { x: width / 2 - view.x * view.scale, y: height / 2 - view.y * view.scale };
-      const controlX = (from.x + to.x + center.x) / 3;
-      const controlY = (from.y + to.y + center.y) / 3;
-      context.quadraticCurveTo(controlX, controlY, to.x, to.y);
+      const fromX = screenX[parent.index];
+      const fromY = screenY[parent.index];
+      const toX = screenX[node.index];
+      const toY = screenY[node.index];
+      if (!segmentMightBeVisible(fromX, fromY, toX, toY)) continue;
+      context.moveTo(fromX, fromY);
+      context.lineTo(toX, toY);
     }
     context.strokeStyle = activePass ? palette.active : palette.hierarchy;
     context.globalAlpha = activePass ? 0.88 : hoveredIndex >= 0 ? 0.035 : 0.19;
@@ -233,17 +453,23 @@
   function drawNoteLinks(activePass) {
     context.save();
     context.beginPath();
-    for (const [sourceIndex, targetIndex] of links) {
-      const isActive = hoveredIndex >= 0 && (sourceIndex === hoveredIndex || targetIndex === hoveredIndex);
-      if (activePass !== isActive) continue;
+    const start = activePass && hoveredIndex >= 0 ? incidentLinkOffsets[hoveredIndex] : 0;
+    const end = activePass && hoveredIndex >= 0 ? incidentLinkOffsets[hoveredIndex + 1] : linkSources.length;
+    for (let position = start; position < end; position += 1) {
+      const linkIndex = activePass ? incidentLinkIndexes[position] : position;
+      const sourceIndex = linkSources[linkIndex];
+      const targetIndex = linkTargets[linkIndex];
+      if (!activePass && hoveredIndex >= 0 && (sourceIndex === hoveredIndex || targetIndex === hoveredIndex)) continue;
       const source = nodes[sourceIndex];
       const target = nodes[targetIndex];
       if (!source || !target || !visibleAtReveal(source) || !visibleAtReveal(target)) continue;
-      const from = worldToScreen(source);
-      const to = worldToScreen(target);
-      if (!segmentMightBeVisible(from, to)) continue;
-      context.moveTo(from.x, from.y);
-      context.quadraticCurveTo(width / 2 - view.x * view.scale, height / 2 - view.y * view.scale, to.x, to.y);
+      const fromX = screenX[sourceIndex];
+      const fromY = screenY[sourceIndex];
+      const toX = screenX[targetIndex];
+      const toY = screenY[targetIndex];
+      if (!segmentMightBeVisible(fromX, fromY, toX, toY)) continue;
+      context.moveTo(fromX, fromY);
+      context.lineTo(toX, toY);
     }
     context.strokeStyle = activePass ? palette.linkActive : palette.link;
     context.globalAlpha = activePass ? 0.78 : hoveredIndex >= 0 ? 0.018 : 0.045;
@@ -252,26 +478,29 @@
     context.restore();
   }
 
-  function segmentMightBeVisible(from, to) {
+  function segmentMightBeVisible(fromX, fromY, toX, toY) {
     const margin = 60;
-    return !(from.x < -margin && to.x < -margin)
-      && !(from.y < -margin && to.y < -margin)
-      && !(from.x > width + margin && to.x > width + margin)
-      && !(from.y > height + margin && to.y > height + margin);
+    return !(fromX < -margin && toX < -margin)
+      && !(fromY < -margin && toY < -margin)
+      && !(fromX > width + margin && toX > width + margin)
+      && !(fromY > height + margin && toY > height + margin);
   }
 
   function drawNodes() {
     const passes = ["note", "folder"];
     for (const type of passes) {
+      const typeIndexes = type === "folder" ? folderIndexes : noteIndexes;
       context.save();
       context.beginPath();
-      for (const node of nodes) {
-        if (node.type !== type || node.index === hoveredIndex || !visibleAtReveal(node)) continue;
-        const point = worldToScreen(node);
-        if (point.x < -10 || point.y < -10 || point.x > width + 10 || point.y > height + 10) continue;
+      for (const nodeIndex of typeIndexes) {
+        const node = nodes[nodeIndex];
+        if (node.index === hoveredIndex || !visibleAtReveal(node)) continue;
+        const pointX = screenX[nodeIndex];
+        const pointY = screenY[nodeIndex];
+        if (pointX < -10 || pointY < -10 || pointX > width + 10 || pointY > height + 10) continue;
         const isRelated = hoveredIndex < 0 || relatedNodes.has(node.index);
-        context.moveTo(point.x + nodeRadius(node), point.y);
-        context.arc(point.x, point.y, nodeRadius(node), 0, Math.PI * 2);
+        context.moveTo(pointX + node.radius, pointY);
+        context.arc(pointX, pointY, node.radius, 0, Math.PI * 2);
         if (!isRelated) continue;
       }
       context.fillStyle = type === "folder" ? palette.folder : palette.note;
@@ -282,12 +511,14 @@
       if (hoveredIndex >= 0) {
         context.save();
         context.beginPath();
-        for (const node of nodes) {
-          if (node.type !== type || node.index === hoveredIndex || !relatedNodes.has(node.index) || !visibleAtReveal(node)) continue;
-          const point = worldToScreen(node);
-          if (point.x < -10 || point.y < -10 || point.x > width + 10 || point.y > height + 10) continue;
-          context.moveTo(point.x + nodeRadius(node, true), point.y);
-          context.arc(point.x, point.y, nodeRadius(node, true), 0, Math.PI * 2);
+        for (const nodeIndex of typeIndexes) {
+          const node = nodes[nodeIndex];
+          if (node.index === hoveredIndex || !relatedNodes.has(node.index) || !visibleAtReveal(node)) continue;
+          const pointX = screenX[nodeIndex];
+          const pointY = screenY[nodeIndex];
+          if (pointX < -10 || pointY < -10 || pointX > width + 10 || pointY > height + 10) continue;
+          context.moveTo(pointX + node.activeRadius, pointY);
+          context.arc(pointX, pointY, node.activeRadius, 0, Math.PI * 2);
         }
         context.fillStyle = palette.active;
         context.globalAlpha = type === "folder" ? 0.94 : 0.72;
@@ -302,15 +533,16 @@
   }
 
   function drawSingleNode(node, color, active) {
-    const point = worldToScreen(node);
+    const pointX = screenX[node.index];
+    const pointY = screenY[node.index];
     context.save();
     context.beginPath();
-    context.arc(point.x, point.y, nodeRadius(node, active) + (active ? 1 : 0), 0, Math.PI * 2);
+    context.arc(pointX, pointY, (active ? node.activeRadius : node.radius) + (active ? 1 : 0), 0, Math.PI * 2);
     context.fillStyle = color;
     context.globalAlpha = 1;
     context.fill();
     if (active) {
-      context.strokeStyle = "rgba(255,255,255,.92)";
+      context.strokeStyle = palette.nodeStroke;
       context.lineWidth = 2;
       context.stroke();
     }
@@ -321,7 +553,8 @@
     const candidates = [];
     for (const node of nodes) {
       if (!visibleAtReveal(node)) continue;
-      const forced = node.index === hoveredIndex || node.parent === null || isAncestorOfHovered(node.index);
+      const forced = node.index === hoveredIndex || node.index === rootIndex || Boolean(ancestorNodes && ancestorNodes.has(node.index));
+      const related = hoveredIndex < 0 || relatedNodes.has(node.index);
       const folderEligible = node.type === "folder" && (
         node.depth <= 2
         || view.scale > 0.055 && node.depth <= 4
@@ -329,13 +562,19 @@
       );
       const noteEligible = view.scale > 0.42 && node.linkCount > 0;
       if (!forced && !folderEligible && !noteEligible) continue;
-      const point = worldToScreen(node);
-      if (point.x < -80 || point.y < -30 || point.x > width + 80 || point.y > height + 30) continue;
+      const pointX = screenX[node.index];
+      const pointY = screenY[node.index];
+      if (pointX < -80 || pointY < -30 || pointX > width + 80 || pointY > height + 30) continue;
       candidates.push({
         node,
-        point,
+        pointX,
+        pointY,
         forced,
-        priority: forced ? 1e9 - node.depth : node.type === "folder" ? node.noteCount * 30 - node.depth : node.linkCount
+        related,
+        priority: forced
+          ? 1e9 - node.depth
+          : (hoveredIndex >= 0 && related ? 5e8 : 0)
+            + (node.type === "folder" ? node.noteCount * 30 - node.depth : node.linkCount)
       });
     }
     candidates.sort((left, right) => right.priority - left.priority);
@@ -351,19 +590,19 @@
       const text = candidate.node.title.length > 38 ? `${candidate.node.title.slice(0, 36)}…` : candidate.node.title;
       const textWidth = context.measureText(text).width;
       const box = {
-        x: candidate.point.x + nodeRadius(candidate.node) + 5,
-        y: candidate.point.y - 7,
+        x: candidate.pointX + candidate.node.radius + 5,
+        y: candidate.pointY - 7,
         width: textWidth + 4,
         height: 14
       };
       if (!candidate.forced && occupied.some((other) => boxesOverlap(box, other))) continue;
       occupied.push(box);
-      context.strokeStyle = "rgba(251,250,246,.92)";
+      context.globalAlpha = candidate.related ? (candidate.forced ? 1 : 0.88) : 0.1;
+      context.strokeStyle = palette.labelHalo;
       context.lineWidth = 3;
-      context.strokeText(text, box.x + 2, candidate.point.y);
+      context.strokeText(text, box.x + 2, candidate.pointY);
       context.fillStyle = candidate.forced ? palette.text : palette.mutedText;
-      context.globalAlpha = candidate.forced ? 1 : 0.88;
-      context.fillText(text, box.x + 2, candidate.point.y);
+      context.fillText(text, box.x + 2, candidate.pointY);
       drawn += 1;
     }
     context.restore();
@@ -376,21 +615,13 @@
       && left.y + left.height + 3 > right.y;
   }
 
-  function isAncestorOfHovered(index) {
-    if (hoveredIndex < 0) return false;
-    let current = nodes[hoveredIndex].parentIndex;
-    while (current >= 0) {
-      if (current === index) return true;
-      current = nodes[current].parentIndex;
-    }
-    return false;
-  }
-
   function relatedFor(index) {
     const related = new Set([index]);
+    const ancestors = new Set();
     let ancestor = nodes[index].parentIndex;
     while (ancestor >= 0) {
       related.add(ancestor);
+      ancestors.add(ancestor);
       ancestor = nodes[ancestor].parentIndex;
     }
     const stack = [...nodes[index].children];
@@ -398,25 +629,38 @@
       const child = stack.pop();
       if (related.has(child)) continue;
       related.add(child);
-      stack.push(...nodes[child].children);
+      for (const descendant of nodes[child].children) stack.push(descendant);
     }
-    return related;
+    return { related, ancestors };
   }
 
   function findNodeAt(clientX, clientY) {
+    ensureHitGrid();
     const bounds = canvas.getBoundingClientRect();
     const x = clientX - bounds.left;
     const y = clientY - bounds.top;
     let best = -1;
     let bestDistance = Infinity;
-    for (const node of nodes) {
-      if (!visibleAtReveal(node)) continue;
-      const point = worldToScreen(node);
-      const distance = Math.hypot(point.x - x, point.y - y);
-      const hitRadius = Math.max(6, nodeRadius(node) + 3);
-      if (distance <= hitRadius && distance < bestDistance) {
-        best = node.index;
-        bestDistance = distance;
+    const column = Math.floor((x + hitGridMargin) / hitGridCellSize);
+    const row = Math.floor((y + hitGridMargin) / hitGridCellSize);
+    const reach = Math.ceil(maxHitRadius / hitGridCellSize);
+    const firstColumn = Math.max(0, column - reach);
+    const lastColumn = Math.min(hitGridColumns - 1, column + reach);
+    const firstRow = Math.max(0, row - reach);
+    const lastRow = Math.min(hitGridRows - 1, row + reach);
+
+    for (let bucketRow = firstRow; bucketRow <= lastRow; bucketRow += 1) {
+      for (let bucketColumn = firstColumn; bucketColumn <= lastColumn; bucketColumn += 1) {
+        let nodeIndex = hitGridHeads[bucketRow * hitGridColumns + bucketColumn];
+        while (nodeIndex >= 0) {
+          const node = nodes[nodeIndex];
+          const distance = Math.hypot(screenX[nodeIndex] - x, screenY[nodeIndex] - y);
+          if (distance <= node.hitRadius && (distance < bestDistance || distance === bestDistance && node.index < best)) {
+            best = node.index;
+            bestDistance = distance;
+          }
+          nodeIndex = hitGridNext[nodeIndex];
+        }
       }
     }
     return best;
@@ -424,19 +668,29 @@
 
   function setHovered(index, clientX, clientY, force = false) {
     if (frozenIndex >= 0 && !force) return;
-    if (hoveredIndex !== index) {
+    const changed = hoveredIndex !== index;
+    if (changed) {
       hoveredIndex = index;
-      relatedNodes = index >= 0 ? relatedFor(index) : null;
+      if (index >= 0) {
+        const relation = relatedFor(index);
+        relatedNodes = relation.related;
+        ancestorNodes = relation.ancestors;
+      } else {
+        relatedNodes = null;
+        ancestorNodes = null;
+      }
       canvas.classList.toggle("is-hovering-node", index >= 0);
       requestDraw();
     }
     if (index >= 0) {
       const node = nodes[index];
-      const detail = node.type === "folder" ? `${format.format(node.noteCount)} notes in this branch` : `${format.format(node.linkCount)} connections`;
-      setStatus(`${node.title}. ${detail}.${frozenIndex === index ? " Locked — click elsewhere to release." : ""}`);
+      if (changed) {
+        const detail = node.type === "folder" ? `${format.format(node.noteCount)} notes in this branch` : `${format.format(node.linkCount)} connections`;
+        setStatus(`${node.title}. ${detail}.`);
+      }
       showTooltip(node, clientX, clientY);
     } else {
-      setStatus("Drag to pan. Scroll to zoom. Hover or click a node to reveal its branch.");
+      if (changed) setStatus("");
       tooltip.hidden = true;
     }
   }
@@ -454,16 +708,37 @@
   }
 
   function showTooltip(node, clientX, clientY) {
+    if (tooltipNodeIndex !== node.index) {
+      tooltip.innerHTML = `
+        <strong>${escapeHtml(node.title)}</strong>
+        <span>${node.type === "folder" ? `${format.format(node.noteCount)} notes in branch` : `${format.format(node.linkCount)} internal connections`}</span>
+        <small>${escapeHtml(nodePath(node) || "Vault root")}</small>
+      `;
+      tooltipNodeIndex = node.index;
+      tooltipWidth = 0;
+      tooltipHeight = 0;
+    }
+    if (tooltip.hidden) tooltip.hidden = false;
+    if (!tooltipWidth || !tooltipHeight) {
+      tooltipWidth = tooltip.offsetWidth;
+      tooltipHeight = tooltip.offsetHeight;
+    }
     const bounds = root.getBoundingClientRect();
-    tooltip.innerHTML = `
-      <strong>${escapeHtml(node.title)}</strong>
-      <span>${node.type === "folder" ? `${format.format(node.noteCount)} notes in branch` : `${format.format(node.linkCount)} internal connections`}</span>
-      <small>${escapeHtml(node.id || "Vault root")}</small>
-    `;
-    tooltip.hidden = false;
-    const left = clamp(clientX - bounds.left + 14, 10, Math.max(10, bounds.width - tooltip.offsetWidth - 10));
-    const top = clamp(clientY - bounds.top + 14, 10, Math.max(10, bounds.height - tooltip.offsetHeight - 10));
+    const left = clamp(clientX - bounds.left + 14, 10, Math.max(10, bounds.width - tooltipWidth - 10));
+    const top = clamp(clientY - bounds.top + 14, 10, Math.max(10, bounds.height - tooltipHeight - 10));
     tooltip.style.transform = `translate(${left}px, ${top}px)`;
+  }
+
+  function nodePath(node) {
+    if (!compactNodes) return node.id;
+    const segments = [];
+    let current = node;
+    while (current.parentIndex >= 0) {
+      segments.push(current.segment);
+      current = nodes[current.parentIndex];
+    }
+    segments.reverse();
+    return segments.join("/");
   }
 
   function escapeHtml(value) {
@@ -473,6 +748,7 @@
   }
 
   function zoomAt(factor, screenX = width / 2, screenY = height / 2) {
+    cancelPointerMove();
     const previousScale = view.scale;
     const nextScale = clamp(previousScale * factor, 0.0015, 2.4);
     const worldX = view.x + (screenX - width / 2) / previousScale;
@@ -480,64 +756,119 @@
     view.x = worldX - (screenX - width / 2) / nextScale;
     view.y = worldY - (screenY - height / 2) / nextScale;
     view.scale = nextScale;
+    invalidateProjection();
     setHovered(-1);
     requestDraw();
   }
 
-  function startReveal() {
-    if (reducedMotion) {
-      reveal = 1;
-      requestDraw();
-      return;
-    }
-    const start = performance.now();
-    const duration = 1450;
-    const step = (now) => {
-      reveal = clamp((now - start) / duration, 0, 1);
-      requestDraw();
-      if (reveal < 1) requestAnimationFrame(step);
+  function startPinch() {
+    const pointers = Array.from(touchPointers.values());
+    if (pointers.length < 2) return;
+    const [first, second] = pointers;
+    const bounds = canvas.getBoundingClientRect();
+    const screenX = (first.x + second.x) / 2 - bounds.left;
+    const screenY = (first.y + second.y) / 2 - bounds.top;
+    pinch = {
+      distance: Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)),
+      scale: view.scale,
+      worldX: view.x + (screenX - width / 2) / view.scale,
+      worldY: view.y + (screenY - height / 2) / view.scale
     };
-    requestAnimationFrame(step);
+    drag = null;
+    cancelPointerMove();
+    setHovered(-1);
+    tooltip.hidden = true;
+  }
+
+  function updatePinch() {
+    const pointers = Array.from(touchPointers.values());
+    if (!pinch || pointers.length < 2) return;
+    const [first, second] = pointers;
+    const bounds = canvas.getBoundingClientRect();
+    const screenX = (first.x + second.x) / 2 - bounds.left;
+    const screenY = (first.y + second.y) / 2 - bounds.top;
+    const distance = Math.max(1, Math.hypot(second.x - first.x, second.y - first.y));
+    const nextScale = clamp(pinch.scale * distance / pinch.distance, 0.0015, 2.4);
+    view.x = pinch.worldX - (screenX - width / 2) / nextScale;
+    view.y = pinch.worldY - (screenY - height / 2) / nextScale;
+    view.scale = nextScale;
+    invalidateProjection();
+    requestDraw();
   }
 
   canvas.addEventListener("pointerdown", (event) => {
     if (event.button !== 0) return;
+    cancelPointerMove();
+    if (event.pointerType === "touch") {
+      touchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    }
     drag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, viewX: view.x, viewY: view.y, moved: false };
     canvas.setPointerCapture(event.pointerId);
     canvas.classList.add("is-dragging");
     tooltip.hidden = true;
+    if (touchPointers.size >= 2) startPinch();
   });
 
   canvas.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "touch" && touchPointers.has(event.pointerId)) {
+      touchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (pinch) {
+        updatePinch();
+        return;
+      }
+    }
     if (drag && drag.pointerId === event.pointerId) {
       const deltaX = event.clientX - drag.x;
       const deltaY = event.clientY - drag.y;
       if (Math.abs(deltaX) + Math.abs(deltaY) > 2) drag.moved = true;
       view.x = drag.viewX - deltaX / view.scale;
       view.y = drag.viewY - deltaY / view.scale;
+      invalidateProjection();
       setHovered(-1);
       requestDraw();
       return;
     }
-    setHovered(findNodeAt(event.clientX, event.clientY), event.clientX, event.clientY);
+    requestPointerMove(event.clientX, event.clientY);
   });
 
-  const endDrag = (event) => {
+  const endDrag = (event, cancelled = false) => {
+    const wasPinching = Boolean(pinch);
+    touchPointers.delete(event.pointerId);
+    if (wasPinching) {
+      pinch = null;
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      if (touchPointers.size >= 2) {
+        startPinch();
+        return;
+      }
+      const remaining = touchPointers.entries().next().value;
+      if (remaining) {
+        const [pointerId, point] = remaining;
+        drag = { pointerId, x: point.x, y: point.y, viewX: view.x, viewY: view.y, moved: true };
+      } else {
+        drag = null;
+        canvas.classList.remove("is-dragging");
+      }
+      return;
+    }
     if (!drag || drag.pointerId !== event.pointerId) return;
     const completedDrag = drag;
     drag = null;
     canvas.classList.remove("is-dragging");
     if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
-    if (!completedDrag.moved) {
+    if (!cancelled && !completedDrag.moved) {
       const clickedIndex = findNodeAt(event.clientX, event.clientY);
       if (clickedIndex >= 0) freezeNode(clickedIndex, event.clientX, event.clientY);
       else releaseFrozen();
     }
   };
   canvas.addEventListener("pointerup", endDrag);
-  canvas.addEventListener("pointercancel", endDrag);
+  canvas.addEventListener("pointercancel", (event) => endDrag(event, true));
   canvas.addEventListener("pointerleave", (event) => {
-    if (!drag) setHovered(-1, event.clientX, event.clientY);
+    if (!drag) {
+      cancelPointerMove();
+      setHovered(-1, event.clientX, event.clientY);
+    }
   });
 
   canvas.addEventListener("wheel", (event) => {
@@ -555,7 +886,11 @@
     event.preventDefault();
   });
 
-  new ResizeObserver(resize).observe(canvas);
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(resize).observe(canvas);
+  } else {
+    window.addEventListener("resize", resize);
+  }
   resize();
   if (window.WORLDMODEL_MAP_DATA) {
     prepareMap(window.WORLDMODEL_MAP_DATA);

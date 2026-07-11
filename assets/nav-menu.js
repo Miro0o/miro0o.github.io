@@ -1,5 +1,5 @@
 (() => {
-  const menus = document.querySelectorAll(".nav-menu");
+  const menus = document.querySelectorAll(".nav-menu, .theme-switcher");
 
   const closeMenus = (except) => {
     menus.forEach((menu) => {

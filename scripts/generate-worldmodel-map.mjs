@@ -269,7 +269,7 @@ async function main() {
     .sort((left, right) => left[0] - right[0] || left[1] - right[1]);
 
   const payload = {
-    version: 1,
+    version: 2,
     generatedAt: new Date().toISOString(),
     source: "Miro0o/miniWorldModel",
     counts: {
@@ -278,7 +278,16 @@ async function main() {
       visibleNodes: nodes.length,
       links: links.length
     },
-    nodes,
+    // Keep the published snapshot small enough to parse quickly on low-power devices.
+    // Rows contain: basename, folder flag, parent index, note count, link count.
+    // Full paths, titles, and depths are reconstructed in the browser.
+    nodes: nodes.map((node) => [
+      basename(node.id),
+      node.type === "folder" ? 1 : 0,
+      node.parent === null ? -1 : nodeIndexById.get(node.parent),
+      node.noteCount,
+      node.linkCount
+    ]),
     links
   };
 
