@@ -1,0 +1,393 @@
+/* Personal life: a living wall built from NetEase Cloud Music listening data. */
+.life-page {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--life-surface);
+}
+
+.life-page .page {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  padding: 28px 0 32px;
+  overflow: hidden;
+}
+
+.life-page .masthead,
+.life-page footer {
+  position: relative;
+  z-index: 20;
+  flex: 0 0 auto;
+  width: calc(100% - 40px);
+  max-width: 1220px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.life-page .life-main {
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 16px 0 14px;
+}
+
+.life-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--life-surface);
+}
+
+.life-stage::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    var(--life-surface) 0%,
+    color-mix(in srgb, var(--life-surface) 96%, transparent) 18%,
+    color-mix(in srgb, var(--life-surface) 70%, transparent) 34%,
+    transparent 57%
+  );
+  pointer-events: none;
+}
+
+.album-wall {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--life-surface);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.1) 17%, #000 47%);
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.1) 17%, #000 47%);
+}
+
+.album-grid {
+  --album-size: clamp(96px, 9.4vw, 144px);
+  --track-gap: 4px;
+  --track-angle: -10deg;
+  position: absolute;
+  inset: -8% -12%;
+  overflow: visible;
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+.life-stage.is-ready .album-grid {
+  opacity: 1;
+}
+
+.album-track {
+  --track-duration: 240s;
+  --track-delay: 0s;
+  position: absolute;
+  top: var(--track-top, 50%);
+  left: -8vw;
+  display: flex;
+  width: max-content;
+  animation: album-track-roll var(--track-duration) linear infinite;
+  animation-delay: var(--track-delay);
+  animation-play-state: running !important;
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+
+.album-track.is-reverse {
+  animation-direction: reverse;
+}
+
+.album-track:hover,
+.album-track:focus-within {
+  z-index: 5;
+}
+
+.album-sequence {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--track-gap);
+  padding-right: var(--track-gap);
+}
+
+.album-tile {
+  position: relative;
+  display: block;
+  flex: 0 0 var(--album-size);
+  width: var(--album-size);
+  aspect-ratio: 1;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 55%),
+    #34342f;
+}
+
+.album-tile::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  content: "";
+  pointer-events: none;
+}
+
+.album-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 400ms ease, transform 650ms cubic-bezier(0.2, 0.72, 0.25, 1);
+}
+
+.album-tile:hover,
+.album-tile:focus-visible {
+  z-index: 5;
+  outline: 0;
+}
+
+.album-tile:hover img,
+.album-tile:focus-visible img {
+  filter: brightness(0.42) saturate(0.7);
+  transform: scale(1.08);
+}
+
+.album-tile:focus-visible::before {
+  border: 3px solid rgba(255, 255, 255, 0.9);
+}
+
+.album-tile.has-image-error::after {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.55);
+  content: "♪";
+  font: 500 clamp(1rem, 2vw, 2rem)/1 Georgia, serif;
+}
+
+.album-tile.has-image-error img {
+  display: none;
+}
+
+.album-details {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: clamp(7px, 1vw, 14px);
+  color: #fff;
+  font-size: clamp(0.54rem, 0.72vw, 0.78rem);
+  line-height: 1.25;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 240ms ease, transform 300ms ease;
+}
+
+.album-details strong,
+.album-details span,
+.album-details small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.album-details span,
+.album-details small {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.album-details small {
+  margin-top: 3px;
+  font-size: 0.83em;
+}
+
+.album-tile:hover .album-details,
+.album-tile:focus-visible .album-details {
+  opacity: 1;
+  transform: none;
+}
+
+.module-music .panel-content {
+  --music-intro-left: max(20px, calc((100vw - 1220px) / 2));
+  --music-intro-width: min(390px, 34vw);
+}
+
+.music-intro {
+  position: absolute;
+  top: 50%;
+  left: var(--music-intro-left);
+  z-index: 7;
+  width: var(--music-intro-width);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.music-kicker {
+  margin: 0 0 13px;
+  color: var(--red);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.music-intro h1 {
+  font-size: clamp(3.3rem, 6.3vw, 6.4rem);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+}
+
+.music-intro > p:not(.music-kicker) {
+  max-width: 355px;
+  margin: 23px 0 0;
+  color: var(--copy);
+  font-size: clamp(0.92rem, 1.2vw, 1.1rem);
+  line-height: 1.5;
+}
+
+.music-source {
+  display: inline-block;
+  margin-top: 23px;
+  color: var(--muted);
+  font-size: 0.69rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.life-page footer {
+  margin-top: 0;
+  padding-top: 22px;
+}
+
+@keyframes album-track-roll {
+  from { transform: rotate(var(--track-angle)) translate3d(0, 0, 0); }
+  to { transform: rotate(var(--track-angle)) translate3d(-50%, 0, 0); }
+}
+
+@media (max-width: 900px) {
+  .life-page .page {
+    padding-top: 18px;
+  }
+
+  .life-page .masthead,
+  .life-page footer {
+    width: calc(100% - 28px);
+  }
+
+  .life-page footer {
+    flex-direction: row !important;
+    gap: 14px;
+    padding-top: 16px;
+    font-size: 0.78rem;
+  }
+
+  .life-page .life-main {
+    padding: 10px 0;
+  }
+
+  .module-music .panel-content {
+    --music-intro-left: 24px;
+    --music-intro-width: min(360px, 50vw);
+  }
+
+  .album-grid {
+    --album-size: clamp(90px, 12vw, 124px);
+    right: -18%;
+    left: -18%;
+  }
+}
+
+@media (max-width: 620px) {
+  .life-page .masthead {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .life-page .masthead .brand span {
+    display: none;
+  }
+
+  .life-page .masthead nav {
+    width: auto;
+    flex: 0 0 auto;
+    gap: 10px;
+    font-size: 0.8rem;
+  }
+
+  .life-page .masthead nav > a[href="worldmodel.html"],
+  .life-page .masthead .theme-switcher {
+    display: none;
+  }
+
+  .life-stage::after {
+    background: linear-gradient(
+      90deg,
+      var(--life-surface) 0%,
+      color-mix(in srgb, var(--life-surface) 94%, transparent) 28%,
+      color-mix(in srgb, var(--life-surface) 46%, transparent) 66%,
+      transparent 100%
+    );
+  }
+
+  .album-wall {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.22) 28%, #000 72%);
+    mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.22) 28%, #000 72%);
+  }
+
+  .album-grid {
+    --album-size: clamp(84px, 22vw, 104px);
+    --track-gap: 3px;
+    right: -26%;
+    left: -26%;
+  }
+
+  .module-music .panel-content {
+    --music-intro-left: 20px;
+    --music-intro-width: min(295px, 72vw);
+  }
+
+  .music-intro h1 {
+    font-size: clamp(3rem, 15vw, 4.6rem);
+  }
+
+  .music-intro > p:not(.music-kicker) {
+    max-width: 270px;
+    font-size: 0.88rem;
+  }
+
+  .life-page footer > span {
+    white-space: nowrap;
+  }
+
+  .life-page footer .elsewhere {
+    gap: 10px;
+  }
+
+  .life-page footer {
+    justify-content: center;
+  }
+
+  .life-page footer > span {
+    display: none;
+  }
+}
+
+@media (max-width: 440px) {
+  .module-music .panel-content {
+    --music-intro-left: 16px;
+    --music-intro-width: 72vw;
+  }
+
+  .music-source {
+    display: none;
+  }
+
+}

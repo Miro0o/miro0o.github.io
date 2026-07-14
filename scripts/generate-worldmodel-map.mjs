@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const siteDirectory = path.resolve(scriptDirectory, "..");
 const vaultDirectory = path.resolve(process.argv[2] || path.join(siteDirectory, "../../../miniWorldModel"));
-const outputPath = path.resolve(process.argv[3] || path.join(siteDirectory, "assets/worldmodel-map-data.js"));
+const outputPath = path.resolve(process.argv[3] || path.join(siteDirectory, "assets/data/worldmodel-map-data.js"));
 const toVaultPath = (absolutePath) => path.relative(vaultDirectory, absolutePath).split(path.sep).join("/");
 const withoutMarkdownExtension = (value) => value.replace(/\.md$/i, "");
 const basename = (value) => value.slice(value.lastIndexOf("/") + 1);

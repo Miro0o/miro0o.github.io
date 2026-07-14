@@ -1,0 +1,465 @@
+/* Personal life hub: five full-height folds that open into individual worlds. */
+.life-stage::after {
+  display: none;
+}
+
+.life-overview {
+  position: absolute;
+  top: 50%;
+  left: max(20px, calc((100vw - 1220px) / 2));
+  z-index: 4;
+  width: min(320px, 25vw);
+  transform: translateY(-50%);
+  transition: opacity 200ms ease, transform 420ms cubic-bezier(0.2, 0.72, 0.25, 1);
+}
+
+.life-kicker,
+.module-kicker {
+  margin: 0 0 14px;
+  color: var(--red);
+  font-size: 0.7rem;
+  font-weight: 760;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.life-overview h1 {
+  max-width: 320px;
+  margin: 0;
+  font-size: clamp(2.7rem, 4.6vw, 5rem);
+  line-height: 0.94;
+  letter-spacing: -0.05em;
+}
+
+.life-overview > p:not(.life-kicker) {
+  max-width: 280px;
+  margin: 22px 0 0;
+  color: var(--copy);
+  font-size: clamp(0.88rem, 1.05vw, 1rem);
+}
+
+.life-instruction {
+  display: block;
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+.life-stage.has-open-panel .life-overview {
+  opacity: 0;
+  transform: translate(-28px, -50%);
+  pointer-events: none;
+}
+
+.life-accordion {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 5;
+  display: flex;
+  width: min(70vw, 1040px);
+  min-width: 680px;
+  overflow: hidden;
+  transition: width 440ms cubic-bezier(0.2, 0.72, 0.25, 1);
+}
+
+.life-accordion.has-open-panel {
+  width: 100%;
+}
+
+.life-accordion.has-peek-panel {
+  width: min(76vw, 1120px);
+}
+
+.life-panel {
+  --fold-color: #75685d;
+  --fold-slope: clamp(38px, 4vw, 64px);
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  margin-left: calc(0px - var(--fold-slope));
+  overflow: hidden;
+  color: var(--ink);
+  background: transparent;
+  contain: layout paint style;
+  transition:
+    flex-grow 460ms cubic-bezier(0.2, 0.72, 0.25, 1),
+    opacity 180ms ease;
+}
+
+/* Alternate the taper so neighbouring trapezoids share one clean seam. */
+.life-panel:nth-child(odd) {
+  clip-path: polygon(
+    var(--fold-slope) 0,
+    calc(100% - var(--fold-slope)) 0,
+    100% 100%,
+    0 100%
+  );
+}
+
+.life-panel:nth-child(even) {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    calc(100% - var(--fold-slope)) 100%,
+    var(--fold-slope) 100%
+  );
+}
+
+.life-panel:first-child {
+  margin-left: 0;
+}
+
+.life-panel::before {
+  display: none;
+}
+
+.life-panel::after {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 3;
+  width: 1px;
+  content: "";
+  background: color-mix(in srgb, var(--ink) 24%, transparent);
+  pointer-events: none;
+}
+
+.module-music { --fold-color: #75685d; }
+.module-film { --fold-color: #8a684c; }
+.module-games { --fold-color: #625875; }
+.module-soccer { --fold-color: #4d725a; }
+.module-books { --fold-color: #4f6977; }
+
+.life-accordion.has-peek-panel .life-panel {
+  flex-grow: 0.82;
+}
+
+.life-accordion.has-peek-panel .life-panel.is-peeking {
+  z-index: 6;
+  flex-grow: 1.9;
+}
+
+.life-accordion.has-open-panel .life-panel {
+  flex-grow: 0.025;
+  opacity: 0.84;
+}
+
+.life-accordion.has-open-panel .life-panel.is-active {
+  z-index: 10;
+  flex-grow: 1;
+  opacity: 1;
+  clip-path: inset(0);
+}
+
+.panel-tab {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  padding: 24px 15px 20px;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+  font: inherit;
+  text-shadow: 0 1px 8px var(--life-surface), 0 0 3px var(--life-surface);
+  cursor: pointer;
+  transition: opacity 180ms ease, visibility 180ms ease;
+}
+
+.panel-tab:focus-visible {
+  outline: 3px solid var(--focus-outline);
+  outline-offset: -6px;
+}
+
+.panel-name {
+  margin: auto 0;
+  font-size: clamp(0.78rem, 1vw, 0.95rem);
+  font-weight: 720;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.life-panel.is-active .panel-tab {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.panel-content {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  z-index: 2;
+  width: 100vw;
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--life-surface);
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.life-panel.is-active .panel-content {
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.module-games .panel-content {
+  transform: translateX(-56%);
+}
+
+.module-books .panel-content {
+  transform: translateX(-56%);
+}
+
+.module-games.is-active .panel-content,
+.module-books.is-active .panel-content {
+  transform: translateX(-50%);
+}
+
+.panel-close {
+  position: absolute;
+  top: 22px;
+  right: max(20px, calc((100vw - 1220px) / 2));
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
+  border-radius: 999px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--life-surface) 96%, var(--ink));
+  font: inherit;
+  font-size: 0.72rem;
+  opacity: 0;
+  visibility: hidden;
+  cursor: pointer;
+  transition: opacity 180ms ease 260ms, visibility 0s linear 440ms;
+}
+
+.life-panel.is-active .panel-close {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 180ms ease 260ms, visibility 0s;
+}
+
+.panel-close span {
+  font-size: 1rem;
+  line-height: 0.8;
+}
+
+.panel-close:hover,
+.panel-close:focus-visible {
+  border-color: var(--ink);
+}
+
+.module-music .panel-content {
+  background: var(--life-surface);
+}
+
+.module-music .panel-content::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    var(--life-surface) 0%,
+    color-mix(in srgb, var(--life-surface) 96%, transparent) 18%,
+    color-mix(in srgb, var(--life-surface) 70%, transparent) 34%,
+    transparent 57%
+  );
+  pointer-events: none;
+}
+
+/*
+ * The album wall is faded with a mask, which does not alter browser hit
+ * testing. Keep the text/transition zone above the moving links so albums
+ * hidden beneath it cannot be hovered or opened.
+ */
+.module-music .panel-content::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 6;
+  width: calc(var(--music-intro-left) + var(--music-intro-width));
+  content: "";
+  background: transparent;
+  pointer-events: auto;
+}
+
+.module-music .album-wall {
+  z-index: 0;
+}
+
+.music-intro h2 {
+  margin: 0;
+  font-size: clamp(3.3rem, 6.3vw, 6.4rem);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+}
+
+.module-sheet {
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  padding: clamp(70px, 10vw, 150px);
+  background: var(--life-surface);
+}
+
+.module-sheet::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background-image: linear-gradient(color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px);
+  background-size: 100% 42px;
+  opacity: 0.42;
+}
+
+.module-copy {
+  position: relative;
+  z-index: 3;
+  width: min(500px, 46vw);
+}
+
+.module-copy h2 {
+  max-width: 600px;
+  margin: 0;
+  font-size: clamp(3.2rem, 7vw, 7.6rem);
+  line-height: 0.9;
+  letter-spacing: -0.055em;
+}
+
+.module-copy > p:not(.module-kicker) {
+  max-width: 460px;
+  margin: 27px 0 0;
+  color: var(--copy);
+  font-size: clamp(0.92rem, 1.25vw, 1.12rem);
+}
+
+.module-status {
+  display: block;
+  margin-top: 27px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.history-line {
+  position: absolute;
+  right: 7vw;
+  bottom: 18%;
+  display: flex;
+  align-items: center;
+  width: min(42vw, 620px);
+  color: var(--muted);
+  font: 650 0.65rem/1 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(-7deg);
+}
+
+.history-line i {
+  position: relative;
+  flex: 1;
+  height: 1px;
+  margin: 0 12px;
+  background: color-mix(in srgb, var(--fold-color) 60%, var(--line));
+}
+
+.history-line i::before {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--fold-color);
+  content: "";
+}
+
+.philosophy-question {
+  position: absolute;
+  right: 7vw;
+  bottom: 8%;
+  color: color-mix(in srgb, var(--fold-color) 58%, transparent);
+  font: italic clamp(3rem, 7vw, 8rem)/0.86 Georgia, serif;
+  letter-spacing: -0.055em;
+  text-align: right;
+}
+
+.paint-study {
+  position: absolute;
+  top: 15%;
+  right: 7vw;
+  display: grid;
+  grid-template-columns: repeat(3, clamp(70px, 10vw, 150px));
+  gap: clamp(8px, 1vw, 17px);
+  transform: rotate(4deg);
+}
+
+.paint-study i {
+  aspect-ratio: 0.72;
+  border: 8px solid color-mix(in srgb, var(--life-surface) 72%, var(--ink));
+  box-shadow: var(--shadow);
+}
+
+.paint-study i:nth-child(1) { background: linear-gradient(150deg, #d8a05c 0 34%, #557d88 35% 68%, #59423e 69%); }
+.paint-study i:nth-child(2) { background: radial-gradient(circle at 40% 35%, #e4c18a 0 14%, transparent 15%), linear-gradient(130deg, #7b5260 0 45%, #c36f4a 46% 70%, #304b50 71%); }
+.paint-study i:nth-child(3) { background: linear-gradient(165deg, #c8c2aa 0 28%, #334c67 29% 48%, #9b533e 49% 66%, #c39d55 67%); }
+
+.soccer-pitch {
+  position: absolute;
+  right: 6vw;
+  bottom: 7%;
+  width: min(43vw, 640px);
+  aspect-ratio: 1.7;
+  border: 2px solid color-mix(in srgb, var(--fold-color) 52%, var(--ink));
+  opacity: 0.48;
+  transform: perspective(700px) rotateX(58deg) rotateZ(-8deg);
+}
+
+.soccer-pitch::before,
+.soccer-pitch::after,
+.soccer-pitch i,
+.soccer-pitch span {
+  position: absolute;
+  content: "";
+}
+
+.soccer-pitch::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 2px solid currentColor;
+}
+
+.soccer-pitch::after {
+  top: 50%;
+  left: 50%;
+  width: 21%;
+  aspect-ratio: 1;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.soccer-pitch i,
+.soccer-pitch span {
+  top: 27%;
+  bottom: 27%;
+  width: 16%;
+  border: 2px solid currentColor;
+}
+
+.soccer-pitch i { left: -2px; }
+.soccer-pitch span { right: -2px; }

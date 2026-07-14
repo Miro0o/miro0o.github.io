@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Academic profile of Yiqing (Miro) Sun, an MSc student in Computer Science and Engineering at DTU.">
   <title>Yiqing Sun - Academic</title>
-  <script src="assets/theme-switcher.js"></script>
-  <link rel="stylesheet" href="styles.css">
-  <script src="assets/nav-menu.js" defer></script>
+  <script src="assets/scripts/theme-switcher.js"></script>
+  <link rel="stylesheet" href="assets/styles/main.css">
+  <script src="assets/scripts/nav-menu.js" defer></script>
 </head>
 <body class="academic-page">
   <div class="page">
     <header class="masthead">
       <a class="brand" href="https://miro0o.github.io/" aria-label="Miro0o home">
-        <img src="images/site-logo.webp" width="42" height="42" alt="">
+        <img src="assets/images/branding/site-logo.webp" width="42" height="42" alt="">
         <span>Miro0o</span>
       </a>
       <nav aria-label="Primary">
@@ -41,13 +41,13 @@
       <article class="academic-profile">
         <header class="academic-intro">
           <figure class="academic-photo-wrap">
-            <img class="academic-photo" src="images/academic-placeholder.png" alt="Fictional placeholder portrait; a real photograph will be added later.">
-            <figcaption>Placeholder portrait</figcaption>
+            <img class="academic-photo" src="assets/images/profile/academic-profile.webp" alt="Portrait of Yiqing (Miro) Sun">
+            <!-- <figcaption>Yiqing (Miro) Sun</figcaption> -->
           </figure>
 
           <div class="academic-identity">
-            <p class="academic-kicker">Academic profile</p>
-            <h1>Yiqing Sun <span>(Miro)</span></h1>
+            <!-- <p class="academic-kicker">Academic profile</p> -->
+            <h1>Yiqing Sun 孙一清</h1>
             <p class="academic-role">MSc Eng. in Computer Science and Engineering</p>
             <p class="academic-affiliation">Technical University of Denmark (DTU)</p>
             <address class="academic-contact">
@@ -55,7 +55,9 @@
               <span aria-hidden="true">·</span>
               <a href="https://github.com/Miro0o">GitHub</a>
               <span aria-hidden="true">·</span>
-              <a href="CV-Sun-2601.pdf">CV</a>
+              <a href="https://www.linkedin.com/in/yiqing-sun">LinkedIn</a>
+              <!-- <span aria-hidden="true">·</span> -->
+              <!-- <a>CV (comming soon)</a> -->
             </address>
           </div>
         </header>
@@ -64,19 +66,18 @@
           <h2 id="about-heading" class="sr-only">About</h2>
           <p>
             I am an MSc student in Computer Science and Engineering at
-            <a href="https://www.dtu.dk/english/">DTU</a>. My interests sit at the intersection of
-            <strong>software and systems security</strong>, <strong>program analysis</strong>, and
-            <strong>LLM-based developer tools</strong>. I am especially interested in using language
-            models to make security analysis and testing more adaptable across programming languages.
+            <a href="https://www.compute.dtu.dk/">DTU</a>. My current interests lie at the intersection of software analysis and large language models. I am especially interested in LLM-based methods, including agents, that complement traditional techniques to improve software security, correctness, reliability, and efficiency.
           </p>
           <p>
-            Before DTU, I studied cybersecurity at Sichuan University and spent a semester as a
-            visiting student at UC Berkeley. I have worked on eBPF monitoring, cloud and network
-            performance, penetration testing, static malware analysis, and multi-language fuzzing.
+            More broadly, I think of language as any system for representing information or the world—from natural languages and formal notation to programs and learned representations. This view connects my interests in mathematics, logic, formal methods, programming languages and program analysis, natural language processing, and generative and predictive AI. I also enjoy learning history, philosophy, and foreign languages (Chinese is my native language), which give me another perspective on how language supports thought, computation, and intelligence. To me, these subjects share a deeper connection: the possibility of understanding computation /intelligence through language.
+          </p>
+          <p>
+            Before coming to DTU, I studied cybersecurity at <a href="https://en.scu.edu.cn/">Sichuan University</a> and spent a semester as a
+            visiting student at <a href="https://www.berkeley.edu/">UC Berkeley</a>. I have experience working with network and cloud technologies (eBPF, DPDK, SDN, etc.) and security techniques (penetration testing, malware analysis, fuzzing, etc.).
           </p>
         </section>
 
-        <section class="academic-section" aria-labelledby="interests-heading">
+        <!-- <section class="academic-section" aria-labelledby="interests-heading">
           <h2 id="interests-heading">Research interests</h2>
           <ul class="interest-list">
             <li>Software and systems security</li>
@@ -85,6 +86,37 @@
             <li>Fuzzing and automated testing</li>
             <li>Network and cloud security</li>
           </ul>
+        </section> -->
+<!--
+        <section class="academic-section" aria-labelledby="education-heading">
+          <h2 id="education-heading">Education</h2>
+          <div class="academic-list">
+            <article class="academic-item compact">
+              <div class="academic-item-heading">
+                <h3>Technical University of Denmark</h3>
+                <time datetime="2025-09">2025–2027</time>
+              </div>
+              <p class="academic-meta">MSc Eng., Computer Science and Engineering · Kongens Lyngby, Denmark</p>
+              <p>Coursework includes program analysis, model checking, and logic for security.</p>
+            </article>
+
+            <article class="academic-item compact">
+              <div class="academic-item-heading">
+                <h3>University of California, Berkeley</h3>
+                <time datetime="2024-08">Fall 2024</time>
+              </div>
+              <p class="academic-meta">Berkeley Global Access visiting student · Berkeley, USA</p>
+              <p>Coursework in computer security, computability and complexity, and LLM agents.</p>
+            </article>
+
+            <article class="academic-item compact">
+              <div class="academic-item-heading">
+                <h3>Sichuan University</h3>
+                <time datetime="2021-09">2021–2025</time>
+              </div>
+              <p class="academic-meta">B.Eng., Cybersecurity · Chengdu, China</p>
+            </article>
+          </div>
         </section>
 
         <section class="academic-section" aria-labelledby="projects-heading">
@@ -163,38 +195,7 @@
               <p>eBPF-based kernel event monitoring and performance evaluation of OpenStack and Kubernetes environments.</p>
             </article>
           </div>
-        </section>
-
-        <section class="academic-section" aria-labelledby="education-heading">
-          <h2 id="education-heading">Education</h2>
-          <div class="academic-list">
-            <article class="academic-item compact">
-              <div class="academic-item-heading">
-                <h3>Technical University of Denmark</h3>
-                <time datetime="2025-09">2025–2027</time>
-              </div>
-              <p class="academic-meta">MSc Eng., Computer Science and Engineering · Kongens Lyngby, Denmark</p>
-              <p>Coursework includes program analysis, model checking, and logic for security.</p>
-            </article>
-
-            <article class="academic-item compact">
-              <div class="academic-item-heading">
-                <h3>University of California, Berkeley</h3>
-                <time datetime="2024-08">Fall 2024</time>
-              </div>
-              <p class="academic-meta">Berkeley Global Access visiting student · Berkeley, USA</p>
-              <p>Coursework in computer security, computability and complexity, and LLM agents.</p>
-            </article>
-
-            <article class="academic-item compact">
-              <div class="academic-item-heading">
-                <h3>Sichuan University</h3>
-                <time datetime="2021-09">2021–2025</time>
-              </div>
-              <p class="academic-meta">B.Eng., Cybersecurity · Chengdu, China</p>
-            </article>
-          </div>
-        </section>
+        </section> -->
       </article>
     </main>
 

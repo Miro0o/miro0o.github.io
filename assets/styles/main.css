@@ -1,0 +1,15 @@
+/*
+ * Stylesheet entry point.
+ *
+ * The imports are intentionally ordered: later feature styles refine the
+ * shared shell and preserve the cascade of the original combined stylesheet.
+ */
+@import url("base-home.css");
+@import url("academic.css");
+@import url("site-shell-worldmodel.css");
+@import url("life-music.css?v=20260713-1");
+@import url("life-world-cup-archive.css");
+@import url("life-accordion.css?v=20260713-30");
+@import url("life-posters.css");
+@import url("life-responsive.css?v=20260713-30");
+@import url("life-games.css?v=20260713-35");

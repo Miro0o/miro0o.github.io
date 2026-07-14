@@ -1,0 +1,793 @@
+/* Soccer archive v2: a theme-native vertical wall using the official tournament emblems. */
+.soccer-world {
+  color: var(--ink);
+  background: var(--life-surface);
+}
+
+.soccer-world::before {
+  display: none;
+}
+
+.soccer-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: color-mix(in srgb, var(--ink) 28%, transparent) transparent;
+  scrollbar-width: thin;
+}
+
+.soccer-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.soccer-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid var(--life-surface);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 28%, transparent);
+}
+
+.soccer-archive {
+  display: grid;
+  grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 78px);
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 76px 0 46px;
+}
+
+.soccer-wall-intro {
+  position: sticky;
+  top: 76px;
+  align-self: start;
+  padding: 18px 0 30px;
+}
+
+.soccer-wall-intro .module-kicker {
+  color: var(--green);
+}
+
+.soccer-wall-intro h2 {
+  margin: 0;
+  font-size: clamp(3.3rem, 5.6vw, 5.6rem);
+  line-height: 0.84;
+  letter-spacing: -0.06em;
+}
+
+.soccer-wall-intro > p:not(.module-kicker) {
+  max-width: 300px;
+  margin: 24px 0 0;
+  color: var(--copy);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.soccer-wall-intro > span {
+  display: inline-block;
+  margin-top: 24px;
+  color: var(--muted);
+  font: 650 0.65rem/1 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.1em;
+}
+
+.world-cup-stack {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.wc-banner {
+  --banner-ink: #fff;
+  --banner-muted: rgba(255, 255, 255, 0.72);
+  position: relative;
+  min-height: 190px;
+  aspect-ratio: 4.15 / 1;
+  overflow: hidden;
+  color: var(--banner-ink);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 32px rgba(20, 24, 20, 0.09);
+  isolation: isolate;
+  transition: transform 360ms cubic-bezier(0.2, 0.72, 0.25, 1), box-shadow 360ms ease;
+}
+
+.wc-banner:hover {
+  z-index: 3;
+  box-shadow: 0 22px 48px rgba(20, 24, 20, 0.18);
+  transform: translateX(-10px);
+}
+
+.wc-banner::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background:
+    linear-gradient(104deg, transparent 0 52%, rgba(255, 255, 255, 0.1) 52.2% 52.6%, transparent 52.8%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 5px);
+  pointer-events: none;
+}
+
+.wc-banner__index {
+  position: absolute;
+  top: 16px;
+  right: 17px;
+  z-index: 6;
+  color: var(--banner-muted);
+  font: 700 0.56rem/1 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.12em;
+}
+
+.wc-banner__year {
+  position: absolute;
+  top: 50%;
+  left: 2.5%;
+  z-index: 1;
+  font-size: clamp(4.8rem, 8.3vw, 8.5rem);
+  font-weight: 900;
+  line-height: 0.72;
+  letter-spacing: -0.1em;
+  opacity: 0.16;
+  transform: translateY(-50%) rotate(-90deg);
+}
+
+.wc-banner__emblem {
+  position: absolute;
+  top: 50%;
+  left: 35%;
+  z-index: 5;
+  width: 20%;
+  height: 75%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.2));
+  transform: translate(-50%, -50%);
+  transition: transform 440ms cubic-bezier(0.2, 0.72, 0.25, 1);
+}
+
+.wc-banner:hover .wc-banner__emblem {
+  transform: translate(-50%, -50%) scale(1.06) rotate(-2deg);
+}
+
+.wc-banner__copy {
+  position: absolute;
+  top: 50%;
+  left: 53%;
+  z-index: 5;
+  width: 40%;
+  transform: translateY(-50%);
+}
+
+.wc-banner__copy > span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--banner-muted);
+  font: 750 0.62rem/1.2 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.wc-banner__copy h3 {
+  max-width: 360px;
+  margin: 0;
+  font-size: clamp(1.65rem, 3vw, 3.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.wc-banner__copy p {
+  margin: 13px 0 0;
+  color: var(--banner-muted);
+  font-size: clamp(0.65rem, 0.9vw, 0.78rem);
+}
+
+.wc-banner__motif {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 2026 official identity: trophy emblem with the three-host colour system. */
+.wc-banner--2026 {
+  background: #121212;
+}
+
+.wc-banner--2026 .wc-banner__motif {
+  background:
+    linear-gradient(128deg, transparent 0 72%, #1f65d6 72.2% 83%, transparent 83.2%),
+    linear-gradient(53deg, transparent 0 70%, #15a66d 70.2% 83%, transparent 83.2%),
+    linear-gradient(153deg, #e94235 0 12%, transparent 12.2%),
+    radial-gradient(circle at 88% 30%, #f6c742 0 3%, transparent 3.2%);
+}
+
+.wc-banner--2026 .wc-banner__emblem {
+  width: 17%;
+  height: 82%;
+}
+
+/* Qatar 2022 official maroon, desert ivory and Sadu-inspired geometry. */
+.wc-banner--2022 {
+  --banner-ink: #7b1538;
+  --banner-muted: rgba(92, 15, 47, 0.72);
+  background: #eee5d6;
+}
+
+.wc-banner--2022 .wc-banner__motif {
+  right: 0;
+  left: auto;
+  width: 30%;
+  background:
+    conic-gradient(from 45deg, #7b1538 25%, transparent 0 50%, #7b1538 0 75%, transparent 0) 0 0 / 24px 24px;
+  opacity: 0.14;
+}
+
+.wc-banner--2022 .wc-banner__emblem {
+  filter: drop-shadow(0 8px 10px rgba(74, 18, 42, 0.14));
+}
+
+/* Russia 2018 official deep blue, red, gold and space-orbit language. */
+.wc-banner--2018 {
+  background: #122d44;
+}
+
+.wc-banner--2018 .wc-banner__motif {
+  background:
+    radial-gradient(circle at 83% 50%, transparent 0 23%, rgba(215, 179, 89, 0.48) 23.5% 24.2%, transparent 24.7%),
+    radial-gradient(circle at 83% 50%, transparent 0 35%, rgba(215, 179, 89, 0.22) 35.5% 36%, transparent 36.5%),
+    radial-gradient(circle at 74% 24%, #d6b45b 0 1.2%, transparent 1.5%),
+    linear-gradient(145deg, transparent 0 72%, #a72c31 72.2%);
+}
+
+/* Brazil 2014 official green, yellow and blue ribbon palette. */
+.wc-banner--2014 {
+  background: #098255;
+}
+
+.wc-banner--2014 .wc-banner__motif {
+  background:
+    radial-gradient(circle at 81% 50%, #1265a4 0 13%, #f1cf25 13.4% 24%, transparent 24.4%),
+    linear-gradient(153deg, transparent 0 64%, #f4c928 64.2% 73%, transparent 73.2%),
+    linear-gradient(25deg, transparent 0 70%, #ef793a 70.2% 82%, transparent 82.2%);
+}
+
+/* South Africa 2010 official warm yellow and pan-African colour cuts. */
+.wc-banner--2010 {
+  --banner-ink: #17271d;
+  --banner-muted: rgba(23, 39, 29, 0.7);
+  background: #f0b92a;
+}
+
+.wc-banner--2010 .wc-banner__motif {
+  background:
+    linear-gradient(145deg, transparent 0 68%, #15804b 68.2% 76%, transparent 76.2%),
+    linear-gradient(32deg, transparent 0 75%, #d54a31 75.2% 83%, transparent 83.2%),
+    repeating-linear-gradient(90deg, transparent 0 91px, rgba(20, 39, 28, 0.12) 91px 94px);
+}
+
+.wc-banner--2010 .wc-banner__emblem {
+  filter: drop-shadow(0 8px 10px rgba(38, 39, 22, 0.16));
+}
+
+/* Germany 2006 official sky blue and Celebrating Faces palette. */
+.wc-banner--2006 {
+  --banner-ink: #152d4c;
+  --banner-muted: rgba(21, 45, 76, 0.7);
+  background: #9fd7ef;
+}
+
+.wc-banner--2006 .wc-banner__motif {
+  background:
+    radial-gradient(circle at 82% 35%, #f0c928 0 7%, transparent 7.4%),
+    radial-gradient(circle at 91% 67%, #46a663 0 10%, transparent 10.4%),
+    radial-gradient(circle at 74% 75%, #e75b45 0 5%, transparent 5.4%),
+    linear-gradient(154deg, transparent 0 77%, rgba(255, 255, 255, 0.56) 77.2%);
+}
+
+/* Korea/Japan 2002 official Taegeuk-inspired blue, red and gold brush rings. */
+.wc-banner--2002 {
+  --banner-ink: #173a68;
+  --banner-muted: rgba(23, 58, 104, 0.68);
+  background: #f3f0e8;
+}
+
+.wc-banner--2002 .wc-banner__motif {
+  background:
+    radial-gradient(ellipse at 83% 50%, transparent 0 15%, rgba(223, 54, 56, 0.78) 15.5% 20%, transparent 20.5%),
+    radial-gradient(ellipse at 83% 50%, transparent 0 25%, rgba(29, 81, 143, 0.72) 25.5% 29%, transparent 29.5%),
+    linear-gradient(148deg, transparent 0 76%, rgba(226, 159, 33, 0.62) 76.2% 82%, transparent 82.2%);
+}
+
+.soccer-world .panel-close {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--ink) 22%, transparent);
+  background: color-mix(in srgb, var(--life-surface) 94%, var(--ink));
+  backdrop-filter: blur(9px);
+}
+
+.soccer-world .panel-close:hover,
+.soccer-world .panel-close:focus-visible {
+  border-color: var(--ink);
+}
+
+/* Fit the complete 2002–2026 archive into the soccer panel without scrolling. */
+.soccer-scroll {
+  overflow: hidden;
+}
+
+.soccer-archive {
+  grid-template-columns: minmax(280px, 31%) minmax(0, 1fr);
+  gap: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+.soccer-wall-intro {
+  position: relative;
+  top: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(34px, 6vw, 88px);
+  padding-right: clamp(24px, 4vw, 56px);
+}
+
+.soccer-wall-intro h2 {
+  font-size: clamp(3rem, 5.2vw, 5.2rem);
+}
+
+.soccer-wall-intro > p:not(.module-kicker) {
+  margin-top: 20px;
+}
+
+.soccer-wall-intro > span {
+  margin-top: 18px;
+}
+
+.world-cup-stack {
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+  height: 100%;
+  min-height: 0;
+}
+
+.wc-banner {
+  min-height: 0;
+  aspect-ratio: auto;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  box-shadow: none;
+}
+
+.wc-banner:hover {
+  box-shadow: inset 5px 0 0 rgba(255, 255, 255, 0.72);
+  transform: none;
+}
+
+.wc-banner__index {
+  top: 9px;
+  right: 12px;
+  font-size: 0.5rem;
+}
+
+.wc-banner__year {
+  left: 2%;
+  font-size: clamp(3.4rem, 5.8vw, 6rem);
+}
+
+.wc-banner__emblem {
+  left: 29%;
+  width: 16%;
+  height: 82%;
+}
+
+.wc-banner--2026 .wc-banner__emblem {
+  width: 12%;
+  height: 88%;
+}
+
+.wc-banner__copy {
+  left: 46%;
+  width: 47%;
+}
+
+.wc-banner__copy > span {
+  margin-bottom: 4px;
+  font-size: clamp(0.46rem, 0.55vw, 0.58rem);
+}
+
+.wc-banner__copy h3 {
+  font-size: clamp(1.12rem, 2vw, 2.15rem);
+  line-height: 0.9;
+}
+
+.wc-banner__copy p {
+  margin-top: 6px;
+  font-size: clamp(0.52rem, 0.68vw, 0.68rem);
+  line-height: 1.2;
+}
+
+/* Faithful reductions of the documented official poster concepts. */
+.wc-banner--2026 .wc-banner__motif {
+  background:
+    linear-gradient(132deg, transparent 0 78%, #296bd6 78.2% 90%, transparent 90.2%),
+    linear-gradient(48deg, transparent 0 76%, #12a66c 76.2% 88%, transparent 88.2%),
+    linear-gradient(154deg, #e94335 0 14%, transparent 14.2%),
+    radial-gradient(circle at 88% 30%, #f6c742 0 2.5%, transparent 2.8%);
+}
+
+.wc-banner--2022 .wc-banner__motif {
+  right: 0;
+  left: 0;
+  width: auto;
+  background:
+    radial-gradient(circle at 82% 31%, #85143e 0 5%, transparent 5.4%),
+    linear-gradient(169deg, transparent 0 57%, rgba(31, 27, 25, 0.16) 57.5% 63%, transparent 63.5%),
+    repeating-linear-gradient(3deg, transparent 0 12px, rgba(35, 30, 27, 0.035) 12px 13px);
+  opacity: 1;
+}
+
+.wc-banner--2022 .wc-banner__motif::before {
+  position: absolute;
+  top: -45%;
+  right: 5%;
+  width: 32%;
+  height: 170%;
+  border: clamp(10px, 1.5vw, 22px) solid rgba(255, 255, 255, 0.8);
+  border-bottom-color: transparent;
+  border-left-color: rgba(40, 35, 32, 0.58);
+  border-radius: 48%;
+  content: "";
+  transform: rotate(25deg);
+}
+
+.wc-banner--2018 .wc-banner__motif {
+  background:
+    repeating-conic-gradient(from 210deg at 80% 50%, rgba(224, 194, 111, 0.22) 0 4deg, transparent 4deg 13deg),
+    radial-gradient(circle at 80% 50%, transparent 0 20%, rgba(218, 183, 91, 0.52) 20.5% 21.3%, transparent 21.8%),
+    linear-gradient(145deg, transparent 0 78%, #a82e32 78.2%);
+}
+
+.wc-banner--2018 .wc-banner__motif::before {
+  position: absolute;
+  top: 2%;
+  right: 3%;
+  width: 23%;
+  height: 96%;
+  background: rgba(8, 19, 26, 0.46);
+  clip-path: polygon(8% 5%, 18% 0, 28% 18%, 49% 30%, 66% 20%, 73% 27%, 61% 39%, 51% 40%, 60% 59%, 88% 88%, 73% 100%, 42% 70%, 26% 96%, 9% 87%, 31% 58%, 31% 38%, 17% 24%);
+  content: "";
+  transform: rotate(-18deg);
+}
+
+.wc-banner--2014 .wc-banner__motif {
+  background:
+    radial-gradient(circle at 82% 50%, #f3d12c 0 5%, #1266a4 5.4% 8%, transparent 8.4%),
+    linear-gradient(154deg, transparent 0 71%, #f4cf25 71.2% 80%, transparent 80.2%),
+    linear-gradient(24deg, transparent 0 76%, #ee793c 76.2% 86%, transparent 86.2%);
+}
+
+.wc-banner--2014 .wc-banner__motif::before,
+.wc-banner--2014 .wc-banner__motif::after {
+  position: absolute;
+  top: -15%;
+  width: 9%;
+  height: 135%;
+  background: rgba(12, 67, 46, 0.52);
+  clip-path: polygon(30% 0, 75% 0, 65% 44%, 100% 100%, 58% 100%, 44% 61%, 18% 100%, 0 100%, 30% 43%);
+  content: "";
+}
+
+.wc-banner--2014 .wc-banner__motif::before {
+  right: 23%;
+  transform: rotate(12deg);
+}
+
+.wc-banner--2014 .wc-banner__motif::after {
+  right: 8%;
+  transform: scaleX(-1) rotate(12deg);
+}
+
+.wc-banner--2010 .wc-banner__motif {
+  background:
+    linear-gradient(150deg, transparent 0 76%, rgba(19, 126, 72, 0.7) 76.2% 83%, transparent 83.2%),
+    linear-gradient(30deg, transparent 0 80%, rgba(205, 61, 43, 0.72) 80.2% 87%, transparent 87.2%);
+}
+
+.wc-banner--2010 .wc-banner__motif::before {
+  position: absolute;
+  top: -30%;
+  right: 8%;
+  width: 24%;
+  height: 165%;
+  background: rgba(45, 30, 24, 0.38);
+  clip-path: polygon(40% 0, 75% 10%, 91% 28%, 76% 43%, 85% 58%, 67% 77%, 60% 100%, 37% 86%, 25% 68%, 8% 56%, 18% 37%, 10% 18%);
+  content: "";
+  transform: rotate(-8deg);
+}
+
+.wc-banner--2006 .wc-banner__motif {
+  background:
+    radial-gradient(circle at 78% 50%, transparent 0 19%, rgba(255, 255, 255, 0.5) 19.5% 20.2%, transparent 20.7%),
+    radial-gradient(circle at 71% 29%, #fff 0 0.8%, transparent 1%),
+    radial-gradient(circle at 85% 32%, #fff 0 0.9%, transparent 1.1%),
+    radial-gradient(circle at 91% 55%, #fff 0 0.8%, transparent 1%),
+    radial-gradient(circle at 80% 70%, #fff 0 1%, transparent 1.2%),
+    radial-gradient(circle at 68% 59%, #fff 0 0.75%, transparent 0.95%),
+    radial-gradient(circle at 76% 45%, #fff 0 0.8%, transparent 1%),
+    #173d70;
+  opacity: 0.88;
+}
+
+.wc-banner--2006 {
+  --banner-ink: #fff;
+  --banner-muted: rgba(255, 255, 255, 0.74);
+}
+
+.wc-banner--2002 .wc-banner__motif {
+  background:
+    radial-gradient(ellipse at 82% 50%, transparent 0 12%, rgba(222, 52, 54, 0.74) 12.5% 17%, transparent 17.5%),
+    radial-gradient(ellipse at 82% 50%, transparent 0 21%, rgba(27, 79, 142, 0.72) 21.5% 25%, transparent 25.5%),
+    radial-gradient(ellipse at 82% 50%, transparent 0 29%, rgba(229, 161, 34, 0.62) 29.5% 32%, transparent 32.5%),
+    linear-gradient(148deg, transparent 0 78%, rgba(39, 135, 83, 0.62) 78.2% 86%, transparent 86.2%);
+}
+
+.wc-banner--2002 .wc-banner__copy {
+  padding: 5px 9px;
+  background: linear-gradient(90deg, rgba(243, 240, 232, 0.9), rgba(243, 240, 232, 0.66) 72%, transparent);
+}
+
+@media (max-width: 720px) {
+  .soccer-archive {
+    display: grid;
+    grid-template-rows: minmax(145px, 24%) minmax(0, 1fr);
+    grid-template-columns: 1fr;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+  }
+
+  .soccer-wall-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-content: center;
+    column-gap: 20px;
+    padding: 48px 20px 12px;
+  }
+
+  .soccer-wall-intro .module-kicker {
+    grid-column: 1 / -1;
+    margin-bottom: 7px;
+  }
+
+  .soccer-wall-intro h2 {
+    font-size: clamp(2.45rem, 11vw, 3.5rem);
+  }
+
+  .soccer-wall-intro > p:not(.module-kicker) {
+    align-self: end;
+    margin: 0 0 3px;
+    font-size: 0.7rem;
+    line-height: 1.35;
+  }
+
+  .soccer-wall-intro > span {
+    display: none;
+  }
+
+  .world-cup-stack {
+    grid-template-rows: repeat(7, minmax(0, 1fr));
+    gap: 2px;
+    height: 100%;
+  }
+
+  .wc-banner {
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .wc-banner__year {
+    left: -1%;
+    font-size: clamp(2.5rem, 13vw, 4rem);
+  }
+
+  .wc-banner__emblem,
+  .wc-banner--2026 .wc-banner__emblem {
+    left: 24%;
+    width: 18%;
+    height: 88%;
+  }
+
+  .wc-banner--2026 .wc-banner__emblem {
+    width: 12%;
+  }
+
+  .wc-banner__copy {
+    left: 41%;
+    width: 54%;
+  }
+
+  .wc-banner__copy h3 {
+    font-size: clamp(0.92rem, 4.2vw, 1.2rem);
+  }
+
+  .wc-banner__copy p {
+    display: none;
+  }
+
+  .wc-banner__copy > span {
+    margin-bottom: 3px;
+    font-size: 0.43rem;
+  }
+
+  .wc-banner__index {
+    top: 6px;
+    right: 7px;
+    font-size: 0.4rem;
+  }
+}
+
+@media (max-height: 680px) and (min-width: 721px) {
+  .soccer-wall-intro > p:not(.module-kicker) {
+    font-size: 0.8rem;
+  }
+
+  .soccer-wall-intro > span {
+    display: none;
+  }
+
+  .wc-banner__copy p {
+    display: none;
+  }
+}
+
+@media (max-width: 920px) {
+  .soccer-archive {
+    grid-template-columns: minmax(210px, 250px) minmax(0, 1fr);
+    gap: 24px;
+    width: calc(100% - 32px);
+  }
+
+  .wc-banner {
+    min-height: 176px;
+    aspect-ratio: 3.25 / 1;
+  }
+
+  .wc-banner__copy {
+    left: 51%;
+    width: 44%;
+  }
+
+  .wc-banner__emblem {
+    left: 31%;
+    width: 23%;
+  }
+}
+
+@media (max-width: 720px) {
+  .soccer-archive {
+    display: block;
+    width: calc(100% - 28px);
+    padding: 68px 0 28px;
+  }
+
+  .soccer-wall-intro {
+    position: relative;
+    top: auto;
+    padding: 4px 2px 32px;
+  }
+
+  .soccer-wall-intro h2 {
+    font-size: clamp(3rem, 15vw, 4.6rem);
+  }
+
+  .soccer-wall-intro > p:not(.module-kicker) {
+    max-width: min(88vw, 460px);
+    margin-top: 18px;
+    font-size: 0.84rem;
+  }
+
+  .soccer-wall-intro > span {
+    margin-top: 16px;
+  }
+
+  .world-cup-stack {
+    gap: 9px;
+  }
+
+  .wc-banner {
+    min-height: 170px;
+    aspect-ratio: 2.15 / 1;
+  }
+
+  .wc-banner:hover {
+    transform: none;
+  }
+
+  .wc-banner__year {
+    left: -4%;
+    font-size: clamp(4rem, 23vw, 6.8rem);
+  }
+
+  .wc-banner__emblem,
+  .wc-banner--2026 .wc-banner__emblem {
+    left: 27%;
+    width: 24%;
+    height: 70%;
+  }
+
+  .wc-banner__copy {
+    left: 48%;
+    width: 47%;
+  }
+
+  .wc-banner__copy h3 {
+    font-size: clamp(1.3rem, 6vw, 2rem);
+  }
+
+  .wc-banner__copy p {
+    max-width: 180px;
+    margin-top: 9px;
+    font-size: 0.62rem;
+    line-height: 1.35;
+  }
+
+  .wc-banner__copy > span {
+    margin-bottom: 6px;
+    font-size: 0.52rem;
+  }
+
+  .wc-banner__index {
+    top: 11px;
+    right: 11px;
+    font-size: 0.48rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .soccer-archive {
+    width: calc(100% - 18px);
+  }
+
+  .wc-banner {
+    min-height: 154px;
+  }
+
+  .wc-banner__emblem,
+  .wc-banner--2026 .wc-banner__emblem {
+    left: 25%;
+    width: 27%;
+  }
+
+  .wc-banner__copy {
+    left: 46%;
+    width: 51%;
+  }
+
+  .wc-banner__copy h3 {
+    font-size: 1.25rem;
+  }
+
+  .wc-banner__copy p {
+    font-size: 0.57rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-banner,
+  .wc-banner__emblem {
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .album-track {
+    animation-duration: var(--track-duration) !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  .album-tile {
+    filter: none;
+  }
+}

@@ -1,0 +1,616 @@
+/* Soccer: four tall tournament posters, drawn in CSS from each event's visual language. */
+.soccer-world {
+  isolation: isolate;
+  color: #fff;
+  background: #07140f;
+}
+
+.soccer-world::before {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  content: "";
+  background:
+    linear-gradient(90deg, #07140f 0%, rgba(7, 20, 15, 0.98) 20%, rgba(7, 20, 15, 0.82) 31%, rgba(7, 20, 15, 0.16) 48%, transparent 64%),
+    linear-gradient(180deg, rgba(7, 20, 15, 0.22), transparent 30%, transparent 70%, rgba(7, 20, 15, 0.26));
+  pointer-events: none;
+}
+
+.world-cup-wall {
+  position: absolute;
+  inset: -5% 3.5% -5% 27%;
+  z-index: 1;
+  display: flex;
+  overflow: hidden;
+  background: #12251d;
+  box-shadow: -32px 0 70px rgba(0, 0, 0, 0.24);
+  transform: rotate(-1.6deg) scale(1.025);
+  transform-origin: 50% 50%;
+}
+
+.cup-poster {
+  --poster-ink: #fff;
+  position: relative;
+  flex: 1 1 25%;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--poster-ink);
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  outline: 0;
+  transform: translateZ(0);
+  transition: flex 560ms cubic-bezier(0.2, 0.72, 0.25, 1), filter 340ms ease;
+}
+
+.cup-poster:first-child {
+  border-left: 0;
+}
+
+.world-cup-wall:hover .cup-poster:not(:hover),
+.world-cup-wall:has(.cup-poster:focus-visible) .cup-poster:not(:focus-visible) {
+  flex-grow: 0.72;
+  filter: brightness(0.74) saturate(0.72);
+}
+
+.cup-poster:hover,
+.cup-poster:focus-visible {
+  z-index: 3;
+  flex-grow: 1.72;
+}
+
+.cup-poster:focus-visible::after {
+  position: absolute;
+  inset: 7px;
+  z-index: 20;
+  border: 3px solid rgba(255, 255, 255, 0.88);
+  content: "";
+  pointer-events: none;
+}
+
+.cup-poster-art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.cup-poster-art::after {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  content: "";
+  background:
+    linear-gradient(102deg, transparent 0 46%, rgba(255, 255, 255, 0.08) 46.2% 46.8%, transparent 47%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 5px);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.cup-edition,
+.cup-chant,
+.cup-poster-meta > span {
+  font: 700 0.58rem/1.2 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cup-edition {
+  position: absolute;
+  top: 8%;
+  left: 13%;
+  z-index: 10;
+  opacity: 0.76;
+  writing-mode: vertical-rl;
+}
+
+.cup-year-mark {
+  position: absolute;
+  right: 8%;
+  bottom: 17%;
+  z-index: 7;
+  font-size: clamp(4.4rem, 8.7vw, 9rem);
+  font-weight: 900;
+  line-height: 0.62;
+  letter-spacing: -0.12em;
+  text-align: right;
+  transition: transform 700ms cubic-bezier(0.2, 0.72, 0.25, 1);
+}
+
+.cup-poster:hover .cup-year-mark,
+.cup-poster:focus-visible .cup-year-mark {
+  transform: translateY(-7px) scale(1.035);
+}
+
+.cup-chant {
+  position: absolute;
+  right: 9%;
+  bottom: 7.5%;
+  z-index: 10;
+  opacity: 0.8;
+  writing-mode: vertical-rl;
+}
+
+.cup-ball {
+  position: absolute;
+  z-index: 6;
+  display: block;
+  width: clamp(44px, 5vw, 78px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+  transition: transform 750ms cubic-bezier(0.18, 0.75, 0.2, 1);
+}
+
+.cup-poster:hover .cup-ball,
+.cup-poster:focus-visible .cup-ball {
+  transform: translateY(-8px) rotate(24deg);
+}
+
+.cup-poster-meta {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 12;
+  min-width: 220px;
+  padding: 80px 18px 6.5%;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.88));
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 240ms ease 80ms, transform 420ms cubic-bezier(0.2, 0.72, 0.25, 1) 60ms;
+  pointer-events: none;
+}
+
+.cup-poster:hover .cup-poster-meta,
+.cup-poster:focus-visible .cup-poster-meta {
+  opacity: 1;
+  transform: none;
+}
+
+.cup-poster-meta > span {
+  display: block;
+  margin-bottom: 7px;
+  opacity: 0.7;
+}
+
+.cup-poster-meta h3 {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.3vw, 2.25rem);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
+
+.cup-poster-meta h3 b {
+  font-weight: 400;
+  opacity: 0.68;
+}
+
+.cup-poster-meta p {
+  max-width: 260px;
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.soccer-intro {
+  position: absolute;
+  top: 50%;
+  left: max(20px, calc((100vw - 1220px) / 2));
+  z-index: 6;
+  width: min(390px, 32vw);
+  color: #fff;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.soccer-intro .module-kicker {
+  color: #f4c934;
+}
+
+.soccer-intro h2 {
+  margin: 0;
+  font-size: clamp(3.3rem, 6.3vw, 6.4rem);
+  line-height: 0.83;
+  letter-spacing: -0.06em;
+}
+
+.soccer-intro > p:not(.module-kicker) {
+  max-width: 355px;
+  margin: 23px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: clamp(0.88rem, 1.1vw, 1.02rem);
+  line-height: 1.5;
+}
+
+.soccer-source {
+  display: inline-block;
+  margin-top: 23px;
+  color: rgba(255, 255, 255, 0.5);
+  font: 650 0.66rem/1 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.07em;
+}
+
+.soccer-world .panel-close {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.26);
+  background: rgba(7, 20, 15, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.soccer-world .panel-close:hover,
+.soccer-world .panel-close:focus-visible {
+  border-color: #fff;
+}
+
+/* Brazil 2014 — tropical geometry, carnival movement, yellow and green. */
+.cup-poster--2014 {
+  --poster-ink: #fff7c7;
+  background:
+    radial-gradient(circle at 78% 20%, #f8d330 0 9%, transparent 9.4%),
+    linear-gradient(148deg, transparent 0 34%, rgba(0, 94, 169, 0.9) 34.2% 48%, transparent 48.2%),
+    linear-gradient(25deg, #007c59 0 27%, #00a86b 27.2% 48%, #f4cc22 48.2% 68%, #f77a37 68.2% 100%);
+}
+
+.cup-poster--2014::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    radial-gradient(ellipse at 14% 72%, transparent 0 23%, rgba(255, 243, 166, 0.34) 23.5% 24.5%, transparent 25%),
+    radial-gradient(ellipse at 88% 43%, transparent 0 28%, rgba(0, 84, 153, 0.36) 28.5% 29.5%, transparent 30%);
+}
+
+.brazil-sun {
+  position: absolute;
+  top: 17%;
+  left: 50%;
+  width: 170%;
+  aspect-ratio: 1;
+  background: repeating-conic-gradient(from 8deg, rgba(255, 245, 176, 0.35) 0 4deg, transparent 4deg 14deg);
+  transform: translate(-50%, -50%);
+}
+
+.brazil-ribbon {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  width: 150%;
+  height: 17%;
+  border: 10px solid rgba(255, 239, 105, 0.72);
+  border-right-color: transparent;
+  border-left-color: transparent;
+  border-radius: 50%;
+}
+
+.brazil-ribbon--one {
+  top: 41%;
+  left: -28%;
+  transform: rotate(-19deg);
+}
+
+.brazil-ribbon--two {
+  top: 53%;
+  left: -18%;
+  border-color: rgba(0, 79, 146, 0.62) transparent;
+  transform: rotate(16deg);
+}
+
+.brazil-player {
+  position: absolute;
+  top: 22%;
+  z-index: 5;
+  display: block;
+  width: 22%;
+  height: 43%;
+  background: #163d31;
+  clip-path: polygon(33% 0, 68% 2%, 74% 28%, 100% 52%, 80% 58%, 57% 39%, 62% 69%, 93% 100%, 65% 100%, 34% 73%, 16% 100%, 0 96%, 25% 63%, 18% 30%);
+  opacity: 0.9;
+}
+
+.brazil-player--left {
+  left: 17%;
+  transform: rotate(7deg);
+}
+
+.brazil-player--right {
+  right: 12%;
+  transform: scaleX(-1) rotate(9deg);
+}
+
+.brazil-ball {
+  top: 43%;
+  left: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #174a86 0 16%, transparent 17%),
+    conic-gradient(from 18deg, #fff4bd 0 18%, #14855d 18% 34%, #fff4bd 34% 53%, #14855d 53% 69%, #fff4bd 69% 84%, #14855d 84%);
+  transform: translate(-50%, -50%) rotate(-12deg);
+}
+
+.cup-poster--2014:hover .brazil-ball,
+.cup-poster--2014:focus-visible .brazil-ball {
+  transform: translate(-50%, calc(-50% - 8px)) rotate(22deg);
+}
+
+/* Russia 2018 — Soviet Constructivism, cosmic orbit, Lev Yashin's reach. */
+.cup-poster--2018 {
+  --poster-ink: #f5e8c6;
+  background: #b73e28;
+}
+
+.cup-poster--2018::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(152deg, transparent 0 46%, #e7c96a 46.2% 48%, transparent 48.2%),
+    linear-gradient(28deg, #152c2a 0 22%, transparent 22.2%),
+    linear-gradient(165deg, transparent 0 72%, #7d211c 72.2%);
+}
+
+.russia-rays {
+  position: absolute;
+  top: 31%;
+  left: 50%;
+  width: 185%;
+  aspect-ratio: 1;
+  background: repeating-conic-gradient(from -4deg, rgba(242, 213, 132, 0.58) 0 5deg, transparent 5deg 13deg);
+  transform: translate(-50%, -50%);
+}
+
+.russia-orbit {
+  position: absolute;
+  top: 31%;
+  left: 50%;
+  z-index: 2;
+  display: block;
+  aspect-ratio: 1;
+  border: 2px solid #ead58e;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.russia-orbit--outer { width: 110%; }
+.russia-orbit--inner { width: 73%; border-color: #2c6554; border-width: 9px; }
+
+.russia-keeper {
+  position: absolute;
+  top: 32%;
+  left: 45%;
+  z-index: 5;
+  width: 55%;
+  height: 38%;
+  background: #172321;
+  clip-path: polygon(6% 5%, 16% 0, 24% 16%, 45% 30%, 60% 26%, 68% 33%, 57% 41%, 48% 39%, 55% 59%, 82% 90%, 69% 100%, 39% 70%, 25% 95%, 10% 88%, 30% 58%, 30% 37%, 17% 23%);
+  transform: translate(-50%, -50%) rotate(-26deg);
+  transition: transform 700ms cubic-bezier(0.2, 0.72, 0.25, 1);
+}
+
+.cup-poster--2018:hover .russia-keeper,
+.cup-poster--2018:focus-visible .russia-keeper {
+  transform: translate(-50%, -53%) rotate(-29deg) scale(1.04);
+}
+
+.russia-ball {
+  top: 20%;
+  right: 8%;
+  border: 4px solid #eee0b7;
+  background:
+    radial-gradient(circle at 38% 32%, #f5df92 0 5%, transparent 6%),
+    radial-gradient(circle at 66% 56%, #ad3b2a 0 7%, transparent 8%),
+    radial-gradient(circle at 44% 70%, #2c6655 0 6%, transparent 7%),
+    #193432;
+}
+
+/* Qatar 2022 — monochrome ink, maroon details, a ghutra in the air. */
+.cup-poster--2022 {
+  --poster-ink: #231d1a;
+  color: #231d1a;
+  background:
+    repeating-linear-gradient(94deg, rgba(61, 44, 34, 0.025) 0 1px, transparent 1px 6px),
+    #e9dfcf;
+}
+
+.cup-poster--2022 .cup-poster-art::after {
+  background: repeating-linear-gradient(8deg, rgba(54, 38, 29, 0.05) 0 1px, transparent 1px 7px);
+  mix-blend-mode: multiply;
+}
+
+.qatar-brush {
+  position: absolute;
+  display: block;
+  background: #221d1a;
+  opacity: 0.12;
+  filter: blur(0.4px);
+}
+
+.qatar-brush--one {
+  top: 18%;
+  left: -20%;
+  width: 145%;
+  height: 7%;
+  clip-path: polygon(0 32%, 12% 20%, 25% 38%, 43% 10%, 63% 28%, 78% 6%, 100% 43%, 96% 71%, 71% 58%, 55% 87%, 33% 60%, 11% 79%);
+  transform: rotate(-14deg);
+}
+
+.qatar-brush--two {
+  right: -15%;
+  bottom: 27%;
+  width: 130%;
+  height: 10%;
+  clip-path: polygon(0 20%, 23% 8%, 47% 36%, 72% 10%, 100% 30%, 94% 70%, 67% 55%, 39% 91%, 16% 62%);
+  transform: rotate(11deg);
+}
+
+.qatar-scarf {
+  position: absolute;
+  top: 27%;
+  left: 50%;
+  z-index: 4;
+  display: block;
+  width: 70%;
+  height: 32%;
+  border: clamp(14px, 2.2vw, 30px) solid #f8f4eb;
+  border-bottom-color: transparent;
+  border-left-color: #d5c9b6;
+  border-radius: 50% 45% 48% 38%;
+  box-shadow: 7px -5px 0 rgba(35, 29, 26, 0.82), 12px 2px 18px rgba(35, 29, 26, 0.18);
+  transform: translateX(-50%) rotate(24deg);
+  transition: transform 720ms cubic-bezier(0.2, 0.72, 0.25, 1);
+}
+
+.cup-poster--2022:hover .qatar-scarf,
+.cup-poster--2022:focus-visible .qatar-scarf {
+  transform: translate(-2%, -7px) translateX(-50%) rotate(29deg);
+}
+
+.qatar-ball {
+  top: 19%;
+  left: 61%;
+  border: 2px solid #6f1534;
+  background:
+    conic-gradient(from 30deg, transparent 0 8%, #86183e 8% 17%, transparent 17% 42%, #86183e 42% 53%, transparent 53% 76%, #86183e 76% 88%, transparent 88%),
+    #f6eee1;
+}
+
+.qatar-hayya {
+  position: absolute;
+  top: 10%;
+  right: 9%;
+  z-index: 8;
+  color: #7b1537;
+  font: 700 clamp(1.5rem, 3vw, 3.4rem)/1 Georgia, serif;
+  transform: rotate(-7deg);
+}
+
+.cup-poster--2022 .cup-year-mark {
+  color: #781638;
+}
+
+.cup-poster--2022 .cup-poster-meta {
+  color: #fff;
+}
+
+/* North America 2026 — modular host colours and the bold stacked 26 system. */
+.cup-poster--2026 {
+  --poster-ink: #fff;
+  background: #171719;
+}
+
+.cup-poster--2026::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(30deg, transparent 0 58%, rgba(249, 187, 43, 0.9) 58.2% 63%, transparent 63.2%),
+    linear-gradient(155deg, transparent 0 72%, #55248a 72.2% 84%, transparent 84.2%);
+}
+
+.north-shape {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  transition: transform 700ms cubic-bezier(0.2, 0.72, 0.25, 1);
+}
+
+.north-shape--red {
+  top: -6%;
+  left: -21%;
+  width: 92%;
+  height: 52%;
+  background: #e54435;
+  clip-path: polygon(0 0, 100% 0, 83% 57%, 100% 100%, 19% 88%);
+}
+
+.north-shape--green {
+  top: 26%;
+  right: -18%;
+  width: 92%;
+  height: 52%;
+  background: #10a76c;
+  clip-path: polygon(25% 0, 100% 16%, 88% 100%, 0 79%, 18% 48%);
+}
+
+.north-shape--blue {
+  bottom: -8%;
+  left: -16%;
+  width: 91%;
+  height: 47%;
+  background: #296bd6;
+  clip-path: polygon(0 8%, 75% 0, 100% 42%, 82% 100%, 0 100%);
+}
+
+.cup-poster--2026:hover .north-shape--red,
+.cup-poster--2026:focus-visible .north-shape--red { transform: translate(4px, 5px); }
+.cup-poster--2026:hover .north-shape--green,
+.cup-poster--2026:focus-visible .north-shape--green { transform: translate(-5px, -3px); }
+.cup-poster--2026:hover .north-shape--blue,
+.cup-poster--2026:focus-visible .north-shape--blue { transform: translate(4px, -5px); }
+
+.north-star,
+.north-leaf {
+  position: absolute;
+  z-index: 6;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1;
+}
+
+.north-star--one { top: 14%; left: 15%; font-size: clamp(1.5rem, 3.2vw, 3.5rem); }
+.north-star--two { top: 34%; right: 13%; font-size: clamp(2rem, 4vw, 4.5rem); }
+.north-leaf { bottom: 15%; left: 17%; font-size: clamp(2rem, 4.2vw, 4.8rem); transform: rotate(45deg); }
+
+.cup-trophy {
+  position: absolute;
+  top: 22%;
+  left: 50%;
+  z-index: 6;
+  display: block;
+  width: 25%;
+  height: 34%;
+  background: linear-gradient(90deg, #8d5e15, #f6d47b 43%, #b87d22 72%, #f3cb67);
+  clip-path: polygon(28% 0, 72% 0, 88% 12%, 78% 29%, 62% 37%, 60% 69%, 74% 86%, 82% 100%, 18% 100%, 26% 86%, 40% 69%, 38% 37%, 22% 29%, 12% 12%);
+  filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.34));
+  transform: translateX(-50%);
+}
+
+.north-ball {
+  top: 14%;
+  right: 8%;
+  border: 3px solid #fff;
+  background:
+    conic-gradient(from 0deg, #e74436 0 12%, #fff 12% 26%, #286bd6 26% 40%, #fff 40% 54%, #10a76c 54% 68%, #fff 68% 82%, #e74436 82%),
+    #fff;
+}
+
+.cup-poster--2026 .cup-year-mark {
+  right: auto;
+  left: 9%;
+  color: #fff;
+  font-size: clamp(5.8rem, 9vw, 9rem);
+  line-height: 0.48;
+  text-align: left;
+}
+
+.economics-chart {
+  position: absolute;
+  right: 8vw;
+  bottom: 14%;
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(9px, 1.2vw, 18px);
+  width: min(38vw, 540px);
+  height: min(45vh, 330px);
+  padding: 0 0 1px 1px;
+  border-bottom: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  opacity: 0.6;
+}
+
+.economics-chart i {
+  flex: 1;
+  height: 22%;
+  background: color-mix(in srgb, var(--fold-color) 58%, transparent);
+}
+
+.economics-chart i:nth-child(2) { height: 36%; }
+.economics-chart i:nth-child(3) { height: 31%; }
+.economics-chart i:nth-child(4) { height: 62%; }
+.economics-chart i:nth-child(5) { height: 84%; }

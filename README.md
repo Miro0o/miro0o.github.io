@@ -8,7 +8,11 @@ This is now a small static site with no build step:
 - `academic.html` is a placeholder for academic-facing material.
 - `personal-life.html` is a placeholder for personal-life material.
 - `worldmodel.html` is an interactive, Canvas-rendered 2D atlas of the public knowledge-base structure.
-- `styles.css` contains the shared visual system.
+- `assets/styles/` contains the stylesheet entry point and focused style modules.
+- `assets/scripts/` contains browser-side interactions and visualizations.
+- `assets/data/` contains generated JavaScript data snapshots.
+- `assets/images/` and `assets/media/` contain static visual and media resources.
+- `scripts/` contains the Node.js utilities that refresh generated assets.
 
 ## Refreshing the Worldmodel map
 
@@ -24,4 +28,4 @@ You can also pass explicit vault and output paths:
 node scripts/generate-worldmodel-map.mjs /path/to/vault /path/to/worldmodel-map-data.js
 ```
 
-The generated `assets/worldmodel-map-data.js` is loaded before `assets/worldmodel-map.js`. Keeping the snapshot as JavaScript rather than fetched JSON lets the map work both on GitHub Pages and when the HTML files are opened directly from disk. Commit the refreshed data file whenever the public vault structure should be updated.
+The generated `assets/data/worldmodel-map-data.js` is loaded before `assets/scripts/worldmodel-map.js`. Keeping the snapshot as JavaScript rather than fetched JSON lets the map work both on GitHub Pages and when the HTML files are opened directly from disk. Commit the refreshed data file whenever the public vault structure should be updated.
