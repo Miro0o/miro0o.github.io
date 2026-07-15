@@ -4,6 +4,12 @@
   const accordion = document.querySelector("[data-life-accordion]");
   if (!accordion) return;
 
+  const panelOrder = ["module-music", "module-books", "module-film", "module-soccer", "module-games"];
+  panelOrder.forEach((className) => {
+    const panel = accordion.querySelector(`.${className}`);
+    if (panel) accordion.append(panel);
+  });
+
   const stage = accordion.closest(".life-stage");
   const panels = [...accordion.querySelectorAll("[data-life-panel]")];
   const canHover = window.matchMedia("(hover: hover) and (pointer: fine)");

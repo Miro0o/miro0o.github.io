@@ -94,8 +94,13 @@
   width: max-content;
   animation: album-track-roll var(--track-duration) linear infinite;
   animation-delay: var(--track-delay);
-  animation-play-state: running !important;
+  animation-play-state: paused;
   transform-origin: 0 50%;
+  will-change: auto;
+}
+
+.module-music.is-active .album-track {
+  animation-play-state: running;
   will-change: transform;
 }
 

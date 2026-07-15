@@ -150,30 +150,26 @@
   resizeObserver.observe(grid);
   updateRoll();
 
-  const ensureRolling = () => {
+  const musicPanel = grid.closest("[data-life-panel]");
+
+  const syncRollingState = () => {
+    const shouldRoll = !document.hidden && musicPanel?.classList.contains("is-active");
+
     tracks.forEach((track) => {
-      track.style.animationPlayState = "running";
+      track.style.animationPlayState = shouldRoll ? "running" : "paused";
       track.getAnimations?.().forEach((animation) => {
-        animation.playbackRate = 1;
-        animation.play();
+        if (shouldRoll) animation.play();
+        else animation.pause();
       });
     });
+
+    grid.dataset.musicMotion = shouldRoll ? "running" : "paused";
   };
 
-  const verifyRolling = () => {
-    ensureRolling();
-    const startingTransform = getComputedStyle(tracks[0]).transform;
+  const panelObserver = new MutationObserver(syncRollingState);
+  if (musicPanel) panelObserver.observe(musicPanel, { attributes: true, attributeFilter: ["class"] });
 
-    window.setTimeout(() => {
-      ensureRolling();
-      const currentTransform = getComputedStyle(tracks[0]).transform;
-      grid.dataset.musicMotion = startingTransform === currentTransform ? "stalled" : "running";
-    }, 350);
-  };
-
-  window.addEventListener("pageshow", verifyRolling);
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) verifyRolling();
-  });
-  requestAnimationFrame(verifyRolling);
+  window.addEventListener("pageshow", syncRollingState);
+  document.addEventListener("visibilitychange", syncRollingState);
+  requestAnimationFrame(syncRollingState);
 })();

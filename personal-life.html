@@ -3,14 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Music, film and TV, games, soccer, and books—five parts of Miro Son's life beyond work.">
-  <title>Miro Son - Life</title>
+  <meta name="description" content="A personal archive of Miro Son's favorite music, films and TV, games, World Cups, and books.">
+  <title>Miro Son - Personal Life</title>
   <script src="assets/scripts/theme-switcher.js"></script>
   <link rel="preconnect" href="https://p1.music.126.net">
   <link rel="preconnect" href="https://i.ytimg.com">
   <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com">
   <link rel="preconnect" href="https://upload.wikimedia.org">
-  <link rel="stylesheet" href="assets/styles/main.css">
+  <link rel="preconnect" href="https://m.media-amazon.com">
+  <link rel="stylesheet" href="assets/styles/main.css?v=20260716-9">
   <script src="assets/scripts/nav-menu.js" defer></script>
 </head>
 <body class="life-page">
@@ -45,8 +46,8 @@
       <section class="life-stage" aria-labelledby="personal-title">
         <div class="life-overview">
           <p class="life-kicker">Personal life</p>
-          <h1 id="personal-title">What keeps me curious.</h1>
-          <p>Music I return to, games that shaped me, and matches I still remember.</p>
+          <h1 id="personal-title">What stays with me.</h1>
+          <p>A library of memories.</p>
           <span class="life-instruction">Choose a section to explore</span>
         </div>
 
@@ -73,11 +74,31 @@
             <button class="panel-tab" type="button" aria-expanded="false" aria-controls="life-film">
               <span class="panel-name">Film &amp; TV</span>
             </button>
-            <div class="panel-content module-sheet" id="life-film" data-panel-content>
-              <div class="module-copy">
-                <p class="module-kicker">Film &amp; TV</p><h2>Coming soon.</h2>
+            <div class="panel-content film-world" id="life-film" data-panel-content>
+              <div class="film-scroll">
+                <header class="film-header">
+                  <div class="film-heading">
+                    <p class="module-kicker">Film &amp; TV</p>
+                    <h2><span>Seen on</span> <span>screen.</span></h2>
+                    <p>Visit the <a class="life-profile-link" href="https://github.com/Miro0o/miniWorldModel/blob/main/Other%20Networks%20of%20Knowledge/Arts%20%26%20Humanities/My%20Info%20Lists.md">full Film &amp; TV list</a> in my knowledge base.</p>
+                  </div>
+                  <div class="film-toolbar" data-film-toolbar aria-label="Filter watched works">
+                    <input class="film-search" type="search" placeholder="Find a title" aria-label="Find a watched title" data-film-search>
+                    <div class="film-filter-tabs" aria-label="Watched work categories">
+                      <button class="film-filter" type="button" data-film-filter="all" aria-pressed="true">All</button>
+                      <button class="film-filter" type="button" data-film-filter="favourites" aria-pressed="false">★ Favourites</button>
+                      <button class="film-filter" type="button" data-film-filter="Films" aria-pressed="false">Films</button>
+                      <button class="film-filter" type="button" data-film-filter="TV Shows" aria-pressed="false">TV</button>
+                      <button class="film-filter" type="button" data-film-filter="Animation" aria-pressed="false">Animation</button>
+                      <button class="film-filter" type="button" data-film-filter="Documentary" aria-pressed="false">Documentary</button>
+                      <button class="film-filter" type="button" data-film-filter="News Reports (Ongoing)" aria-pressed="false">News</button>
+                      <button class="film-filter" type="button" data-film-filter="Variety /Reality Shows" aria-pressed="false">Variety</button>
+                    </div>
+                  </div>
+                  <button class="panel-close" type="button" data-panel-close aria-label="Close Film and TV">Close <span aria-hidden="true">×</span></button>
+                </header>
+                <div class="film-grid" data-film-wall aria-label="Poster wall of watched film, television, documentary, animation, news, and variety shows"></div>
               </div>
-              <button class="panel-close" type="button" data-panel-close aria-label="Close Film and TV">Close <span aria-hidden="true">×</span></button>
             </div>
           </article>
 
@@ -176,7 +197,7 @@
                     <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2229850/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2229850/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2000</span><strong>Command &amp; Conquer</strong><small>Red Alert 2</small><span class="release-index">01</span>
                     </li>
-                    <li style="--cover: url('assets/media/games/warcraft-shelf.webp')">
+                    <li style="--cover: url('assets/media/games/warcraft-shelf.jpg?v=20260715')">
                       <span class="release-year">2003</span><strong>Warcraft III</strong><small>The Frozen Throne</small><span class="release-index">02</span>
                     </li>
                     <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1547000/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1547000/library_hero_2x.jpg') 2x)">
@@ -396,16 +417,42 @@
             <button class="panel-tab" type="button" aria-expanded="false" aria-controls="life-books">
               <span class="panel-name">Books</span>
             </button>
-            <div class="panel-content module-sheet" id="life-books" data-panel-content>
-              <div class="module-copy">
-                <p class="module-kicker">Books</p><h2>Coming soon.</h2>
+            <div class="book-shelf-preview" data-book-shelf-preview aria-hidden="true">
+              <div class="book-preview-heading">
+                <span>Personal library</span>
+                <strong data-book-preview-summary>Loading the shelves…</strong>
               </div>
-              <button class="panel-close" type="button" data-panel-close aria-label="Close Books">Close <span aria-hidden="true">×</span></button>
+              <div class="book-preview-shelves" data-book-preview-shelves></div>
+            </div>
+            <div class="panel-content books-world" id="life-books" data-panel-content>
+              <div class="books-scroll">
+                <header class="books-heading">
+                  <p class="module-kicker">Books</p>
+                  <h2>When ideas arrived.</h2>
+                  <p>Visit the <a class="life-profile-link" href="https://github.com/Miro0o/miniWorldModel/blob/main/Other%20Networks%20of%20Knowledge/Arts%20%26%20Humanities/My%20Info%20Lists.md">full book list</a> in my knowledge base.</p>
+                  <button class="panel-close" type="button" data-panel-close aria-label="Close Books">Close <span aria-hidden="true">×</span></button>
+                </header>
+                <div class="book-legend" aria-label="Book timeline legend">
+                  <span><i class="lang-english"></i> English</span>
+                  <span><i class="lang-chinese"></i> Chinese</span>
+                  <span><i class="lang-bilingual"></i> English / Chinese</span>
+                  <span><i class="is-unread"></i> Status uncertain</span>
+                  <span data-book-summary>Loading the library…</span>
+                </div>
+                <div class="book-chart" aria-label="Books by reading domain and date added to Apple Books">
+                  <div class="book-y-axis" data-book-y-axis aria-hidden="true"></div>
+                  <div class="book-chart-scroll" tabindex="0" aria-label="Scrollable chronological book plot">
+                    <div class="book-plot" data-book-plot>
+                      <div class="book-x-axis" data-book-x-axis aria-hidden="true"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </article>
 
         </div>
-        <noscript>This album wall needs JavaScript to display.</noscript>
+        <noscript>The music, film, and book visualizations need JavaScript to display.</noscript>
       </section>
     </main>
 
@@ -419,8 +466,10 @@
     </footer>
   </div>
   <script src="assets/data/music-wall-data.js"></script>
-  <script src="assets/scripts/music-wall.js?v=20260714-13"></script>
+  <script src="assets/data/life-library-data.js?v=20260716-5"></script>
+  <script src="assets/scripts/music-wall.js?v=20260716-14"></script>
+  <script src="assets/scripts/life-film-books.js?v=20260716-6"></script>
   <script src="assets/scripts/life-games.js?v=20260713-7"></script>
-  <script src="assets/scripts/life-accordion.js?v=20260713-7"></script>
+  <script src="assets/scripts/life-accordion.js?v=20260716-9"></script>
 </body>
 </html>
