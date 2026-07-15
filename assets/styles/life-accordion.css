@@ -47,6 +47,22 @@
   text-transform: uppercase;
 }
 
+.life-profile-link {
+  color: var(--ink);
+  pointer-events: auto;
+  text-decoration: underline;
+  text-decoration-color: var(--red);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: color 160ms ease, text-decoration-thickness 160ms ease;
+}
+
+.life-profile-link:hover,
+.life-profile-link:focus-visible {
+  color: var(--red);
+  text-decoration-thickness: 2px;
+}
+
 .life-stage.has-open-panel .life-overview {
   opacity: 0;
   transform: translate(-28px, -50%);

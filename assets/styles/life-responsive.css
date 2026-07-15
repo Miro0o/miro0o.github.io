@@ -332,6 +332,148 @@
   }
 }
 
+/* On phones, stack cards vertically with tapered horizontal fold seams. */
+@media (max-width: 720px) {
+  .life-page .life-accordion:not(.has-open-panel) {
+    top: 42%;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    height: 58%;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .life-panel,
+  .life-page .life-accordion:not(.has-open-panel) .life-panel:first-child {
+    --fold-slope: 11px;
+    flex: 1 1 0;
+    min-height: 0;
+    margin: calc(0px - var(--fold-slope)) 0 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    background: var(--fold-color);
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .life-panel:first-child {
+    margin-top: 0;
+  }
+
+  .life-page .life-accordion.has-peek-panel:not(.has-open-panel) .life-panel {
+    flex-grow: 0.82;
+  }
+
+  .life-page .life-accordion.has-peek-panel:not(.has-open-panel) .life-panel.is-peeking {
+    z-index: 6;
+    flex-grow: 1.9;
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .life-panel:nth-child(odd) {
+    clip-path: polygon(
+      0 var(--fold-slope),
+      100% 0,
+      100% 100%,
+      0 calc(100% - var(--fold-slope))
+    );
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .life-panel:nth-child(even) {
+    clip-path: polygon(
+      0 0,
+      100% var(--fold-slope),
+      100% calc(100% - var(--fold-slope)),
+      0 100%
+    );
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .life-panel::after {
+    display: none;
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .panel-content {
+    inset: 0;
+    width: 100%;
+    opacity: 0.58;
+    filter: saturate(0.78) contrast(0.94);
+    transform: none !important;
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .panel-tab {
+    z-index: 12;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    color: #fff;
+    background: linear-gradient(90deg, rgba(8, 12, 10, 0.78), rgba(8, 12, 10, 0.24) 72%, rgba(8, 12, 10, 0.08));
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.62);
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .panel-tab::after {
+    display: block;
+    content: "Open  ↗";
+    font-size: 0.56rem;
+    font-weight: 720;
+    letter-spacing: 0.11em;
+    opacity: 0.8;
+    text-transform: uppercase;
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .panel-name {
+    margin: 0;
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
+    writing-mode: initial;
+    transform: none;
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .music-intro,
+  .life-page .life-accordion:not(.has-open-panel) .module-sheet .module-copy,
+  .life-page .life-accordion:not(.has-open-panel) .module-games .game-feature__copy,
+  .life-page .life-accordion:not(.has-open-panel) .module-games .games-rail,
+  .life-page .life-accordion:not(.has-open-panel) .module-soccer .soccer-wall-intro,
+  .life-page .life-accordion:not(.has-open-panel) .panel-close {
+    display: none;
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .module-music .panel-content::before,
+  .life-page .life-accordion:not(.has-open-panel) .module-music .panel-content::after {
+    display: none;
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .module-soccer .soccer-scroll,
+  .life-page .life-accordion:not(.has-open-panel) .module-soccer .soccer-archive,
+  .life-page .life-accordion:not(.has-open-panel) .module-soccer .world-cup-stack {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .module-soccer .world-cup-stack {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .life-page .life-accordion:not(.has-open-panel) .module-soccer .wc-banner {
+    min-height: 0;
+    height: 100%;
+    border: 0;
+  }
+
+  .life-page .module-soccer.is-active .soccer-scroll {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .life-overview,
   .life-accordion,

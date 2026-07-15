@@ -691,9 +691,31 @@ body.meta-home {
 @media (max-width: 680px) {
   .academic-intro {
     grid-template-columns: 116px minmax(0, 1fr);
-    gap: 20px;
-    align-items: start;
+    column-gap: 20px;
+    row-gap: 14px;
+    align-items: center;
     margin-bottom: 35px;
+  }
+
+  .academic-details {
+    display: contents;
+  }
+
+  .academic-photo-wrap {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .academic-identity {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .academic-contact {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 0;
   }
 
   .academic-photo {
@@ -711,6 +733,24 @@ body.meta-home {
   .academic-identity h1 {
     margin-bottom: 11px;
     font-size: clamp(1.8rem, 8vw, 2.55rem);
+  }
+
+  .academic-identity h1 .academic-name-en,
+  .academic-identity h1 .academic-name-zh {
+    display: block;
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+  }
+
+  .academic-identity h1 .academic-name-en {
+    margin-top: 0;
+  }
+
+  .academic-identity h1 .academic-name-zh {
+    margin-top: 11px;
+    margin-left: 0;
   }
 
   .academic-role,

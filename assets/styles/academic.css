@@ -87,6 +87,19 @@
   white-space: nowrap;
 }
 
+.academic-identity h1 .academic-name-en,
+.academic-identity h1 .academic-name-zh {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  white-space: nowrap;
+}
+
+.academic-identity h1 .academic-name-zh {
+  margin-left: 0.2em;
+}
+
 .academic-role,
 .academic-affiliation {
   margin: 3px 0;

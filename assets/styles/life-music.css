@@ -282,13 +282,6 @@
     width: calc(100% - 28px);
   }
 
-  .life-page footer {
-    flex-direction: row !important;
-    gap: 14px;
-    padding-top: 16px;
-    font-size: 0.78rem;
-  }
-
   .life-page .life-main {
     padding: 10px 0;
   }
@@ -306,27 +299,6 @@
 }
 
 @media (max-width: 620px) {
-  .life-page .masthead {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .life-page .masthead .brand span {
-    display: none;
-  }
-
-  .life-page .masthead nav {
-    width: auto;
-    flex: 0 0 auto;
-    gap: 10px;
-    font-size: 0.8rem;
-  }
-
-  .life-page .masthead nav > a[href="worldmodel.html"],
-  .life-page .masthead .theme-switcher {
-    display: none;
-  }
-
   .life-stage::after {
     background: linear-gradient(
       90deg,
@@ -363,21 +335,6 @@
     font-size: 0.88rem;
   }
 
-  .life-page footer > span {
-    white-space: nowrap;
-  }
-
-  .life-page footer .elsewhere {
-    gap: 10px;
-  }
-
-  .life-page footer {
-    justify-content: center;
-  }
-
-  .life-page footer > span {
-    display: none;
-  }
 }
 
 @media (max-width: 440px) {
