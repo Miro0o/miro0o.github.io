@@ -715,6 +715,39 @@
 }
 
 @media (max-width: 720px) {
+  .film-scroll {
+    scrollbar-gutter: auto;
+  }
+
+  .film-header {
+    width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .film-heading {
+    min-width: 0;
+    padding-right: 56px;
+  }
+
+  .film-toolbar {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .film-filter-tabs {
+    width: 100%;
+    max-width: 100%;
+    padding-right: 2px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+  }
+
   .book-shelf-preview {
     gap: 0;
     padding: 8px 72px 8px 118px;
@@ -746,11 +779,15 @@
   }
 
   .film-heading p:last-child {
-    display: none;
+    display: block;
+    margin-top: 8px;
+    font-size: 0.7rem;
+    line-height: 1.4;
   }
 
   .film-search {
     width: 100%;
+    max-width: 100%;
   }
 
   .film-grid {
@@ -758,6 +795,17 @@
     grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
     gap: 4px;
     padding: 4px;
+  }
+
+  /* Favourite cards are twice the normal width. Give that filtered view an
+     explicit two-column track so an odd auto-fill column cannot leave a
+     permanent strip of empty space on the right. */
+  .film-grid.is-favourites-view {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .film-grid.is-favourites-view .film-poster-card.is-favourite {
+    grid-column: span 1;
   }
 
   .film-poster-copy {
@@ -789,7 +837,10 @@
   }
 
   .books-heading > p:not(.module-kicker) {
-    display: none;
+    display: block;
+    margin-top: 9px;
+    font-size: 0.7rem;
+    line-height: 1.4;
   }
 
   .book-legend [data-book-summary] {
@@ -814,7 +865,7 @@
   }
 }
 
-@media (max-height: 800px) {
+@media (max-height: 800px) and (min-width: 721px) {
   .books-scroll {
     padding-top: 14px;
     padding-bottom: 14px;

@@ -120,6 +120,7 @@
     const applyFilter = () => {
       const query = normalSearch(search?.value || "").trim();
       let visible = 0;
+      grid.classList.toggle("is-favourites-view", activeFilter === "favourites");
       cards.forEach((card) => {
         const inCategory = activeFilter === "all"
           || (activeFilter === "favourites" && card.dataset.favourite === "true")

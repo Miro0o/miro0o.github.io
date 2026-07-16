@@ -412,6 +412,24 @@
     text-shadow: 0 1px 12px rgba(0, 0, 0, 0.62);
   }
 
+  /* Closed clips should follow the active theme instead of always looking
+     like night-mode thumbnails. */
+  :root[data-theme="day"] .life-page .life-accordion:not(.has-open-panel) .panel-content {
+    opacity: 0.76;
+    filter: saturate(0.86) contrast(0.97) brightness(1.04);
+  }
+
+  :root[data-theme="day"] .life-page .life-accordion:not(.has-open-panel) .panel-tab {
+    color: var(--ink);
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--life-surface) 94%, transparent),
+      color-mix(in srgb, var(--life-surface) 72%, transparent) 72%,
+      color-mix(in srgb, var(--life-surface) 40%, transparent)
+    );
+    text-shadow: 0 1px 10px var(--life-surface), 0 0 3px var(--life-surface);
+  }
+
   .life-page .life-accordion:not(.has-open-panel) .panel-tab::after {
     display: block;
     content: "Open  ↗";

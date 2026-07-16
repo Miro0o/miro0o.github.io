@@ -349,7 +349,11 @@
   }
 
   .music-source {
-    display: none;
+    display: inline-block;
+    max-width: calc(100vw - 32px);
+    margin-top: 18px;
+    font-size: 0.6rem;
+    line-height: 1.5;
   }
 
 }
