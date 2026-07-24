@@ -50,7 +50,7 @@
     earth: "Planet earth. The home of all known life.",
     author: "Copenhagen: where the author is.",
     self: "where am I?",
-    worldmodel: "Us, the humans, thinking about the universe."
+    worldmodel: "Self-aware agents living in and perceiving (feel and think) about the Universe. That is us, the stargazers."
   };
   const related = {
     universe: ["universe"],
