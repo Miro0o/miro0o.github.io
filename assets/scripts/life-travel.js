@@ -31,6 +31,7 @@
   let viewerSwipe = null;
   let suppressViewerClick = false;
   let suppressViewerClickTimer = 0;
+  let viewerLoaderTimer = 0;
   let viewerScale = 1;
   let viewerPanX = 0;
   let viewerPanY = 0;
@@ -63,7 +64,7 @@
     if (!assetsPromise) {
       assetsPromise = Promise.all([
         loadScript("assets/data/world-outline.js?v=20260820-1", () => Boolean(window.WORLD_MAP || window.WORLD_OUTLINE)),
-        loadScript("assets/data/travel-data.js?v=20260820-r2-1", () => Boolean(window.TRAVEL_DATA))
+        loadScript(`assets/data/travel-data.js?v=${Date.now()}`, () => Boolean(window.TRAVEL_DATA))
       ]).then(() => {
         data = window.TRAVEL_DATA || { points: [], photos: [], places: [], stats: {} };
         renderYears();
@@ -108,6 +109,14 @@
   const flagEmoji = (countryCode) => /^[A-Z]{2}$/.test(countryCode || "")
     ? [...countryCode].map((character) => String.fromCodePoint(character.charCodeAt(0) + 127397)).join("")
     : "";
+  const sameName = (first, second) => {
+    const left = normaliseName(first);
+    const right = normaliseName(second);
+    return Boolean(left && right && left.localeCompare(right, undefined, { sensitivity: "base" }) === 0);
+  };
+  const isSingleLevelPlace = (photo) => (
+    sameName(photo.city, photo.country) || sameName(photo.localName, photo.localCountry)
+  );
 
   class PhotoAtlasMap {
     constructor(element, cities, onPhotos, onBackground, onInteraction) {
@@ -140,6 +149,10 @@
       this.photos = [];
       this.hits = [];
       this.drag = null;
+      this.pointers = new Map();
+      this.pinch = null;
+      this.gestureMoved = false;
+      this.gestureHadMultiplePointers = false;
       this.hasFitted = false;
       this.frame = 0;
       this.cameraFrame = 0;
@@ -182,21 +195,59 @@
     }
 
     bindEvents() {
+      const pointerPosition = (event) => {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+          x: event.clientX - rect.left,
+          y: event.clientY - rect.top
+        };
+      };
+      const startPinch = () => {
+        const [first, second] = [...this.pointers.values()];
+        if (!first || !second) return;
+        const midpoint = {
+          x: (first.x + second.x) / 2,
+          y: (first.y + second.y) / 2
+        };
+        const center = this.project(this.center.longitude, this.center.latitude, this.zoom);
+        this.pinch = {
+          distance: Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)),
+          midpointX: midpoint.x,
+          midpointY: midpoint.y,
+          zoom: this.zoom,
+          anchor: this.unproject(
+            center.x + midpoint.x - this.width / 2,
+            center.y + midpoint.y - this.height / 2,
+            this.zoom
+          )
+        };
+      };
       this.canvas.addEventListener("pointerdown", (event) => {
         event.preventDefault();
         this.cancelCameraAnimation();
         this.canvas.setPointerCapture(event.pointerId);
-        this.drag = {
-          startX: event.clientX,
-          startY: event.clientY,
-          lastX: event.clientX,
-          lastY: event.clientY,
-          moved: false
-        };
+        const position = pointerPosition(event);
+        this.pointers.set(event.pointerId, position);
+        if (this.pointers.size === 1) {
+          this.gestureMoved = false;
+          this.gestureHadMultiplePointers = false;
+          this.pinch = null;
+          this.drag = {
+            pointerId: event.pointerId,
+            startX: position.x,
+            startY: position.y,
+            lastX: position.x,
+            lastY: position.y
+          };
+        } else {
+          this.gestureHadMultiplePointers = true;
+          this.drag = null;
+          startPinch();
+        }
         this.canvas.classList.add("is-dragging");
       });
       this.canvas.addEventListener("pointermove", (event) => {
-        if (!this.drag) {
+        if (!this.pointers.has(event.pointerId)) {
           const hit = this.hitAt(event.offsetX, event.offsetY);
           if (hit !== this.hoveredHit) {
             this.hoveredHit = hit;
@@ -205,33 +256,89 @@
           }
           return;
         }
-        const distance = Math.hypot(event.clientX - this.drag.startX, event.clientY - this.drag.startY);
-        if (distance > 3 && !this.drag.moved) {
-          this.drag.moved = true;
+        const position = pointerPosition(event);
+        this.pointers.set(event.pointerId, position);
+        if (this.pointers.size >= 2) {
+          if (!this.pinch) startPinch();
+          const [first, second] = [...this.pointers.values()];
+          const distance = Math.max(1, Math.hypot(second.x - first.x, second.y - first.y));
+          const midpoint = {
+            x: (first.x + second.x) / 2,
+            y: (first.y + second.y) / 2
+          };
+          const midpointMovement = Math.hypot(
+            midpoint.x - this.pinch.midpointX,
+            midpoint.y - this.pinch.midpointY
+          );
+          if (!this.gestureMoved && (Math.abs(distance - this.pinch.distance) > 2 || midpointMovement > 3)) {
+            this.gestureMoved = true;
+            this.onInteraction?.();
+          }
+          const zoom = Math.max(
+            this.minZoom,
+            Math.min(this.maxZoom, this.pinch.zoom + Math.log2(distance / this.pinch.distance))
+          );
+          const anchor = this.project(this.pinch.anchor.longitude, this.pinch.anchor.latitude, zoom);
+          this.zoom = zoom;
+          this.setCenterFromWorld(
+            anchor.x - midpoint.x + this.width / 2,
+            anchor.y - midpoint.y + this.height / 2,
+            zoom
+          );
+          this.requestRender();
+          event.preventDefault();
+          return;
+        }
+        if (!this.drag || this.drag.pointerId !== event.pointerId) return;
+        const distance = Math.hypot(position.x - this.drag.startX, position.y - this.drag.startY);
+        if (distance > 3 && !this.gestureMoved) {
+          this.gestureMoved = true;
           this.onInteraction?.();
         }
         const center = this.project(this.center.longitude, this.center.latitude, this.zoom);
         this.setCenterFromWorld(
-          center.x - (event.clientX - this.drag.lastX),
-          center.y - (event.clientY - this.drag.lastY),
+          center.x - (position.x - this.drag.lastX),
+          center.y - (position.y - this.drag.lastY),
           this.zoom
         );
-        this.drag.lastX = event.clientX;
-        this.drag.lastY = event.clientY;
+        this.drag.lastX = position.x;
+        this.drag.lastY = position.y;
         this.requestRender();
       });
-      const endDrag = (event, allowClick) => {
-        if (!this.drag) return;
+      const endGesture = (event, allowClick) => {
+        if (!this.pointers.has(event.pointerId)) return;
+        const position = pointerPosition(event);
+        this.pointers.set(event.pointerId, position);
+        const isClick = allowClick
+          && this.pointers.size === 1
+          && !this.gestureMoved
+          && !this.gestureHadMultiplePointers;
         this.canvas.releasePointerCapture?.(event.pointerId);
-        const moved = this.drag.moved;
-        this.drag = null;
-        this.canvas.classList.remove("is-dragging");
-        if (allowClick && !moved && !this.activateHit(event.offsetX, event.offsetY)) {
+        this.pointers.delete(event.pointerId);
+        if (this.pointers.size >= 2) {
+          this.drag = null;
+          startPinch();
+        } else if (this.pointers.size === 1) {
+          const [pointerId, remaining] = [...this.pointers.entries()][0];
+          this.pinch = null;
+          this.drag = {
+            pointerId,
+            startX: remaining.x,
+            startY: remaining.y,
+            lastX: remaining.x,
+            lastY: remaining.y
+          };
+        } else {
+          this.drag = null;
+          this.pinch = null;
+          this.canvas.classList.remove("is-dragging");
+        }
+        if (isClick && !this.activateHit(position.x, position.y)) {
           this.onBackground?.();
         }
       };
-      this.canvas.addEventListener("pointerup", (event) => endDrag(event, true));
-      this.canvas.addEventListener("pointercancel", (event) => endDrag(event, false));
+      this.canvas.addEventListener("pointerup", (event) => endGesture(event, true));
+      this.canvas.addEventListener("pointercancel", (event) => endGesture(event, false));
       this.canvas.addEventListener("wheel", (event) => {
         event.preventDefault();
         this.onInteraction?.();
@@ -245,7 +352,7 @@
         this.easeZoomAt(1.5, event.offsetX, event.offsetY);
       });
       this.canvas.addEventListener("pointerleave", () => {
-        if (this.drag || !this.hoveredHit) return;
+        if (this.pointers.size || !this.hoveredHit) return;
         this.hoveredHit = null;
         this.canvas.classList.remove("has-interactive-hit");
         this.requestRender();
@@ -454,8 +561,8 @@
     focusLocation(longitude, latitude) {
       const targetZoom = this.zoom;
       const point = this.project(longitude, latitude, targetZoom);
-      const xRatio = this.width <= 720 ? 0.82 : 0.79;
-      const yRatio = this.width <= 720 ? 0.56 : 0.5;
+      const xRatio = this.width <= 720 ? 0.5 : 0.79;
+      const yRatio = this.width <= 720 ? 0.24 : 0.5;
       const targetCenter = this.unproject(
         point.x - this.width * xRatio + this.width / 2,
         point.y - this.height * yRatio + this.height / 2,
@@ -999,15 +1106,15 @@
       };
     };
     const preview = fit(
-      mobile ? bounds.width * 0.66 : Math.min(bounds.width * 0.48, 760),
-      bounds.height * (mobile ? 0.58 : 0.74)
+      mobile ? bounds.width * 0.88 : Math.min(bounds.width * 0.62, 980),
+      bounds.height * (mobile ? 0.52 : 0.82)
     );
     const large = fit(
       mobile ? bounds.width - 24 : Math.min(bounds.width * 0.94, 1400),
       bounds.height * (mobile ? 0.88 : 0.9)
     );
     const shown = expanded ? large : preview;
-    const previewCenterY = bounds.height * (mobile ? 0.39 : 0.44);
+    const previewCenterY = bounds.height * (mobile ? 0.59 : 0.44);
     viewer.style.setProperty("--travel-preview-width", `${preview.width}px`);
     viewer.style.setProperty("--travel-preview-height", `${preview.height}px`);
     viewer.style.setProperty("--travel-photo-width", `${shown.width}px`);
@@ -1024,6 +1131,12 @@
     requestAnimationFrame(layoutViewerImage);
   }
 
+  function stopViewerLoader() {
+    window.clearTimeout(viewerLoaderTimer);
+    viewerLoaderTimer = 0;
+    viewer.classList.remove("is-image-loading");
+  }
+
   function renderViewer() {
     const photoIndex = viewerPhotos[viewerPosition];
     const photo = data.photos?.[photoIndex];
@@ -1031,21 +1144,37 @@
     const flag = flagEmoji(photo.countryCode);
     const imageToken = ++viewerImageToken;
     resetViewerTransform();
+    stopViewerLoader();
     viewer.classList.remove("is-image-ready");
     viewerImage.classList.add("is-loading");
+    viewerLoaderTimer = window.setTimeout(() => {
+      if (imageToken === viewerImageToken && !viewer.classList.contains("is-image-ready")) {
+        viewer.classList.add("is-image-loading");
+      }
+    }, 10);
     viewerImage.onload = () => {
       if (imageToken !== viewerImageToken) return;
+      stopViewerLoader();
       layoutViewerImage();
       viewer.classList.add("is-image-ready");
       viewerImage.classList.remove("is-loading");
     };
     viewerImage.onerror = () => {
-      if (imageToken === viewerImageToken) viewerImage.classList.remove("is-loading");
+      if (imageToken !== viewerImageToken) return;
+      stopViewerLoader();
+      viewerImage.classList.remove("is-loading");
     };
     viewerImage.src = imageUrl(photo);
     viewerImage.alt = `Travel photograph from ${photo.city || photo.country || "a selected location"}`;
-    renderNamePair(viewerPlace, photo.localName || "Unknown place", photo.city);
-    renderNamePair(viewerCountry, photo.localCountry, photo.country, flag);
+    if (isSingleLevelPlace(photo)) {
+      renderNamePair(viewerPlace, photo.localName || photo.localCountry || "Unknown place", photo.city || photo.country, flag);
+      viewerCountry.replaceChildren();
+      viewerCountry.hidden = true;
+    } else {
+      renderNamePair(viewerPlace, photo.localName || "Unknown place", photo.city);
+      renderNamePair(viewerCountry, photo.localCountry, photo.country, flag);
+      viewerCountry.hidden = false;
+    }
     viewerDescription.textContent = photo.description || "";
     viewerDescription.hidden = !photo.description;
     viewerMeta.textContent = viewerPhotos.length > 1
@@ -1084,6 +1213,7 @@
     if (panel.classList.contains("is-photo-open")) panel.classList.remove("is-photo-open");
     panel.classList.remove("is-photo-expanded");
     viewer.classList.remove("is-expanded", "is-image-ready");
+    stopViewerLoader();
     if (viewer.getAttribute("aria-hidden") !== "true") viewer.setAttribute("aria-hidden", "true");
     const camera = viewerCamera;
     viewerCamera = null;

@@ -867,6 +867,106 @@ body.meta-home {
   }
 }
 
+/* Keep the mobile footer as a utility bar and let status copy float over the canvas. */
+@media (max-width: 600px) {
+  .page,
+  .meta-home .page,
+  .worldmodel-page .page,
+  body.life-page .page {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  footer {
+    gap: 12px;
+    padding-top: 10px;
+    font-size: 0.78rem;
+    text-align: left;
+  }
+
+  body:not(.meta-home):not(.worldmodel-page) footer {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .life-page .page > footer {
+    padding-top: 10px;
+  }
+
+  footer > span:first-child {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .footer-credit {
+    display: none;
+  }
+
+  footer .elsewhere {
+    gap: 12px;
+    margin-left: auto;
+  }
+
+  footer .elsewhere a {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+  }
+
+  .meta-home footer,
+  .worldmodel-page footer {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 0;
+    padding-top: 10px;
+    font-size: 0.78rem;
+  }
+
+  .meta-home footer > span:first-child,
+  .worldmodel-page footer > span:first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .meta-home footer .elsewhere,
+  .worldmodel-page footer .elsewhere {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    margin-left: 0;
+  }
+
+  .diagram-readout,
+  .worldmodel-caption {
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 68px);
+    left: 50%;
+    z-index: 8;
+    width: max-content;
+    max-width: calc(100vw - 28px);
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    font-size: 0.76rem;
+    line-height: 1.35;
+    text-align: center;
+    transform: translate(-50%, -4px);
+  }
+
+  .worldmodel-caption:not(.has-status) {
+    display: none;
+  }
+
+  .diagram-readout.is-visible {
+    transform: translate(-50%, 0);
+  }
+
+  .worldmodel-caption {
+    transform: translateX(-50%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

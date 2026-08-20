@@ -1,5 +1,0 @@
-{
-  "_instructions": {
-    "description": "Add a photo ID with a description here, for example: \"photo-0123456789abcdef\": { \"description\": \"Summer Palace, 2026\" }. Photo IDs appear in the enlarged viewer and stay stable across rebuilds."
-  }
-}

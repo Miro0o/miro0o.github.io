@@ -431,6 +431,11 @@
     text-shadow: 0 1px 10px var(--life-surface), 0 0 3px var(--life-surface);
   }
 
+  :root[data-theme="night"] .life-page .life-accordion:not(.has-open-panel) .module-travel .panel-content {
+    opacity: 0.88;
+    filter: none;
+  }
+
   .life-page .life-accordion:not(.has-open-panel) .panel-tab::after {
     display: block;
     content: "Open  ↗";

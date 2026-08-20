@@ -53,6 +53,10 @@
   object-position: center;
 }
 
+.travel-map__preview .travel-map__preview-image--night {
+  display: none;
+}
+
 .module-travel.is-map-loaded .travel-map__preview {
   opacity: 0;
   visibility: hidden;
@@ -253,6 +257,90 @@
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
+}
+
+.travel-viewer__loader {
+  position: absolute;
+  top: var(--travel-preview-center-y);
+  left: var(--travel-preview-center-x);
+  z-index: 5;
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  color: color-mix(in srgb, var(--travel-ink) 72%, var(--travel-muted));
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  visibility: hidden;
+  transition: opacity 180ms ease, visibility 180ms ease;
+}
+
+.travel-viewer.is-expanded .travel-viewer__loader {
+  top: 50%;
+  left: 50%;
+}
+
+.travel-viewer.is-image-loading .travel-viewer__loader {
+  opacity: 1;
+  visibility: visible;
+}
+
+.travel-viewer__loader-matrix {
+  display: grid;
+  grid-template-columns: repeat(4, 6px);
+  gap: 7px;
+  padding: 10px;
+  animation: travel-loader-breathe 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.travel-viewer__loader-matrix i {
+  width: 6px;
+  height: 6px;
+  background: color-mix(in srgb, var(--travel-muted) 52%, transparent);
+  animation: travel-loader-wave 2.4s ease-in-out infinite;
+}
+
+.travel-viewer__loader-matrix i:nth-child(1) { animation-delay: -2.4s; }
+.travel-viewer__loader-matrix i:nth-child(2),
+.travel-viewer__loader-matrix i:nth-child(5) { animation-delay: -2.25s; }
+.travel-viewer__loader-matrix i:nth-child(3),
+.travel-viewer__loader-matrix i:nth-child(6),
+.travel-viewer__loader-matrix i:nth-child(9) { animation-delay: -2.1s; }
+.travel-viewer__loader-matrix i:nth-child(4),
+.travel-viewer__loader-matrix i:nth-child(7),
+.travel-viewer__loader-matrix i:nth-child(10),
+.travel-viewer__loader-matrix i:nth-child(13) { animation-delay: -1.95s; }
+.travel-viewer__loader-matrix i:nth-child(8),
+.travel-viewer__loader-matrix i:nth-child(11),
+.travel-viewer__loader-matrix i:nth-child(14) { animation-delay: -1.8s; }
+.travel-viewer__loader-matrix i:nth-child(12),
+.travel-viewer__loader-matrix i:nth-child(15) { animation-delay: -1.65s; }
+.travel-viewer__loader-matrix i:nth-child(16) { animation-delay: -1.5s; }
+
+.travel-viewer__loader > span {
+  font-size: 0.58rem;
+  font-weight: 560;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+@keyframes travel-loader-wave {
+  0%, 38%, 62%, 100% {
+    background: color-mix(in srgb, var(--travel-muted) 52%, transparent);
+    opacity: 0.78;
+    transform: scale(1);
+  }
+
+  50% {
+    background: var(--travel-accent);
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
+@keyframes travel-loader-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.94); }
 }
 
 .travel-viewer__content {
@@ -566,8 +654,12 @@
   background: #151d1a;
 }
 
-:root[data-theme="night"] .travel-map__preview img {
-  filter: brightness(0.34) saturate(0.72) contrast(1.2);
+:root[data-theme="night"] .travel-map__preview-image--day {
+  display: none;
+}
+
+:root[data-theme="night"] .travel-map__preview .travel-map__preview-image--night {
+  display: block;
 }
 
 :root[data-theme="night"] .travel-map-controls {
@@ -643,8 +735,8 @@
   }
 
   .travel-viewer {
-    --travel-preview-center-x: 41%;
-    --travel-preview-center-y: 39%;
+    --travel-preview-center-x: 50%;
+    --travel-preview-center-y: 59%;
   }
 
   .travel-viewer__arrow {
@@ -701,5 +793,13 @@
   .travel-viewer__image-wrap img,
   .travel-years button {
     transition: none;
+  }
+
+  .travel-viewer__loader-matrix {
+    animation: none;
+  }
+
+  .travel-viewer__loader-matrix i {
+    animation-duration: 4.8s;
   }
 }

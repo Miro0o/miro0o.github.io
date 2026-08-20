@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://i.ytimg.com">
   <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com">
   <link rel="preconnect" href="https://m.media-amazon.com">
-  <link rel="stylesheet" href="assets/styles/main.css?v=20260820-14">
+  <link rel="stylesheet" href="assets/styles/main.css?v=20260820-18">
   <script src="assets/scripts/nav-menu.js" defer></script>
 </head>
 <body class="life-page">
@@ -353,9 +353,13 @@
               <div class="travel-layout">
                 <figure class="travel-map" aria-label="Zoomable map of photographs taken while travelling">
                   <div class="travel-map__preview" data-travel-preview aria-hidden="true">
-                    <picture>
-                      <source media="(max-width: 720px)" srcset="assets/images/travel-map-preview-mobile.webp?v=20260820-1">
-                      <img src="assets/images/travel-map-preview.webp?v=20260820-2" width="1440" height="721" alt="" decoding="async">
+                    <picture class="travel-map__preview-image travel-map__preview-image--day">
+                      <source media="(max-width: 720px)" srcset="assets/images/travel/map-preview-mobile.webp?v=20260820-1">
+                      <img src="assets/images/travel/map-preview.webp?v=20260820-2" width="1440" height="721" alt="" decoding="async">
+                    </picture>
+                    <picture class="travel-map__preview-image travel-map__preview-image--night">
+                      <source media="(max-width: 720px)" srcset="assets/images/travel/map-preview-night-mobile.webp?v=20260820-1">
+                      <img src="assets/images/travel/map-preview-night.webp?v=20260820-1" width="1440" height="721" alt="" decoding="async">
                     </picture>
                   </div>
                   <div class="travel-map__canvas" data-travel-map></div>
@@ -365,6 +369,15 @@
                     <span>Location data appears after the privacy review.</span>
                   </div>
                   <div class="travel-viewer" data-travel-viewer aria-hidden="true" role="region" aria-label="Selected travel photograph">
+                    <div class="travel-viewer__loader" role="status" aria-label="Loading photograph">
+                      <div class="travel-viewer__loader-matrix" aria-hidden="true">
+                        <i></i><i></i><i></i><i></i>
+                        <i></i><i></i><i></i><i></i>
+                        <i></i><i></i><i></i><i></i>
+                        <i></i><i></i><i></i><i></i>
+                      </div>
+                      <span>Loading photograph</span>
+                    </div>
                     <div class="travel-viewer__content">
                       <button class="travel-viewer__arrow travel-viewer__arrow--previous" type="button" data-travel-viewer-previous aria-label="Previous photograph" hidden><span aria-hidden="true">‹</span></button>
                       <div class="travel-viewer__image-wrap">
@@ -408,7 +421,7 @@
   <script src="assets/scripts/music-wall.js?v=20260820-5"></script>
   <script src="assets/scripts/life-film-books.js?v=20260820-5"></script>
   <script src="assets/scripts/life-games.js?v=20260820-5"></script>
-  <script src="assets/scripts/life-travel.js?v=20260820-9"></script>
+  <script src="assets/scripts/life-travel.js?v=20260820-13"></script>
   <script src="assets/scripts/life-accordion.js?v=20260820-5"></script>
 </body>
 </html>

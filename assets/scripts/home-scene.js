@@ -48,9 +48,9 @@
     universe: "The wider universe.",
     firework: "Fireworks over Copenhagen.",
     earth: "Planet earth. The home of all known life.",
-    author: "Copenhagen: where the author is.",
-    self: "where am I?",
-    worldmodel: "Self-aware agents living in and perceiving (feel and think) about the Universe. That is us, the stargazers."
+    author: "I am here.",
+    self: "Where am I?",
+    worldmodel: "Human is thinking."
   };
   const related = {
     universe: ["universe"],
