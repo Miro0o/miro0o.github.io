@@ -25,7 +25,9 @@
     scroller.style.setProperty("--games-viewport", `${scroller.clientHeight}px`);
   };
 
-  const panelIsVisible = () => panel.classList.contains("is-active") || panel.classList.contains("is-peeking");
+  // A peek is only a fold preview. Starting media here makes every pointer
+  // pass load and unload the montage again.
+  const panelIsActive = () => panel.classList.contains("is-active");
 
   const pauseMontage = (feature, unload = false) => {
     const video = feature?.querySelector(".game-montage");
@@ -49,7 +51,7 @@
   };
 
   const playMontage = (feature) => {
-    if (!feature || !panelIsVisible()) return;
+    if (!feature || !panelIsActive()) return;
     const video = feature.querySelector(".game-montage");
     if (!video?.dataset.src) return;
     if (!video.hasAttribute("src")) {
@@ -60,7 +62,7 @@
       feature.classList.add("has-live-video");
     } else {
       video.addEventListener("loadeddata", () => {
-        if (feature.classList.contains("is-current") && panelIsVisible()) {
+        if (feature.classList.contains("is-current") && panelIsActive()) {
           feature.classList.add("has-live-video");
         }
       }, { once: true });
@@ -81,7 +83,13 @@
 
   features.forEach((feature) => {
     const video = feature.querySelector(".game-montage");
-    video?.addEventListener("playing", () => feature.classList.add("has-live-video"));
+    video?.addEventListener("playing", () => {
+      if (panelIsActive() && feature.classList.contains("is-current")) {
+        feature.classList.add("has-live-video");
+      } else {
+        pauseMontage(feature, true);
+      }
+    });
     video?.addEventListener("error", () => feature.classList.remove("has-live-video"));
   });
 
@@ -109,8 +117,13 @@
     });
   });
 
-  new MutationObserver(() => {
-    if (panelIsVisible()) {
+  let wasActive = panelIsActive();
+  const syncPanelState = () => {
+    const isActive = panelIsActive();
+    if (isActive === wasActive) return;
+    wasActive = isActive;
+
+    if (isActive) {
       const linkedSection = window.location.hash ? world.querySelector(window.location.hash) : null;
       const destination = panel.classList.contains("is-active") && sections.includes(linkedSection)
         ? linkedSection
@@ -126,6 +139,8 @@
     } else {
       unloadMontages();
     }
-  }).observe(panel, { attributes: true, attributeFilter: ["class"] });
+  };
+
+  new MutationObserver(syncPanelState).observe(panel, { attributes: true, attributeFilter: ["class"] });
 
 })();

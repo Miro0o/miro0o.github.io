@@ -277,6 +277,22 @@
   to { transform: rotate(var(--track-angle)) translate3d(-50%, 0, 0); }
 }
 
+/*
+ * This exception previously lived at the end of the removed World Cup
+ * stylesheet. Keep the album belts on their intended timeline when the
+ * site-wide reduced-motion rule shortens all animations to one frame.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .album-track {
+    animation-duration: var(--track-duration) !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  .album-tile {
+    filter: none;
+  }
+}
+
 @media (max-width: 900px) {
   .life-page .page {
     padding-top: 18px;

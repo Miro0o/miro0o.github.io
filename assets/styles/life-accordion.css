@@ -101,6 +101,8 @@
   contain: layout paint style;
   transition:
     flex-grow 460ms cubic-bezier(0.2, 0.72, 0.25, 1),
+    margin-left 460ms cubic-bezier(0.2, 0.72, 0.25, 1),
+    margin-top 460ms cubic-bezier(0.2, 0.72, 0.25, 1),
     opacity 180ms ease;
 }
 
@@ -144,7 +146,7 @@
 .module-music { --fold-color: #75685d; }
 .module-film { --fold-color: #8a684c; }
 .module-games { --fold-color: #625875; }
-.module-soccer { --fold-color: #4d725a; }
+.module-travel { --fold-color: #66745f; }
 .module-books { --fold-color: #4f6977; }
 
 .life-accordion.has-peek-panel .life-panel {
@@ -157,8 +159,9 @@
 }
 
 .life-accordion.has-open-panel .life-panel {
-  flex-grow: 0.025;
-  opacity: 0.84;
+  flex-grow: 0;
+  margin-left: 0;
+  opacity: 0;
 }
 
 .life-accordion.has-open-panel .life-panel.is-active {

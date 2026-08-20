@@ -112,7 +112,8 @@
   }
 
   .life-accordion.has-open-panel .life-panel {
-    flex-grow: 0.018;
+    flex-grow: 0;
+    margin-top: 0;
   }
 
   .life-accordion.has-open-panel .life-panel:not(.is-active) .panel-tab {

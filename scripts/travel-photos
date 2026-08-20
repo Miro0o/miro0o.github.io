@@ -1,0 +1,180 @@
+#!/bin/zsh
+set -euo pipefail
+
+SCRIPT_DIR=${0:A:h}
+SITE_ROOT=${SCRIPT_DIR:h}
+CACHE_ROOT="$SITE_ROOT/.travel-cache"
+TOOL_SOURCE="$SITE_ROOT/tools/travel-photo-indexer/main.swift"
+TOOL_PLIST="$SITE_ROOT/tools/travel-photo-indexer/Info.plist"
+APP_ROOT="$CACHE_ROOT/MiroTravelPhotoIndexer.app"
+APP_BINARY="$APP_ROOT/Contents/MacOS/TravelPhotoIndexer"
+APP_PLIST="$APP_ROOT/Contents/Info.plist"
+MODULE_CACHE="$CACHE_ROOT/swift-module-cache"
+SCAN_PATH="$CACHE_ROOT/photos.json"
+CANDIDATES_PATH="$CACHE_ROOT/candidates.json"
+SCORES_PATH="$CACHE_ROOT/vision-scores.json"
+EXPORTS_PATH="$CACHE_ROOT/representatives.json"
+IMAGE_DIRECTORY="$SITE_ROOT/assets/images/traveling"
+FAVORITES_DIRECTORY="$IMAGE_DIRECTORY/favorites"
+FAVORITES_AUDIT_PATH="$CACHE_ROOT/favorites-audit.json"
+FAVORITES_REPORT_PATH="$CACHE_ROOT/favorites-export-report.json"
+ORIGINAL_EXPORTS_PATH="$CACHE_ROOT/gallery-original-exports.json"
+ORIGINALS_DIRECTORY="$IMAGE_DIRECTORY/originals"
+REMATCHED_DIRECTORY="$IMAGE_DIRECTORY/current-rematched"
+REMATCH_REPORT_PATH="$CACHE_ROOT/current-rematch-report.json"
+GEODATA_DIRECTORY="$CACHE_ROOT/geodata"
+GEODATA_PATH="$GEODATA_DIRECTORY/cities15000.txt"
+FALLBACK_SDK="/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk"
+SDK_PATH=$(xcrun --show-sdk-path)
+if [[ -d "$FALLBACK_SDK" ]]; then
+  SDK_PATH="$FALLBACK_SDK"
+fi
+MACHINE_ARCH=$(uname -m)
+
+build_indexer() {
+  if [[ -x "$APP_BINARY" && "$APP_BINARY" -nt "$TOOL_SOURCE" && "$APP_PLIST" -nt "$TOOL_PLIST" ]]; then
+    if ! codesign --verify "$APP_ROOT" >/dev/null 2>&1; then
+      codesign --force --deep --sign - "$APP_ROOT"
+    fi
+    return
+  fi
+  mkdir -p "$APP_ROOT/Contents/MacOS" "$MODULE_CACHE"
+  cp "$TOOL_PLIST" "$APP_PLIST"
+  xcrun swiftc \
+    -sdk "$SDK_PATH" \
+    -module-cache-path "$MODULE_CACHE" \
+    -target "$MACHINE_ARCH-apple-macosx15.0" \
+    -parse-as-library \
+    -O \
+    -framework AppKit \
+    -framework Photos \
+    -framework Vision \
+    "$TOOL_SOURCE" \
+    -o "$APP_BINARY"
+  codesign --force --deep --sign - "$APP_ROOT"
+}
+
+run_indexer() {
+  build_indexer
+  open -n -W "$APP_ROOT" --args "$@"
+}
+
+prepare_geodata() {
+  if [[ -f "$GEODATA_PATH" ]]; then
+    return
+  fi
+  mkdir -p "$GEODATA_DIRECTORY"
+  curl -L --fail --silent --show-error \
+    -o "$GEODATA_DIRECTORY/cities15000.zip" \
+    "https://download.geonames.org/export/dump/cities15000.zip"
+  ditto -x -k "$GEODATA_DIRECTORY/cities15000.zip" "$GEODATA_DIRECTORY"
+}
+
+scan_photos() {
+  mkdir -p "$CACHE_ROOT"
+  run_indexer scan --output "$SCAN_PATH"
+}
+
+prepare_candidates() {
+  prepare_geodata
+  node "$SCRIPT_DIR/build-travel-data.mjs" candidates
+}
+
+rank_candidates() {
+  local network_flag=()
+  if [[ "${TRAVEL_DOWNLOAD_MISSING:-0}" == "1" ]]; then
+    network_flag=(--download-missing)
+  fi
+  run_indexer rank \
+    --input "$CANDIDATES_PATH" \
+    --output "$SCORES_PATH" \
+    "${network_flag[@]}"
+}
+
+finalize_data() {
+  node "$SCRIPT_DIR/build-travel-data.mjs" finalize
+}
+
+build_gallery() {
+  finalize_data
+  node "$SCRIPT_DIR/build-travel-images.mjs"
+}
+
+export_representatives() {
+  run_indexer export --input "$EXPORTS_PATH" --directory "$IMAGE_DIRECTORY"
+}
+
+export_favorites() {
+  run_indexer favorites --directory "$FAVORITES_DIRECTORY" --report "$FAVORITES_REPORT_PATH"
+  if [[ -f "$FAVORITES_REPORT_PATH" ]]; then
+    cat "$FAVORITES_REPORT_PATH"
+  fi
+}
+
+export_originals() {
+  run_indexer export-originals --input "$ORIGINAL_EXPORTS_PATH" --directory "$ORIGINALS_DIRECTORY"
+}
+
+command=${1:-audit}
+case "$command" in
+  build)
+    build_indexer
+    print "Built $APP_ROOT"
+    ;;
+  scan)
+    scan_photos
+    ;;
+  authorize)
+    mkdir -p "$CACHE_ROOT"
+    run_indexer scan --output "$SCAN_PATH"
+    ;;
+  audit)
+    scan_photos
+    prepare_geodata
+    node "$SCRIPT_DIR/build-travel-data.mjs" audit
+    ;;
+  privacy)
+    prepare_geodata
+    node "$SCRIPT_DIR/build-travel-data.mjs" privacy
+    ;;
+  sync)
+    scan_photos
+    prepare_candidates
+    rank_candidates
+    finalize_data
+    export_representatives
+    ;;
+  publish)
+    build_gallery
+    ;;
+  favorites)
+    export_favorites
+    ;;
+  favorites-audit)
+    run_indexer favorites-audit --output "$FAVORITES_AUDIT_PATH"
+    if [[ -f "$FAVORITES_AUDIT_PATH" ]]; then
+      cat "$FAVORITES_AUDIT_PATH"
+    fi
+    ;;
+  originals)
+    finalize_data
+    export_originals
+    finalize_data
+    node "$SCRIPT_DIR/build-travel-images.mjs"
+    ;;
+  rematch)
+    prepare_candidates
+    run_indexer rematch-selections \
+      --selection-directory "$IMAGE_DIRECTORY" \
+      --candidates "$CANDIDATES_PATH" \
+      --directory "$REMATCHED_DIRECTORY" \
+      --report "$REMATCH_REPORT_PATH"
+    if [[ -f "$REMATCH_REPORT_PATH" ]]; then
+      cat "$REMATCH_REPORT_PATH"
+    fi
+    ;;
+  *)
+    print -u2 "Usage: scripts/travel-photos build|authorize|scan|audit|privacy|sync|publish|favorites|favorites-audit|originals|rematch"
+    exit 2
+    ;;
+esac

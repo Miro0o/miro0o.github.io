@@ -3,15 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A personal archive of Miro Son's favorite music, films and TV, games, World Cups, and books.">
+  <meta name="description" content="A personal archive of Miro Son's favorite music, films and TV, games, travels, and books.">
   <title>Miro Son - Personal Life</title>
   <script src="assets/scripts/theme-switcher.js"></script>
   <link rel="preconnect" href="https://p1.music.126.net">
   <link rel="preconnect" href="https://i.ytimg.com">
   <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com">
-  <link rel="preconnect" href="https://upload.wikimedia.org">
   <link rel="preconnect" href="https://m.media-amazon.com">
-  <link rel="stylesheet" href="assets/styles/main.css?v=20260716-14">
+  <link rel="stylesheet" href="assets/styles/main.css?v=20260820-14">
   <script src="assets/scripts/nav-menu.js" defer></script>
 </head>
 <body class="life-page">
@@ -67,6 +66,44 @@
                 <span class="music-source">Visit <a class="life-profile-link" href="https://y.music.163.com/m/user?id=477475836">my playlist</a> on Netease Music (网易云音乐).</span>
               </div>
               <button class="panel-close" type="button" data-panel-close aria-label="Close Music">Close <span aria-hidden="true">×</span></button>
+            </div>
+          </article>
+
+          <article class="life-panel module-books" data-life-panel>
+            <button class="panel-tab" type="button" aria-expanded="false" aria-controls="life-books">
+              <span class="panel-name">Books</span>
+            </button>
+            <div class="book-shelf-preview" data-book-shelf-preview aria-hidden="true">
+              <div class="book-preview-heading">
+                <span>Personal library</span>
+                <strong data-book-preview-summary>Loading the shelves…</strong>
+              </div>
+              <div class="book-preview-shelves" data-book-preview-shelves></div>
+            </div>
+            <div class="panel-content books-world" id="life-books" data-panel-content>
+              <div class="books-scroll">
+                <header class="books-heading">
+                  <p class="module-kicker">Books</p>
+                  <h2>When ideas arrived.</h2>
+                  <p>Visit the <a class="life-profile-link" href="https://github.com/Miro0o/miniWorldModel/blob/main/Other%20Networks%20of%20Knowledge/Arts%20%26%20Humanities/My%20Info%20Lists.md">full book list</a> in my knowledge base.</p>
+                  <button class="panel-close" type="button" data-panel-close aria-label="Close Books">Close <span aria-hidden="true">×</span></button>
+                </header>
+                <div class="book-legend" aria-label="Book timeline legend">
+                  <span><i class="lang-english"></i> English</span>
+                  <span><i class="lang-chinese"></i> Chinese</span>
+                  <span><i class="lang-bilingual"></i> English / Chinese</span>
+                  <span><i class="is-unread"></i> Status uncertain</span>
+                  <span data-book-summary>Loading the library…</span>
+                </div>
+                <div class="book-chart" aria-label="Books by reading domain and date added to Apple Books">
+                  <div class="book-y-axis" data-book-y-axis aria-hidden="true"></div>
+                  <div class="book-chart-scroll" tabindex="0" aria-label="Scrollable chronological book plot">
+                    <div class="book-plot" data-book-plot>
+                      <div class="book-x-axis" data-book-x-axis aria-hidden="true"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </article>
 
@@ -187,34 +224,42 @@
                     <p>Visit <a class="life-profile-link" href="https://steamcommunity.com/profiles/76561199146861816/home">my games</a> on Steam.</p>
                   </div>
                   <div class="game-decades">
-                    <section class="game-decade" aria-labelledby="games-2000s">
+                    <section class="game-decade" aria-labelledby="games-2020s">
                       <header class="game-decade__heading">
-                        <span class="game-decade__count">07 releases</span>
-                        <h4 id="games-2000s">2000s</h4>
-                        <span>2000—2009</span>
+                        <span class="game-decade__count">10 releases</span>
+                        <h4 id="games-2020s">2020s</h4>
+                        <span>2020—2026</span>
                       </header>
                       <ol class="game-release-list" start="1">
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2229850/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2229850/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2000</span><strong>Command &amp; Conquer</strong><small>Red Alert 2</small><span class="release-index">01</span>
+                    <li class="game-release--lighter-cover" style="--cover: url('https://www.rockstargames.com/VI/_next/static/media/Jason_and_Lucia_03_landscape.0419q._86ukpt.jpg?akim=1&amp;imdensity=1&amp;imwidth=3840'); --cover-position: center 38%">
+                      <span class="release-year">2026</span><strong>Grand Theft Auto VI</strong><small>Rockstar Games</small><span class="release-index">01</span>
                     </li>
-                    <li class="game-release--image-cover">
-                      <img class="game-release__cover" src="assets/media/games/warcraft-shelf.jpg?v=20260716-2" alt="" width="2200" height="1238" loading="lazy" decoding="async">
-                      <span class="release-year">2003</span><strong>Warcraft III</strong><small>The Frozen Throne</small><span class="release-index">02</span>
+                    <li class="game-release--lighter-cover" style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2024</span><strong>Black Myth: Wukong</strong><small>Game Science</small><span class="release-index">02</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1547000/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1547000/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2004</span><strong>Grand Theft Auto</strong><small>San Andreas</small><span class="release-index">03</span>
+                    <li class="game-release--lighter-cover" style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2024</span><strong>EA Sports FC 25</strong><small>EA Sports</small><span class="release-index">03</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/933110/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/933110/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2005</span><strong>Age of Empires III</strong><small>Definitive Edition art</small><span class="release-index">04</span>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1448440/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1448440/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2023</span><strong>Wo Long</strong><small>Fallen Dynasty</small><span class="release-index">04</span>
                     </li>
-                    <li style="--cover: url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/15100/0000003837.1920x1080.jpg'); --cover-position: center 38%">
-                      <span class="release-year">2007</span><strong>Assassin’s Creed</strong><small>The original</small><span class="release-index">05</span>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2023</span><strong>Baldur’s Gate 3</strong><small>Larian Studios</small><span class="release-index">05</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/12210/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/12210/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2008</span><strong>Grand Theft Auto IV</strong><small>Rockstar Games</small><span class="release-index">06</span>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2195250/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2195250/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2023</span><strong>EA Sports FC 24</strong><small>EA Sports</small><span class="release-index">06</span>
                     </li>
-                    <li style="--cover: url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/10150/0000008853.1920x1080.jpg'); --cover-position: center 34%">
-                      <span class="release-year">2009</span><strong>Prototype</strong><small>Radical Entertainment</small><span class="release-index">07</span>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1811260/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1811260/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2022</span><strong>FIFA 23</strong><small>EA Sports</small><span class="release-index">07</span>
+                    </li>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1466860/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1466860/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2021</span><strong>Age of Empires IV</strong><small>Relic / World’s Edge</small><span class="release-index">08</span>
+                    </li>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1551360/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1551360/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2021</span><strong>Forza Horizon 5</strong><small>Playground Games</small><span class="release-index">09</span>
+                    </li>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2020</span><strong>Cyberpunk 2077</strong><small>CD Projekt Red</small><span class="release-index">10</span>
                     </li>
                       </ol>
                     </section>
@@ -225,70 +270,62 @@
                         <h4 id="games-2010s">2010s</h4>
                         <span>2010—2019</span>
                       </header>
-                      <ol class="game-release-list" start="8">
-                    <li style="--cover: url('https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/key-art/Vanilla_bundle_3.png'); --cover-position: center 44%">
-                      <span class="release-year">2011</span><strong>Minecraft</strong><small>Mojang Studios</small><span class="release-index">08</span>
+                      <ol class="game-release-list" start="11">
+                    <li style="--cover: url('https://cdn.cloudflare.steamstatic.com/steam/apps/814380/library_hero.jpg')">
+                      <span class="release-year">2019</span><strong>Sekiro</strong><small>Shadows Die Twice</small><span class="release-index">11</span>
                     </li>
-                    <li style="--cover: url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/115320/ss_9f302432e700dcbef4c4826104c04f28cc5b165e.1920x1080.jpg'); --cover-position: center 35%">
-                      <span class="release-year">2012</span><strong>Prototype 2</strong><small>Radical Entertainment</small><span class="release-index">09</span>
-                    </li>
-                    <li style="--cover: url('https://hdwallsbox.com/wallpapers/l/1920x1080/42/video-games-cristiano-ronaldo-pes-2013-1920x1080-41672.jpg'); --cover-position: center 34%">
-                      <span class="release-year">2012</span><strong>Pro Evolution Soccer</strong><small>PES 2013</small><span class="release-index">10</span>
-                    </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/236850/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/236850/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2013</span><strong>Europa Universalis IV</strong><small>Paradox</small><span class="release-index">11</span>
-                    </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/271590/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/271590/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2013</span><strong>Grand Theft Auto V</strong><small>Rockstar Games</small><span class="release-index">12</span>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2018</span><strong>Red Dead Redemption 2</strong><small>Rockstar Games</small><span class="release-index">12</span>
                     </li>
                     <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/289070/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/289070/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2016</span><strong>Civilization VI</strong><small>Firaxis Games</small><span class="release-index">13</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2018</span><strong>Red Dead Redemption 2</strong><small>Rockstar Games</small><span class="release-index">14</span>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/236850/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/236850/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2013</span><strong>Europa Universalis IV</strong><small>Paradox</small><span class="release-index">14</span>
                     </li>
-                    <li style="--cover: url('https://cdn.cloudflare.steamstatic.com/steam/apps/814380/library_hero.jpg')">
-                      <span class="release-year">2019</span><strong>Sekiro</strong><small>Shadows Die Twice</small><span class="release-index">15</span>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/271590/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/271590/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2013</span><strong>Grand Theft Auto V</strong><small>Rockstar Games</small><span class="release-index">15</span>
+                    </li>
+                    <li style="--cover: url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/115320/ss_9f302432e700dcbef4c4826104c04f28cc5b165e.1920x1080.jpg'); --cover-position: center 35%">
+                      <span class="release-year">2012</span><strong>Prototype 2</strong><small>Radical Entertainment</small><span class="release-index">16</span>
+                    </li>
+                    <li style="--cover: url('https://hdwallsbox.com/wallpapers/l/1920x1080/42/video-games-cristiano-ronaldo-pes-2013-1920x1080-41672.jpg'); --cover-position: center 34%">
+                      <span class="release-year">2012</span><strong>Pro Evolution Soccer</strong><small>PES 2013</small><span class="release-index">17</span>
+                    </li>
+                    <li style="--cover: url('https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/key-art/Vanilla_bundle_3.png'); --cover-position: center 44%">
+                      <span class="release-year">2011</span><strong>Minecraft</strong><small>Mojang Studios</small><span class="release-index">18</span>
                     </li>
                       </ol>
                     </section>
 
-                    <section class="game-decade" aria-labelledby="games-2020s">
+                    <section class="game-decade" aria-labelledby="games-2000s">
                       <header class="game-decade__heading">
-                        <span class="game-decade__count">10 releases</span>
-                        <h4 id="games-2020s">2020s</h4>
-                        <span>2020—2026</span>
+                        <span class="game-decade__count">07 releases</span>
+                        <h4 id="games-2000s">2000s</h4>
+                        <span>2000—2009</span>
                       </header>
-                      <ol class="game-release-list" start="16">
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2020</span><strong>Cyberpunk 2077</strong><small>CD Projekt Red</small><span class="release-index">16</span>
+                      <ol class="game-release-list" start="19">
+                    <li style="--cover: url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/10150/0000008853.1920x1080.jpg'); --cover-position: center 34%">
+                      <span class="release-year">2009</span><strong>Prototype</strong><small>Radical Entertainment</small><span class="release-index">19</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1466860/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1466860/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2021</span><strong>Age of Empires IV</strong><small>Relic / World’s Edge</small><span class="release-index">17</span>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/12210/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/12210/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2008</span><strong>Grand Theft Auto IV</strong><small>Rockstar Games</small><span class="release-index">20</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1551360/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1551360/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2021</span><strong>Forza Horizon 5</strong><small>Playground Games</small><span class="release-index">18</span>
+                    <li style="--cover: url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/15100/0000003837.1920x1080.jpg'); --cover-position: center 38%">
+                      <span class="release-year">2007</span><strong>Assassin’s Creed</strong><small>The original</small><span class="release-index">21</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1811260/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1811260/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2022</span><strong>FIFA 23</strong><small>EA Sports</small><span class="release-index">19</span>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/933110/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/933110/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2005</span><strong>Age of Empires III</strong><small>Definitive Edition art</small><span class="release-index">22</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1448440/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1448440/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2023</span><strong>Wo Long</strong><small>Fallen Dynasty</small><span class="release-index">20</span>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1547000/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1547000/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2004</span><strong>Grand Theft Auto</strong><small>San Andreas</small><span class="release-index">23</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2023</span><strong>Baldur’s Gate 3</strong><small>Larian Studios</small><span class="release-index">21</span>
+                    <li class="game-release--image-cover">
+                      <img class="game-release__cover" src="assets/media/games/warcraft-shelf.jpg?v=20260716-2" alt="" width="2200" height="1238" loading="lazy" decoding="async">
+                      <span class="release-year">2003</span><strong>Warcraft III</strong><small>The Frozen Throne</small><span class="release-index">24</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2195250/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2195250/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2023</span><strong>EA Sports FC 24</strong><small>EA Sports</small><span class="release-index">22</span>
-                    </li>
-                    <li class="game-release--lighter-cover" style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2024</span><strong>Black Myth: Wukong</strong><small>Game Science</small><span class="release-index">23</span>
-                    </li>
-                    <li class="game-release--lighter-cover" style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_hero_2x.jpg') 2x)">
-                      <span class="release-year">2024</span><strong>EA Sports FC 25</strong><small>EA Sports</small><span class="release-index">24</span>
-                    </li>
-                    <li class="game-release--lighter-cover" style="--cover: url('https://www.rockstargames.com/VI/_next/static/media/Jason_and_Lucia_03_landscape.0419q._86ukpt.jpg?akim=1&amp;imdensity=1&amp;imwidth=3840'); --cover-position: center 38%">
-                      <span class="release-year">2026</span><strong>Grand Theft Auto VI</strong><small>Rockstar Games</small><span class="release-index">25</span>
+                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2229850/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2229850/library_hero_2x.jpg') 2x)">
+                      <span class="release-year">2000</span><strong>Command &amp; Conquer</strong><small>Red Alert 2</small><span class="release-index">25</span>
                     </li>
                       </ol>
                     </section>
@@ -308,152 +345,52 @@
             </div>
           </article>
 
-          <article class="life-panel module-soccer" data-life-panel>
-            <button class="panel-tab" type="button" aria-expanded="false" aria-controls="life-soccer">
-              <span class="panel-name">Soccer</span>
+          <article class="life-panel module-travel" data-life-panel>
+            <button class="panel-tab" type="button" aria-expanded="false" aria-controls="life-travel">
+              <span class="panel-name">Travel</span>
             </button>
-            <div class="panel-content soccer-world" id="life-soccer" data-panel-content>
-              <div class="soccer-scroll">
-                <div class="soccer-archive">
-                  <header class="soccer-wall-intro">
-                    <p class="module-kicker">Soccer / World Cup</p>
-                    <h2>Every four<br>years.</h2>
-                    <p>Like the rings of a tree, the World Cup carves the steady march of history, layer by layer.</p>
-                    <p>世界杯就像年轮一样，一圈圈镌刻着历史的脚步。</p>
-                    <span>全网搜索：贺炜 鸿雁</span>
-                  </header>
-
-                  <div class="world-cup-stack" aria-label="World Cup tournament banners, newest first">
-                    <article class="wc-banner wc-banner--2026">
-                      <span class="wc-banner__index">01 / 07</span>
-                      <span class="wc-banner__year" aria-hidden="true">2026</span>
-                      <img class="wc-banner__emblem" src="https://upload.wikimedia.org/wikipedia/en/1/17/2026_FIFA_World_Cup_emblem.svg" alt="Official FIFA World Cup 2026 emblem" width="455" height="701" loading="eager">
-                      <div class="wc-banner__copy">
-                        <span>Canada · Mexico · USA</span>
-                        <h3>We are 26</h3>
-                        <p>11 June — 19 July · 16 host cities</p>
-                      </div>
-                      <div class="wc-banner__motif" aria-hidden="true"></div>
-                    </article>
-
-                    <article class="wc-banner wc-banner--2022">
-                      <span class="wc-banner__index">02 / 07</span>
-                      <span class="wc-banner__year" aria-hidden="true">2022</span>
-                      <img class="wc-banner__emblem" src="https://upload.wikimedia.org/wikipedia/en/e/e3/2022_FIFA_World_Cup.svg" alt="Official FIFA World Cup Qatar 2022 emblem" width="512" height="638" loading="eager">
-                      <div class="wc-banner__copy">
-                        <span>Qatar</span>
-                        <h3>Now is all</h3>
-                        <p>20 November — 18 December · Champions: Argentina</p>
-                      </div>
-                      <div class="wc-banner__motif" aria-hidden="true"></div>
-                    </article>
-
-                    <article class="wc-banner wc-banner--2018">
-                      <span class="wc-banner__index">03 / 07</span>
-                      <span class="wc-banner__year" aria-hidden="true">2018</span>
-                      <img class="wc-banner__emblem" src="https://upload.wikimedia.org/wikipedia/en/6/67/2018_FIFA_World_Cup.svg" alt="Official FIFA World Cup Russia 2018 emblem" width="512" height="640" loading="lazy">
-                      <div class="wc-banner__copy">
-                        <span>Russia</span>
-                        <h3>Russia 2018</h3>
-                        <p>14 June — 15 July · Champions: France</p>
-                      </div>
-                      <div class="wc-banner__motif" aria-hidden="true"></div>
-                    </article>
-
-                    <article class="wc-banner wc-banner--2014">
-                      <span class="wc-banner__index">04 / 07</span>
-                      <span class="wc-banner__year" aria-hidden="true">2014</span>
-                      <img class="wc-banner__emblem" src="https://upload.wikimedia.org/wikipedia/en/1/1d/2014_FIFA_World_Cup.svg" alt="Official FIFA World Cup Brazil 2014 emblem" width="512" height="640" loading="lazy">
-                      <div class="wc-banner__copy">
-                        <span>Brazil</span>
-                        <h3>All in one rhythm</h3>
-                        <p>12 June — 13 July · Champions: Germany</p>
-                      </div>
-                      <div class="wc-banner__motif" aria-hidden="true"></div>
-                    </article>
-
-                    <article class="wc-banner wc-banner--2010">
-                      <span class="wc-banner__index">05 / 07</span>
-                      <span class="wc-banner__year" aria-hidden="true">2010</span>
-                      <img class="wc-banner__emblem" src="https://upload.wikimedia.org/wikipedia/en/0/0d/2010_FIFA_World_Cup.svg" alt="Official FIFA World Cup South Africa 2010 emblem" width="512" height="640" loading="lazy">
-                      <div class="wc-banner__copy">
-                        <span>South Africa</span>
-                        <h3>Ke Nako</h3>
-                        <p>Celebrate Africa’s Humanity · Champions: Spain</p>
-                      </div>
-                      <div class="wc-banner__motif" aria-hidden="true"></div>
-                    </article>
-
-                    <article class="wc-banner wc-banner--2006">
-                      <span class="wc-banner__index">06 / 07</span>
-                      <span class="wc-banner__year" aria-hidden="true">2006</span>
-                      <img class="wc-banner__emblem" src="https://upload.wikimedia.org/wikipedia/en/6/6b/2006_FIFA_World_Cup.svg" alt="Official FIFA World Cup Germany 2006 emblem" width="512" height="640" loading="lazy">
-                      <div class="wc-banner__copy">
-                        <span>Germany</span>
-                        <h3>A time to make friends</h3>
-                        <p>9 June — 9 July · Champions: Italy</p>
-                      </div>
-                      <div class="wc-banner__motif" aria-hidden="true"></div>
-                    </article>
-
-                    <article class="wc-banner wc-banner--2002">
-                      <span class="wc-banner__index">07 / 07</span>
-                      <span class="wc-banner__year" aria-hidden="true">2002</span>
-                      <img class="wc-banner__emblem" src="https://upload.wikimedia.org/wikipedia/en/4/47/2002_FIFA_World_Cup_logo.svg" alt="Official 2002 FIFA World Cup Korea Japan emblem" width="512" height="512" loading="lazy">
-                      <div class="wc-banner__copy">
-                        <span>Korea · Japan</span>
-                        <h3>New millennium,<br>new encounter</h3>
-                        <p>31 May — 30 June · Champions: Brazil</p>
-                      </div>
-                      <div class="wc-banner__motif" aria-hidden="true"></div>
-                    </article>
+            <div class="panel-content travel-world" id="life-travel" data-panel-content>
+              <div class="travel-layout">
+                <figure class="travel-map" aria-label="Zoomable map of photographs taken while travelling">
+                  <div class="travel-map__preview" data-travel-preview aria-hidden="true">
+                    <picture>
+                      <source media="(max-width: 720px)" srcset="assets/images/travel-map-preview-mobile.webp?v=20260820-1">
+                      <img src="assets/images/travel-map-preview.webp?v=20260820-2" width="1440" height="721" alt="" decoding="async">
+                    </picture>
                   </div>
-                </div>
-              </div>
-              <button class="panel-close" type="button" data-panel-close aria-label="Close Soccer">Close <span aria-hidden="true">×</span></button>
-            </div>
-          </article>
-
-          <article class="life-panel module-books" data-life-panel>
-            <button class="panel-tab" type="button" aria-expanded="false" aria-controls="life-books">
-              <span class="panel-name">Books</span>
-            </button>
-            <div class="book-shelf-preview" data-book-shelf-preview aria-hidden="true">
-              <div class="book-preview-heading">
-                <span>Personal library</span>
-                <strong data-book-preview-summary>Loading the shelves…</strong>
-              </div>
-              <div class="book-preview-shelves" data-book-preview-shelves></div>
-            </div>
-            <div class="panel-content books-world" id="life-books" data-panel-content>
-              <div class="books-scroll">
-                <header class="books-heading">
-                  <p class="module-kicker">Books</p>
-                  <h2>When ideas arrived.</h2>
-                  <p>Visit the <a class="life-profile-link" href="https://github.com/Miro0o/miniWorldModel/blob/main/Other%20Networks%20of%20Knowledge/Arts%20%26%20Humanities/My%20Info%20Lists.md">full book list</a> in my knowledge base.</p>
-                  <button class="panel-close" type="button" data-panel-close aria-label="Close Books">Close <span aria-hidden="true">×</span></button>
-                </header>
-                <div class="book-legend" aria-label="Book timeline legend">
-                  <span><i class="lang-english"></i> English</span>
-                  <span><i class="lang-chinese"></i> Chinese</span>
-                  <span><i class="lang-bilingual"></i> English / Chinese</span>
-                  <span><i class="is-unread"></i> Status uncertain</span>
-                  <span data-book-summary>Loading the library…</span>
-                </div>
-                <div class="book-chart" aria-label="Books by reading domain and date added to Apple Books">
-                  <div class="book-y-axis" data-book-y-axis aria-hidden="true"></div>
-                  <div class="book-chart-scroll" tabindex="0" aria-label="Scrollable chronological book plot">
-                    <div class="book-plot" data-book-plot>
-                      <div class="book-x-axis" data-book-x-axis aria-hidden="true"></div>
+                  <div class="travel-map__canvas" data-travel-map></div>
+                  <span class="travel-map__attribution">Map: <a href="https://www.naturalearthdata.com/">Natural Earth</a> · Places: <a href="https://www.geonames.org/">GeoNames</a></span>
+                  <div class="travel-map__locked" data-travel-locked hidden>
+                    <strong>Atlas kept private</strong>
+                    <span>Location data appears after the privacy review.</span>
+                  </div>
+                  <div class="travel-viewer" data-travel-viewer aria-hidden="true" role="region" aria-label="Selected travel photograph">
+                    <div class="travel-viewer__content">
+                      <button class="travel-viewer__arrow travel-viewer__arrow--previous" type="button" data-travel-viewer-previous aria-label="Previous photograph" hidden><span aria-hidden="true">‹</span></button>
+                      <div class="travel-viewer__image-wrap">
+                        <button class="travel-viewer__image-button" type="button" data-travel-viewer-toggle aria-label="View photograph larger">
+                          <img data-travel-viewer-image alt="" decoding="async">
+                        </button>
+                      </div>
+                      <button class="travel-viewer__arrow travel-viewer__arrow--next" type="button" data-travel-viewer-next aria-label="Next photograph" hidden><span aria-hidden="true">›</span></button>
+                    </div>
+                    <div class="travel-viewer__caption">
+                      <h3 data-travel-viewer-place></h3>
+                      <p data-travel-viewer-country></p>
+                      <p data-travel-viewer-description hidden></p>
+                      <span data-travel-viewer-meta></span>
                     </div>
                   </div>
-                </div>
+                  <nav class="travel-years" data-travel-years aria-label="Filter photographs by year"></nav>
+                  <span class="travel-selected-count" data-travel-photo-count aria-live="polite">0 selected photos</span>
+                </figure>
               </div>
+              <button class="panel-close" type="button" data-panel-close aria-label="Close Travel">Close <span aria-hidden="true">×</span></button>
             </div>
           </article>
 
         </div>
-        <noscript>The music, film, and book visualizations need JavaScript to display.</noscript>
+        <noscript>The music, film, travel, and book visualizations need JavaScript to display.</noscript>
       </section>
     </main>
 
@@ -468,9 +405,10 @@
   </div>
   <script src="assets/data/music-wall-data.js"></script>
   <script src="assets/data/life-library-data.js?v=20260716-5"></script>
-  <script src="assets/scripts/music-wall.js?v=20260716-14"></script>
-  <script src="assets/scripts/life-film-books.js?v=20260716-7"></script>
-  <script src="assets/scripts/life-games.js?v=20260713-7"></script>
-  <script src="assets/scripts/life-accordion.js?v=20260716-9"></script>
+  <script src="assets/scripts/music-wall.js?v=20260820-5"></script>
+  <script src="assets/scripts/life-film-books.js?v=20260820-5"></script>
+  <script src="assets/scripts/life-games.js?v=20260820-5"></script>
+  <script src="assets/scripts/life-travel.js?v=20260820-9"></script>
+  <script src="assets/scripts/life-accordion.js?v=20260820-5"></script>
 </body>
 </html>

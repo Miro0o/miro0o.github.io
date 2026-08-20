@@ -1,0 +1,5 @@
+Travel map: Natural Earth 1:50m land and admin-0 countries, 1:110m populated
+places, plus a simplified travel-country subset of the 1:10m admin-1 dataset
+(public domain).
+Source: https://www.naturalearthdata.com/downloads/
+Retrieved: 2026-08-20
