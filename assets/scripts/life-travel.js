@@ -15,11 +15,15 @@
   const viewerPrevious = panel.querySelector("[data-travel-viewer-previous]");
   const viewerNext = panel.querySelector("[data-travel-viewer-next]");
   const viewerImage = panel.querySelector("[data-travel-viewer-image]");
+  const viewerCaption = panel.querySelector(".travel-viewer__caption");
   const viewerCountry = panel.querySelector("[data-travel-viewer-country]");
   const viewerPlace = panel.querySelector("[data-travel-viewer-place]");
   const viewerDescription = panel.querySelector("[data-travel-viewer-description]");
   const viewerMeta = panel.querySelector("[data-travel-viewer-meta]");
+  const viewerYear = panel.querySelector("[data-travel-viewer-year]");
+  const viewerPositionLabel = panel.querySelector("[data-travel-viewer-position]");
   const format = new Intl.NumberFormat("en");
+  const compactTravelWidth = 900;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let map = null;
   let activeYear = 0;
@@ -561,8 +565,9 @@
     focusLocation(longitude, latitude) {
       const targetZoom = this.zoom;
       const point = this.project(longitude, latitude, targetZoom);
-      const xRatio = this.width <= 720 ? 0.5 : 0.79;
-      const yRatio = this.width <= 720 ? 0.24 : 0.5;
+      const compact = this.width <= compactTravelWidth;
+      const xRatio = compact ? 0.5 : 0.79;
+      const yRatio = compact ? 0.24 : 0.5;
       const targetCenter = this.unproject(
         point.x - this.width * xRatio + this.width / 2,
         point.y - this.height * yRatio + this.height / 2,
@@ -610,21 +615,21 @@
     palette() {
       if (document.documentElement.dataset.theme === "night") {
         return {
-          ocean: "#151d1a",
-          land: "#26302b",
-          coast: "rgba(151, 170, 160, 0.55)",
-          countryBorder: "rgba(174, 193, 183, 0.46)",
-          provinceBorder: "rgba(132, 153, 143, 0.28)",
-          countryLabel: "rgba(213, 220, 215, 0.78)",
-          provinceLabel: "rgba(169, 183, 175, 0.62)",
-          cityLabel: "rgba(187, 199, 192, 0.72)",
+          ocean: "#111512",
+          land: "#202823",
+          coast: "rgba(151, 170, 160, 0.48)",
+          countryBorder: "rgba(174, 193, 183, 0.38)",
+          provinceBorder: "rgba(132, 153, 143, 0.22)",
+          countryLabel: "rgba(213, 220, 215, 0.74)",
+          provinceLabel: "rgba(169, 183, 175, 0.56)",
+          cityLabel: "rgba(187, 199, 192, 0.68)",
           travelLabel: "rgba(235, 236, 231, 0.9)",
-          halo: "rgba(38, 48, 43, 0.96)",
-          point: "rgba(139, 160, 149, 0.58)",
-          cluster: "rgba(174, 190, 181, 0.72)",
-          photo: "rgba(215, 105, 80, 0.96)",
-          photoCluster: "rgba(225, 121, 94, 0.94)",
-          pointStroke: "rgba(21, 29, 26, 0.9)",
+          halo: "rgba(32, 40, 35, 0.96)",
+          point: "rgba(139, 160, 149, 0.52)",
+          cluster: "rgba(174, 190, 181, 0.66)",
+          photo: "rgba(220, 121, 98, 0.96)",
+          photoCluster: "rgba(226, 132, 107, 0.94)",
+          pointStroke: "rgba(17, 21, 18, 0.92)",
           photoStroke: "rgba(239, 234, 226, 0.95)"
         };
       }
@@ -1090,10 +1095,59 @@
     }, 420);
   }
 
+  function measureCaptionItem(element, maximumWidth = "none") {
+    if (!element || element.hidden) return 0;
+    const probe = element.cloneNode(true);
+    probe.removeAttribute("hidden");
+    probe.setAttribute("aria-hidden", "true");
+    Object.assign(probe.style, {
+      position: "absolute",
+      inset: "auto",
+      width: "max-content",
+      minWidth: "0",
+      maxWidth: maximumWidth,
+      whiteSpace: "nowrap",
+      visibility: "hidden",
+      pointerEvents: "none",
+      transform: "none",
+      transition: "none"
+    });
+    probe.querySelectorAll(".travel-name-pair").forEach((name) => Object.assign(name.style, {
+      maxWidth: "none",
+      flexWrap: "nowrap",
+      whiteSpace: "nowrap"
+    }));
+    viewerCaption.append(probe);
+    const width = Math.ceil(probe.getBoundingClientRect().width);
+    probe.remove();
+    return width;
+  }
+
+  function updateCaptionLayoutMode(captionWidth) {
+    const hasDescription = !viewerDescription.hidden && Boolean(viewerDescription.textContent.trim());
+    viewer.classList.remove("is-caption-stacked");
+    if (!hasDescription) return;
+
+    const locationWidth = measureCaptionItem(viewerPlace.closest(".travel-viewer__location"));
+    const descriptionWidth = measureCaptionItem(viewerDescription, "68ch");
+    const metaWidth = measureCaptionItem(viewerMeta);
+    const layout = viewerCaption.querySelector(".travel-viewer__caption-layout");
+    const columnGap = Number.parseFloat(getComputedStyle(layout).columnGap) || 0;
+    const outsideColumnWidth = Math.max(locationWidth, metaWidth);
+    const requiredInlineWidth = outsideColumnWidth * 2 + descriptionWidth + columnGap * 2;
+    let shouldStack = requiredInlineWidth > captionWidth;
+    viewer.classList.toggle("is-caption-stacked", shouldStack);
+    if (!shouldStack) {
+      const renderedLocationWidth = viewerPlace.closest(".travel-viewer__location").getBoundingClientRect().width;
+      shouldStack = renderedLocationWidth + 0.5 < locationWidth;
+      viewer.classList.toggle("is-caption-stacked", shouldStack);
+    }
+  }
+
   function layoutViewerImage() {
     if (!viewerImage.naturalWidth || !viewerImage.naturalHeight) return;
     const bounds = viewer.getBoundingClientRect();
-    const mobile = bounds.width <= 720;
+    const mobile = bounds.width <= compactTravelWidth;
     const expanded = viewer.classList.contains("is-expanded");
     const fit = (maximumWidth, maximumHeight) => {
       const scale = Math.min(
@@ -1105,20 +1159,43 @@
         height: Math.max(1, Math.round(viewerImage.naturalHeight * scale))
       };
     };
-    const preview = fit(
-      mobile ? bounds.width * 0.88 : Math.min(bounds.width * 0.62, 980),
-      bounds.height * (mobile ? 0.52 : 0.82)
-    );
+    const maximumPreviewWidth = mobile ? bounds.width * 0.88 : Math.min(bounds.width * 0.62, 980);
+    const maximumPreviewHeight = bounds.height * (mobile ? 0.52 : 0.82);
+    let preview = fit(maximumPreviewWidth, maximumPreviewHeight);
     const large = fit(
       mobile ? bounds.width - 24 : Math.min(bounds.width * 0.94, 1400),
       bounds.height * (mobile ? 0.88 : 0.9)
     );
+    const captionInset = mobile ? 16 : 40;
+    const minimumCaptionWidth = mobile ? 288 : 360;
+    const captionWidth = Math.min(
+      Math.max(preview.width, minimumCaptionWidth),
+      Math.max(1, bounds.width - captionInset * 2)
+    );
+    viewer.style.setProperty("--travel-caption-width", `${Math.round(captionWidth)}px`);
+    updateCaptionLayoutMode(captionWidth);
+
+    // Caption height changes with translated names, optional descriptions,
+    // photo counts, and container-query layout. Reserve its real height before
+    // fitting the photograph so neither long copy nor a narrow screen can push
+    // the final line outside the map viewport.
+    const captionHeight = viewerCaption?.scrollHeight || 0;
+    const topInset = mobile ? 12 : 18;
+    const bottomInset = mobile ? 9 : 12;
+    const availableImageHeight = Math.max(1, bounds.height - topInset - captionHeight - bottomInset);
+    if (preview.height > availableImageHeight) {
+      preview = fit(maximumPreviewWidth, Math.min(maximumPreviewHeight, availableImageHeight));
+    }
+    const preferredCenterY = bounds.height * (mobile ? 0.59 : 0.44);
+    const earliestCenterY = topInset + preview.height / 2;
+    const latestCenterY = bounds.height - captionHeight - bottomInset - preview.height / 2;
+    const previewCenterY = Math.max(earliestCenterY, Math.min(preferredCenterY, latestCenterY));
     const shown = expanded ? large : preview;
-    const previewCenterY = bounds.height * (mobile ? 0.59 : 0.44);
     viewer.style.setProperty("--travel-preview-width", `${preview.width}px`);
     viewer.style.setProperty("--travel-preview-height", `${preview.height}px`);
     viewer.style.setProperty("--travel-photo-width", `${shown.width}px`);
     viewer.style.setProperty("--travel-photo-height", `${shown.height}px`);
+    viewer.style.setProperty("--travel-preview-center-y", `${Math.round(previewCenterY)}px`);
     viewer.style.setProperty("--travel-caption-top", `${Math.round(previewCenterY + preview.height / 2)}px`);
     applyViewerTransform();
   }
@@ -1177,10 +1254,16 @@
     }
     viewerDescription.textContent = photo.description || "";
     viewerDescription.hidden = !photo.description;
-    viewerMeta.textContent = viewerPhotos.length > 1
-      ? `${photo.year || ""} · ${viewerPosition + 1} / ${viewerPhotos.length}`
-      : String(photo.year || "");
+    viewer.classList.toggle("has-caption-description", Boolean(photo.description));
     const hasMultiple = viewerPhotos.length > 1;
+    const year = String(photo.year || "");
+    const position = hasMultiple ? `${viewerPosition + 1} / ${viewerPhotos.length}` : "";
+    viewerYear.textContent = year;
+    viewerYear.hidden = !year;
+    viewerPositionLabel.textContent = position;
+    viewerPositionLabel.hidden = !position;
+    viewerMeta.hidden = !year && !position;
+    viewerMeta.setAttribute("aria-label", [year, position && `photograph ${position}`].filter(Boolean).join(", "));
     viewerPrevious.hidden = !hasMultiple;
     viewerNext.hidden = !hasMultiple;
     viewer.dataset.photoId = photo.id;

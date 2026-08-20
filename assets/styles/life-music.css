@@ -268,8 +268,21 @@
 }
 
 .life-page footer {
+  flex-direction: row;
+  flex-wrap: nowrap;
   margin-top: 0;
   padding-top: 22px;
+  text-align: left;
+}
+
+body.life-page .page > footer {
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+.life-page footer > span:first-child {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 @keyframes album-track-roll {
