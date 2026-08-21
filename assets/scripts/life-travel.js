@@ -30,6 +30,7 @@
   let viewerPhotos = [];
   let viewerPosition = 0;
   let viewerImageToken = 0;
+  let viewerFullImageToken = 0;
   let viewerCamera = null;
   let viewerLocation = null;
   let viewerSwipe = null;
@@ -67,8 +68,11 @@
     if (data) return Promise.resolve(data);
     if (!assetsPromise) {
       assetsPromise = Promise.all([
-        loadScript("assets/data/world-outline.js?v=20260820-1", () => Boolean(window.WORLD_MAP || window.WORLD_OUTLINE)),
-        loadScript(`assets/data/travel-data.js?v=${Date.now()}`, () => Boolean(window.TRAVEL_DATA))
+        loadScript("assets/data/world-outline.js?v=20260821-1", () => Boolean(window.WORLD_MAP || window.WORLD_OUTLINE)),
+        // Keep normal HTTP caching and validators. Published photograph URLs
+        // have their own imageVersion, so gallery updates do not need a unique
+        // data-script URL on every page view.
+        loadScript("assets/data/travel-data.js", () => Boolean(window.TRAVEL_DATA))
       ]).then(() => {
         data = window.TRAVEL_DATA || { points: [], photos: [], places: [], stats: {} };
         renderYears();
@@ -138,7 +142,13 @@
       this.outline = Array.isArray(this.world.land)
         ? this.world.land.filter((polygon) => polygon.some((ring) => ring.some((coordinate) => coordinate[1] >= -60)))
         : [];
+      this.lowOutline = Array.isArray(this.world.landLow)
+        ? this.world.landLow.filter((polygon) => polygon.some((ring) => ring.some((coordinate) => coordinate[1] >= -60)))
+        : this.outline;
       this.countryBorders = Array.isArray(this.world.countryBorders) ? this.world.countryBorders : [];
+      this.lowCountryBorders = Array.isArray(this.world.countryBordersLow)
+        ? this.world.countryBordersLow
+        : this.countryBorders;
       this.countryLabels = Array.isArray(this.world.countries) ? this.world.countries : [];
       this.provinceBorders = Array.isArray(this.world.provinceBorders) ? this.world.provinceBorders : [];
       this.provinceLabels = Array.isArray(this.world.provinces) ? this.world.provinces : [];
@@ -170,10 +180,13 @@
       this.frame = 0;
       this.effectsFrame = 0;
       this.effectsBounds = null;
+      this.effectsAnimationDeadline = 0;
       this.cameraFrame = 0;
+      this.renderCenter = null;
       this.hoveredHit = null;
       this.activePhotoIndex = null;
-      this.pixelRatio = Math.min(2, window.devicePixelRatio || 1);
+      const maximumPixelRatio = window.matchMedia(`(max-width: ${compactTravelWidth}px)`).matches ? 1.5 : 2;
+      this.pixelRatio = Math.min(maximumPixelRatio, window.devicePixelRatio || 1);
       this.element.replaceChildren(this.canvas, this.effectsCanvas, this.controls());
       this.bindEvents();
       this.resizeObserver = new ResizeObserver(() => this.resize());
@@ -231,6 +244,7 @@
           midpointX: midpoint.x,
           midpointY: midpoint.y,
           zoom: this.zoom,
+          didZoom: false,
           anchor: this.unproject(
             center.x + midpoint.x - this.width / 2,
             center.y + midpoint.y - this.height / 2,
@@ -286,8 +300,12 @@
             midpoint.x - this.pinch.midpointX,
             midpoint.y - this.pinch.midpointY
           );
-          if (!this.gestureMoved && (Math.abs(distance - this.pinch.distance) > 2 || midpointMovement > 3)) {
+          const distanceChange = Math.abs(distance - this.pinch.distance);
+          if (!this.gestureMoved && (distanceChange > 2 || midpointMovement > 3)) {
             this.gestureMoved = true;
+          }
+          if (distanceChange > 2 && !this.pinch.didZoom) {
+            this.pinch.didZoom = true;
             this.onInteraction?.();
           }
           const zoom = Math.max(
@@ -309,7 +327,6 @@
         const distance = Math.hypot(position.x - this.drag.startX, position.y - this.drag.startY);
         if (distance > 3 && !this.gestureMoved) {
           this.gestureMoved = true;
-          this.onInteraction?.();
         }
         const center = this.project(this.center.longitude, this.center.latitude, this.zoom);
         this.setCenterFromWorld(
@@ -455,7 +472,7 @@
 
     screenPoint(longitude, latitude) {
       const worldSize = 256 * (2 ** this.zoom);
-      const center = this.project(this.center.longitude, this.center.latitude, this.zoom);
+      const center = this.renderCenter || this.project(this.center.longitude, this.center.latitude, this.zoom);
       const point = this.project(longitude, latitude, this.zoom);
       let differenceX = point.x - center.x;
       if (differenceX > worldSize / 2) differenceX -= worldSize;
@@ -593,6 +610,9 @@
       const nextPhotoIndex = Number.isInteger(photoIndex) ? photoIndex : null;
       if (this.activePhotoIndex === nextPhotoIndex) return;
       this.activePhotoIndex = nextPhotoIndex;
+      this.effectsAnimationDeadline = nextPhotoIndex === null || reducedMotion.matches
+        ? 0
+        : performance.now() + 1800;
       if (nextPhotoIndex === null) delete this.element.dataset.travelActivePhoto;
       else this.element.dataset.travelActivePhoto = String(nextPhotoIndex);
       this.requestEffectsRender();
@@ -653,7 +673,12 @@
       this.effectsFrame = requestAnimationFrame((time) => {
         this.effectsFrame = 0;
         this.renderEffects(time);
-        if (this.activePhotoIndex !== null) this.requestEffectsRender();
+        if (
+          this.activePhotoIndex !== null
+          && time < this.effectsAnimationDeadline
+          && !document.hidden
+          && panel.classList.contains("is-active")
+        ) this.requestEffectsRender();
       });
     }
 
@@ -673,11 +698,12 @@
       if (!activeHit) return;
 
       const palette = this.palette();
-      const reduced = reducedMotion.matches;
-      const cycle = reduced ? 2400 : 1500;
-      const breath = (Math.sin(time * Math.PI * 2 / cycle - Math.PI / 2) + 1) / 2;
-      const innerRadius = activeHit.radius + 2.4 + breath * (reduced ? 0.7 : 1.8);
-      const outerRadius = activeHit.radius + 5.5 + breath * (reduced ? 1.5 : 5.5);
+      const animated = !reducedMotion.matches && time < this.effectsAnimationDeadline;
+      const breath = animated
+        ? (Math.sin(time * Math.PI * 2 / 1500 - Math.PI / 2) + 1) / 2
+        : 0.35;
+      const innerRadius = activeHit.radius + 2.4 + breath * 1.8;
+      const outerRadius = activeHit.radius + 5.5 + breath * 5.5;
       const effectPadding = outerRadius + 3;
       this.effectsBounds = {
         x: activeHit.x - effectPadding,
@@ -779,7 +805,8 @@
       context.fillStyle = palette.land;
       context.strokeStyle = palette.coast;
       context.lineWidth = 0.7;
-      for (const polygon of this.outline) {
+      const outline = this.zoom < 3.15 ? this.lowOutline : this.outline;
+      for (const polygon of outline) {
         context.beginPath();
         this.traceRings(context, polygon);
         context.fill("evenodd");
@@ -791,7 +818,8 @@
     drawBorders(context, palette) {
       context.save();
       context.beginPath();
-      for (const country of this.countryBorders) this.traceRings(context, country, false);
+      const borders = this.zoom < 3.15 ? this.lowCountryBorders : this.countryBorders;
+      for (const country of borders) this.traceRings(context, country, false);
       context.strokeStyle = palette.countryBorder;
       context.lineWidth = this.zoom < 3 ? 0.48 : 0.68;
       context.stroke();
@@ -1011,6 +1039,19 @@
       });
     }
 
+    clusterCell(screen, cellSize) {
+      // Keep cluster membership anchored to the projected world instead of
+      // the viewport. A screen-space grid changes its origin whenever the map
+      // is panned, making markers cross cell boundaries and jump between
+      // cluster centroids from one rendered frame to the next.
+      const center = this.renderCenter || this.project(this.center.longitude, this.center.latitude, this.zoom);
+      const worldSize = 256 * (2 ** this.zoom);
+      const rawWorldX = center.x + screen.x - this.width / 2;
+      const worldX = ((rawWorldX % worldSize) + worldSize) % worldSize;
+      const worldY = center.y + screen.y - this.height / 2;
+      return `${Math.floor(worldX / cellSize)},${Math.floor(worldY / cellSize)}`;
+    }
+
     drawBackgroundPoints(context, palette) {
       const farZoom = this.zoom <= 3.5;
       const cellSize = this.zoom > 9 ? 9 : this.zoom > 6 ? 12 : this.zoom > 3.5 ? 18 : 27;
@@ -1018,7 +1059,7 @@
       for (const point of this.points) {
         const screen = this.screenPoint(point.longitude, point.latitude);
         if (screen.x < -cellSize || screen.x > this.width + cellSize || screen.y < -cellSize || screen.y > this.height + cellSize) continue;
-        const key = `${Math.floor(screen.x / cellSize)},${Math.floor(screen.y / cellSize)}`;
+        const key = this.clusterCell(screen, cellSize);
         const bucket = buckets.get(key) || { x: 0, y: 0, longitude: 0, latitude: 0, count: 0 };
         bucket.x += screen.x;
         bucket.y += screen.y;
@@ -1058,7 +1099,7 @@
       for (const photo of this.photos) {
         const screen = this.screenPoint(photo.longitude, photo.latitude);
         if (screen.x < -cellSize || screen.x > this.width + cellSize || screen.y < -cellSize || screen.y > this.height + cellSize) continue;
-        const key = `${Math.floor(screen.x / cellSize)},${Math.floor(screen.y / cellSize)}`;
+        const key = this.clusterCell(screen, cellSize);
         const bucket = buckets.get(key) || {
           x: 0, y: 0, longitude: 0, latitude: 0, count: 0, photoIndexes: []
         };
@@ -1109,20 +1150,25 @@
       this.element.dataset.travelCenterLatitude = this.center.latitude.toFixed(3);
       const palette = this.palette();
       this.labelBoxes = [];
-      context.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
-      context.fillStyle = palette.ocean;
-      context.fillRect(0, 0, this.width, this.height);
-      this.drawOutline(context, palette);
-      this.drawBorders(context, palette);
-      this.drawBackgroundPoints(context, palette);
-      this.drawPhotoPins(context, palette);
+      this.renderCenter = this.project(this.center.longitude, this.center.latitude, this.zoom);
+      try {
+        context.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
+        context.fillStyle = palette.ocean;
+        context.fillRect(0, 0, this.width, this.height);
+        this.drawOutline(context, palette);
+        this.drawBorders(context, palette);
+        this.drawBackgroundPoints(context, palette);
+        this.drawPhotoPins(context, palette);
 
-      // Labels intentionally render above every marker. Countries reserve
-      // collision space first so dense photo clusters cannot erase them.
-      this.drawCountryLabels(context, palette);
-      this.drawCities(context, palette);
-      this.drawProvinceLabels(context, palette);
-      this.drawContextCities(context, palette);
+        // Labels intentionally render above every marker. Countries reserve
+        // collision space first so dense photo clusters cannot erase them.
+        this.drawCountryLabels(context, palette);
+        this.drawCities(context, palette);
+        this.drawProvinceLabels(context, palette);
+        this.drawContextCities(context, palette);
+      } finally {
+        this.renderCenter = null;
+      }
       this.requestEffectsRender();
     }
   }
@@ -1150,9 +1196,27 @@
       }));
   }
 
-  function imageUrl(photo) {
-    const source = `${data.imageBaseUrl || "assets/images/traveling/published/"}${photo.filename}`;
+  function versionedImageUrl(source) {
     return data.imageVersion ? `${source}?v=${encodeURIComponent(data.imageVersion)}` : source;
+  }
+
+  function imageUrl(photo) {
+    const base = data.imageBaseUrl || "assets/images/traveling/published/";
+    return versionedImageUrl(`${base}${photo.filename}`);
+  }
+
+  function previewImageUrl(photo) {
+    const fullBase = data.imageBaseUrl || "assets/images/traveling/published/";
+    if (data.previewImageBaseUrl) {
+      return versionedImageUrl(`${data.previewImageBaseUrl}${photo.filename}`);
+    }
+    const fullUrl = new URL(versionedImageUrl(`${fullBase}${photo.filename}`), window.location.href);
+    if (fullUrl.hostname === "m1r0.uk") {
+      const sourcePath = `${fullUrl.pathname.replace(/^\/+/, "")}${fullUrl.search}`;
+      return `${fullUrl.origin}/cdn-cgi/image/width=960,quality=76,format=auto/${sourcePath}`;
+    }
+    // Local development can use previews generated by the publishing tool.
+    return versionedImageUrl(`${fullBase}previews/${photo.filename}`);
   }
 
   function applyViewerTransform() {
@@ -1298,6 +1362,7 @@
     viewer.classList.toggle("is-expanded", expanded);
     panel.classList.toggle("is-photo-expanded", expanded);
     viewerImageButton.setAttribute("aria-label", expanded ? "Return photograph to map" : "View photograph larger");
+    if (expanded) loadFullViewerImage();
     requestAnimationFrame(layoutViewerImage);
   }
 
@@ -1307,6 +1372,25 @@
     viewer.classList.remove("is-image-loading");
   }
 
+  function loadFullViewerImage() {
+    const photoIndex = viewerPhotos[viewerPosition];
+    const photo = data.photos?.[photoIndex];
+    if (!photo || viewerImage.dataset.resolution === "full") return;
+    const fullImageToken = ++viewerFullImageToken;
+    const fullImage = new Image();
+    fullImage.decoding = "async";
+    fullImage.onload = () => {
+      if (
+        fullImageToken !== viewerFullImageToken
+        || viewerPhotos[viewerPosition] !== photoIndex
+        || !viewer.classList.contains("is-expanded")
+      ) return;
+      viewerImage.dataset.resolution = "full";
+      viewerImage.src = fullImage.src;
+    };
+    fullImage.src = imageUrl(photo);
+  }
+
   function renderViewer() {
     const photoIndex = viewerPhotos[viewerPosition];
     const photo = data.photos?.[photoIndex];
@@ -1314,6 +1398,7 @@
     map?.setActivePhoto(photoIndex);
     const flag = flagEmoji(photo.countryCode);
     const imageToken = ++viewerImageToken;
+    viewerFullImageToken += 1;
     resetViewerTransform();
     stopViewerLoader();
     viewer.classList.remove("is-image-ready");
@@ -1332,10 +1417,21 @@
     };
     viewerImage.onerror = () => {
       if (imageToken !== viewerImageToken) return;
+      if (viewerImage.dataset.resolution === "preview") {
+        // Preview files are deployed beside the full gallery. During a staged
+        // deployment, gracefully fall back to the full file until previews
+        // have reached the image host.
+        viewerImage.dataset.resolution = "full";
+        viewerImage.src = imageUrl(photo);
+        return;
+      }
       stopViewerLoader();
       viewerImage.classList.remove("is-loading");
     };
-    viewerImage.src = imageUrl(photo);
+    const startWithFullImage = viewer.classList.contains("is-expanded");
+    viewerImage.dataset.resolution = startWithFullImage ? "full" : "preview";
+    viewerImage.dataset.photoIndex = String(photoIndex);
+    viewerImage.src = startWithFullImage ? imageUrl(photo) : previewImageUrl(photo);
     viewerImage.alt = `Travel photograph from ${photo.city || photo.country || "a selected location"}`;
     if (isSingleLevelPlace(photo)) {
       renderNamePair(viewerPlace, photo.localName || photo.localCountry || "Unknown place", photo.city || photo.country, flag);
@@ -1398,9 +1494,12 @@
     map?.setActivePhoto(null);
     if (restoreCamera && camera) map?.easeTo(camera, 520);
     viewerImageToken += 1;
+    viewerFullImageToken += 1;
     viewerImage.onload = null;
     viewerImage.onerror = null;
     viewerImage.classList.remove("is-loading");
+    delete viewerImage.dataset.resolution;
+    delete viewerImage.dataset.photoIndex;
     if (viewerImage.hasAttribute("src")) viewerImage.removeAttribute("src");
     viewerPrevious.hidden = true;
     viewerNext.hidden = true;
@@ -1661,14 +1760,16 @@
 
   const warmTravelAssets = () => void loadTravelAssets().catch(() => {});
   panel.querySelector(".panel-tab")?.addEventListener("pointerenter", warmTravelAssets, { once: true });
+  panel.querySelector(".panel-tab")?.addEventListener("pointerdown", warmTravelAssets, { once: true });
   panel.querySelector(".panel-tab")?.addEventListener("focus", warmTravelAssets, { once: true });
 
   const prewarmTravelMap = () => {
     if (!map && !panel.classList.contains("is-active")) void initialiseMap(true);
   };
-  if ("requestIdleCallback" in window) {
+  const shouldPrewarmMap = window.matchMedia("(min-width: 901px) and (hover: hover) and (pointer: fine)").matches;
+  if (shouldPrewarmMap && "requestIdleCallback" in window) {
     window.requestIdleCallback(prewarmTravelMap, { timeout: 1800 });
-  } else {
+  } else if (shouldPrewarmMap) {
     window.setTimeout(prewarmTravelMap, 900);
   }
 

@@ -311,6 +311,7 @@
   gap: 7px;
   padding: 10px;
   animation: travel-loader-breathe 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-play-state: paused;
 }
 
 .travel-viewer__loader-matrix i {
@@ -318,6 +319,12 @@
   height: 6px;
   background: color-mix(in srgb, var(--travel-muted) 52%, transparent);
   animation: travel-loader-wave 2.4s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.travel-viewer.is-image-loading .travel-viewer__loader-matrix,
+.travel-viewer.is-image-loading .travel-viewer__loader-matrix i {
+  animation-play-state: running;
 }
 
 .travel-viewer__loader-matrix i:nth-child(1) { animation-delay: -2.4s; }
@@ -892,6 +899,6 @@
   }
 
   .travel-viewer__loader-matrix i {
-    animation-duration: 4.8s;
+    animation: none;
   }
 }
