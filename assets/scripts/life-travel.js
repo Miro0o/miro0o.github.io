@@ -592,20 +592,6 @@
       };
     }
 
-    visiblePhotoIndexes() {
-      const margin = 8;
-      return this.photos
-        .map((photo) => ({ photo, screen: this.screenPoint(photo.longitude, photo.latitude) }))
-        .filter(({ screen }) => (
-          screen.x >= -margin && screen.x <= this.width + margin
-          && screen.y >= -margin && screen.y <= this.height + margin
-        ))
-        .sort((left, right) => (
-          left.screen.y - right.screen.y || left.screen.x - right.screen.x
-        ))
-        .map(({ photo }) => photo.photoIndex);
-    }
-
     setActivePhoto(photoIndex) {
       const nextPhotoIndex = Number.isInteger(photoIndex) ? photoIndex : null;
       if (this.activePhotoIndex === nextPhotoIndex) return;
@@ -1461,10 +1447,26 @@
 
   function openViewer(photoIndexes, location) {
     const selectedPhotos = [...new Set(photoIndexes)].filter((index) => data.photos?.[index]);
-    const visiblePhotos = map?.visiblePhotoIndexes() || [];
+    const selectedPlaceIndex = data.photos?.[selectedPhotos[0]]?.placeIndex;
+    const selectedPlacePhotos = Number.isInteger(selectedPlaceIndex)
+      ? selectedPhotos.filter((index) => data.photos[index].placeIndex === selectedPlaceIndex)
+      : selectedPhotos;
+    const selectedPlacePhotoSet = new Set(selectedPlacePhotos);
+    // Build the carousel from the selected place, not from the map viewport.
+    // Viewport membership changes with the canvas size and can include cities
+    // that have nothing to do with the marker the visitor selected.
+    const placePhotos = Number.isInteger(selectedPlaceIndex)
+      ? data.photos
+        .map((photo, index) => ({ photo, index }))
+        .filter(({ photo }) => (
+          photo.placeIndex === selectedPlaceIndex
+          && (!activeYear || photo.year === activeYear)
+        ))
+        .map(({ index }) => index)
+      : selectedPhotos;
     viewerPhotos = [
-      ...selectedPhotos,
-      ...visiblePhotos.filter((index) => !selectedPhotos.includes(index))
+      ...selectedPlacePhotos,
+      ...placePhotos.filter((index) => !selectedPlacePhotoSet.has(index))
     ];
     if (!viewerPhotos.length) return;
     if (!panel.classList.contains("is-photo-open")) viewerCamera = map?.cameraState() || null;
