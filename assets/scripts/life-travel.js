@@ -24,6 +24,7 @@
   const viewerPositionLabel = panel.querySelector("[data-travel-viewer-position]");
   const format = new Intl.NumberFormat("en");
   const compactTravelWidth = 900;
+  const photoDetailZoom = 7.75;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let map = null;
   let activeYear = 0;
@@ -592,6 +593,24 @@
       };
     }
 
+    isPhotoDetailZoom() {
+      return this.zoom >= photoDetailZoom;
+    }
+
+    visiblePhotoIndexes() {
+      const margin = 8;
+      return this.photos
+        .map((photo) => ({ photo, screen: this.screenPoint(photo.longitude, photo.latitude) }))
+        .filter(({ screen }) => (
+          screen.x >= -margin && screen.x <= this.width + margin
+          && screen.y >= -margin && screen.y <= this.height + margin
+        ))
+        .sort((left, right) => (
+          left.screen.y - right.screen.y || left.screen.x - right.screen.x
+        ))
+        .map(({ photo }) => photo.photoIndex);
+    }
+
     setActivePhoto(photoIndex) {
       const nextPhotoIndex = Number.isInteger(photoIndex) ? photoIndex : null;
       if (this.activePhotoIndex === nextPhotoIndex) return;
@@ -628,7 +647,7 @@
       const hit = [...this.hits].reverse().find((item) => Math.hypot(x - item.x, y - item.y) <= item.radius + 5);
       if (!hit) return false;
       if (hit.kind === "photo") {
-        if (hit.count > 1 && this.zoom < 7.75) {
+        if (hit.count > 1 && !this.isPhotoDetailZoom()) {
           this.onInteraction?.();
           this.easeTo({ center: [hit.longitude, hit.latitude], zoom: Math.min(this.maxZoom, this.zoom + 2) });
         } else {
@@ -1447,27 +1466,33 @@
 
   function openViewer(photoIndexes, location) {
     const selectedPhotos = [...new Set(photoIndexes)].filter((index) => data.photos?.[index]);
-    const selectedPlaceIndex = data.photos?.[selectedPhotos[0]]?.placeIndex;
-    const selectedPlacePhotos = Number.isInteger(selectedPlaceIndex)
-      ? selectedPhotos.filter((index) => data.photos[index].placeIndex === selectedPlaceIndex)
-      : selectedPhotos;
-    const selectedPlacePhotoSet = new Set(selectedPlacePhotos);
-    // Build the carousel from the selected place, not from the map viewport.
-    // Viewport membership changes with the canvas size and can include cities
-    // that have nothing to do with the marker the visitor selected.
-    const placePhotos = Number.isInteger(selectedPlaceIndex)
-      ? data.photos
-        .map((photo, index) => ({ photo, index }))
-        .filter(({ photo }) => (
-          photo.placeIndex === selectedPlaceIndex
-          && (!activeYear || photo.year === activeYear)
-        ))
-        .map(({ index }) => index)
-      : selectedPhotos;
-    viewerPhotos = [
-      ...selectedPlacePhotos,
-      ...placePhotos.filter((index) => !selectedPlacePhotoSet.has(index))
-    ];
+    const usePlaceScope = map?.isPhotoDetailZoom() ?? true;
+    if (usePlaceScope) {
+      const selectedPlaceIndex = data.photos?.[selectedPhotos[0]]?.placeIndex;
+      const selectedPlacePhotos = Number.isInteger(selectedPlaceIndex)
+        ? selectedPhotos.filter((index) => data.photos[index].placeIndex === selectedPlaceIndex)
+        : selectedPhotos;
+      const selectedPlacePhotoSet = new Set(selectedPlacePhotos);
+      const placePhotos = Number.isInteger(selectedPlaceIndex)
+        ? data.photos
+          .map((photo, index) => ({ photo, index }))
+          .filter(({ photo }) => (
+            photo.placeIndex === selectedPlaceIndex
+            && (!activeYear || photo.year === activeYear)
+          ))
+          .map(({ index }) => index)
+        : selectedPhotos;
+      viewerPhotos = [
+        ...selectedPlacePhotos,
+        ...placePhotos.filter((index) => !selectedPlacePhotoSet.has(index))
+      ];
+    } else {
+      const visiblePhotos = map?.visiblePhotoIndexes() || [];
+      viewerPhotos = [
+        ...selectedPhotos,
+        ...visiblePhotos.filter((index) => !selectedPhotos.includes(index))
+      ];
+    }
     if (!viewerPhotos.length) return;
     if (!panel.classList.contains("is-photo-open")) viewerCamera = map?.cameraState() || null;
     viewerPosition = 0;
