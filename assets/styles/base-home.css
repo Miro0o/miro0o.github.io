@@ -150,6 +150,36 @@ button:focus-visible,
   font-size: 0.92rem;
 }
 
+.masthead > nav {
+  width: auto;
+  padding-bottom: 0;
+}
+
+.masthead-primary {
+  justify-content: flex-start;
+}
+
+.home-link {
+  display: inline-grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+}
+
+.home-link svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.about-compact {
+  display: none;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
