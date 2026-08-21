@@ -164,6 +164,13 @@
   opacity: 0;
 }
 
+/* Skip layout and paint for the four folded-away worlds while one panel is
+ * expanding. Their rich off-screen contents otherwise make a flex animation
+ * miss a frame badly on mobile. */
+.life-accordion.has-open-panel .life-panel:not(.is-active) {
+  content-visibility: hidden;
+}
+
 .life-accordion.has-open-panel .life-panel.is-active {
   z-index: 10;
   flex-grow: 1;

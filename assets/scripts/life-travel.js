@@ -125,6 +125,11 @@
   class PhotoAtlasMap {
     constructor(element, cities, onPhotos, onBackground, onInteraction) {
       this.element = element;
+      // Panel contents are clipped to a short card on mobile before opening,
+      // but the map's real viewport is always the full life stage. Measuring
+      // that stable viewport lets the idle preload render at its final size
+      // and avoids a full map redraw halfway through the opening transition.
+      this.viewportElement = element.closest(".life-stage") || element;
       this.cities = Array.isArray(cities) ? cities : [];
       this.onPhotos = onPhotos;
       this.onBackground = onBackground;
@@ -141,10 +146,14 @@
       this.canvas = document.createElement("canvas");
       this.canvas.className = "travel-map-canvas";
       this.canvas.setAttribute("aria-hidden", "true");
+      this.effectsCanvas = document.createElement("canvas");
+      this.effectsCanvas.className = "travel-map-effects-canvas";
+      this.effectsCanvas.setAttribute("aria-hidden", "true");
       // Alpha lets the static preview sit above the canvas during startup.
       // resize() immediately paints the matching ocean colour before the next
       // detailed frame, so a backing-store reset can never expose black.
       this.context = this.canvas.getContext("2d", { alpha: true });
+      this.effectsContext = this.effectsCanvas.getContext("2d", { alpha: true });
       this.center = { longitude: 8, latitude: 31 };
       this.zoom = 1.5;
       this.minZoom = 1;
@@ -159,10 +168,13 @@
       this.gestureHadMultiplePointers = false;
       this.hasFitted = false;
       this.frame = 0;
+      this.effectsFrame = 0;
+      this.effectsBounds = null;
       this.cameraFrame = 0;
       this.hoveredHit = null;
+      this.activePhotoIndex = null;
       this.pixelRatio = Math.min(2, window.devicePixelRatio || 1);
-      this.element.replaceChildren(this.canvas, this.controls());
+      this.element.replaceChildren(this.canvas, this.effectsCanvas, this.controls());
       this.bindEvents();
       this.resizeObserver = new ResizeObserver(() => this.resize());
       this.resizeObserver.observe(this.element);
@@ -381,13 +393,26 @@
     }
 
     resize() {
-      const rect = this.element.getBoundingClientRect();
-      this.width = Math.max(1, Math.round(rect.width));
-      this.height = Math.max(1, Math.round(rect.height));
+      const rect = this.viewportElement.getBoundingClientRect();
+      const width = Math.max(1, Math.round(rect.width));
+      const height = Math.max(1, Math.round(rect.height));
+      const backingWidth = Math.round(width * this.pixelRatio);
+      const backingHeight = Math.round(height * this.pixelRatio);
+      if (
+        this.width === width && this.height === height
+        && this.canvas.width === backingWidth && this.canvas.height === backingHeight
+      ) return false;
+      this.width = width;
+      this.height = height;
       this.canvas.width = Math.round(this.width * this.pixelRatio);
       this.canvas.height = Math.round(this.height * this.pixelRatio);
       this.canvas.style.width = `${this.width}px`;
       this.canvas.style.height = `${this.height}px`;
+      this.effectsCanvas.width = this.canvas.width;
+      this.effectsCanvas.height = this.canvas.height;
+      this.effectsCanvas.style.width = `${this.width}px`;
+      this.effectsCanvas.style.height = `${this.height}px`;
+      this.effectsBounds = null;
       this.context.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
       this.context.fillStyle = this.palette().ocean;
       this.context.fillRect(0, 0, this.width, this.height);
@@ -399,6 +424,8 @@
       this.setCenterFromWorld(center.x, center.y, this.zoom);
       if (!this.hasFitted && (this.points.length || this.photos.length)) this.fitToPoints();
       else this.requestRender();
+      this.requestEffectsRender();
+      return true;
     }
 
     project(longitude, latitude, zoom) {
@@ -562,12 +589,21 @@
         .map(({ photo }) => photo.photoIndex);
     }
 
+    setActivePhoto(photoIndex) {
+      const nextPhotoIndex = Number.isInteger(photoIndex) ? photoIndex : null;
+      if (this.activePhotoIndex === nextPhotoIndex) return;
+      this.activePhotoIndex = nextPhotoIndex;
+      if (nextPhotoIndex === null) delete this.element.dataset.travelActivePhoto;
+      else this.element.dataset.travelActivePhoto = String(nextPhotoIndex);
+      this.requestEffectsRender();
+    }
+
     focusLocation(longitude, latitude) {
       const targetZoom = this.zoom;
       const point = this.project(longitude, latitude, targetZoom);
       const compact = this.width <= compactTravelWidth;
       const xRatio = compact ? 0.5 : 0.79;
-      const yRatio = compact ? 0.24 : 0.5;
+      const yRatio = compact ? 0.18 : 0.5;
       const targetCenter = this.unproject(
         point.x - this.width * xRatio + this.width / 2,
         point.y - this.height * yRatio + this.height / 2,
@@ -610,6 +646,62 @@
         this.frame = 0;
         this.render();
       });
+    }
+
+    requestEffectsRender() {
+      if (this.effectsFrame) return;
+      this.effectsFrame = requestAnimationFrame((time) => {
+        this.effectsFrame = 0;
+        this.renderEffects(time);
+        if (this.activePhotoIndex !== null) this.requestEffectsRender();
+      });
+    }
+
+    renderEffects(time = performance.now()) {
+      if (!this.effectsContext || !this.width || !this.height) return;
+      const context = this.effectsContext;
+      context.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
+      if (this.effectsBounds) {
+        const { x, y, size } = this.effectsBounds;
+        context.clearRect(x, y, size, size);
+        this.effectsBounds = null;
+      }
+      if (this.activePhotoIndex === null) return;
+      const activeHit = [...this.hits].reverse().find((hit) => (
+        hit.kind === "photo" && hit.photoIndexes.includes(this.activePhotoIndex)
+      ));
+      if (!activeHit) return;
+
+      const palette = this.palette();
+      const reduced = reducedMotion.matches;
+      const cycle = reduced ? 2400 : 1500;
+      const breath = (Math.sin(time * Math.PI * 2 / cycle - Math.PI / 2) + 1) / 2;
+      const innerRadius = activeHit.radius + 2.4 + breath * (reduced ? 0.7 : 1.8);
+      const outerRadius = activeHit.radius + 5.5 + breath * (reduced ? 1.5 : 5.5);
+      const effectPadding = outerRadius + 3;
+      this.effectsBounds = {
+        x: activeHit.x - effectPadding,
+        y: activeHit.y - effectPadding,
+        size: effectPadding * 2
+      };
+      context.save();
+      context.globalAlpha = 0.1 + breath * 0.2;
+      context.beginPath();
+      context.arc(activeHit.x, activeHit.y, outerRadius, 0, Math.PI * 2);
+      context.fillStyle = palette.photo;
+      context.fill();
+      context.globalAlpha = 0.5 + breath * 0.46;
+      context.beginPath();
+      context.arc(activeHit.x, activeHit.y, innerRadius, 0, Math.PI * 2);
+      context.strokeStyle = palette.photo;
+      context.lineWidth = 1.35 + breath * 0.85;
+      context.stroke();
+      context.globalAlpha = 0.28 + breath * 0.38;
+      context.beginPath();
+      context.arc(activeHit.x, activeHit.y, activeHit.radius + breath * (reduced ? 0.35 : 1.35), 0, Math.PI * 2);
+      context.fillStyle = palette.photo;
+      context.fill();
+      context.restore();
     }
 
     palette() {
@@ -1031,6 +1123,7 @@
       this.drawCities(context, palette);
       this.drawProvinceLabels(context, palette);
       this.drawContextCities(context, palette);
+      this.requestEffectsRender();
     }
   }
 
@@ -1218,6 +1311,7 @@
     const photoIndex = viewerPhotos[viewerPosition];
     const photo = data.photos?.[photoIndex];
     if (!photo) return;
+    map?.setActivePhoto(photoIndex);
     const flag = flagEmoji(photo.countryCode);
     const imageToken = ++viewerImageToken;
     resetViewerTransform();
@@ -1301,6 +1395,7 @@
     const camera = viewerCamera;
     viewerCamera = null;
     viewerLocation = null;
+    map?.setActivePhoto(null);
     if (restoreCamera && camera) map?.easeTo(camera, 520);
     viewerImageToken += 1;
     viewerImage.onload = null;
@@ -1358,13 +1453,20 @@
     });
   }
 
-  async function initialiseMap() {
+  const revealLiveMap = () => {
+    if (!map || !panel.classList.contains("is-active")) return;
+    // The map render is queued before this callback. Reveal only after that
+    // frame has painted so the static preview never hands off to a blank or
+    // half-rendered canvas.
+    requestAnimationFrame(() => {
+      if (panel.classList.contains("is-active")) panel.classList.add("is-map-loaded");
+    });
+  };
+
+  async function initialiseMap(preload = false) {
     if (map) {
       map.resize();
-      map.render();
-      requestAnimationFrame(() => {
-        if (panel.classList.contains("is-active")) panel.classList.add("is-map-loaded");
-      });
+      revealLiveMap();
       return;
     }
     try {
@@ -1376,7 +1478,14 @@
       console.error(error);
       return;
     }
-    if (!panel.classList.contains("is-active")) return;
+    // An idle preload and an opening panel can await the same asset request.
+    // Whichever resumes second should reuse the map created by the first.
+    if (map) {
+      map.resize();
+      revealLiveMap();
+      return;
+    }
+    if (!preload && !panel.classList.contains("is-active")) return;
     if (!data.privacyReviewed || (!data.points?.length && !data.photos?.length)) {
       locked.hidden = false;
       return;
@@ -1389,10 +1498,7 @@
       () => closeViewer(false, false)
     );
     map.setData(pointFeatures(), photoFeatures());
-    map.render();
-    requestAnimationFrame(() => {
-      if (panel.classList.contains("is-active")) panel.classList.add("is-map-loaded");
-    });
+    revealLiveMap();
     locked.hidden = true;
   }
 
@@ -1557,8 +1663,17 @@
   panel.querySelector(".panel-tab")?.addEventListener("pointerenter", warmTravelAssets, { once: true });
   panel.querySelector(".panel-tab")?.addEventListener("focus", warmTravelAssets, { once: true });
 
+  const prewarmTravelMap = () => {
+    if (!map && !panel.classList.contains("is-active")) void initialiseMap(true);
+  };
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(prewarmTravelMap, { timeout: 1800 });
+  } else {
+    window.setTimeout(prewarmTravelMap, 900);
+  }
+
   let activationTimer = 0;
-  const activationDelay = reducedMotion.matches ? 0 : 480;
+  const activationDelay = reducedMotion.matches ? 0 : 520;
   const scheduleMap = () => {
     window.clearTimeout(activationTimer);
     activationTimer = window.setTimeout(() => {

@@ -239,8 +239,11 @@
 
     const tooltip = document.createElement("div");
     tooltip.className = "book-tooltip";
+    tooltip.setAttribute("role", "tooltip");
     tooltip.hidden = true;
     document.body.append(tooltip);
+    const canHover = window.matchMedia("(hover: hover) and (pointer: fine)");
+    let activeDot = null;
 
     const positionTooltip = (dot) => {
       const rect = dot.getBoundingClientRect();
@@ -253,7 +256,10 @@
       tooltip.style.top = `${Math.max(8, top)}px`;
     };
 
-    const hideTooltip = () => { tooltip.hidden = true; };
+    const hideTooltip = () => {
+      tooltip.hidden = true;
+      activeDot = null;
+    };
     const fragment = document.createDocumentFragment();
     data.books.forEach((book, sourceIndex) => {
       const genreIndex = Math.max(0, genres.findIndex(([genre]) => genre === book.genre));
@@ -271,6 +277,7 @@
       dot.setAttribute("aria-label", `${book.title}, ${book.language}, ${book.read ? "marked read" : "reading status uncertain"}, added ${formatAdded(book.added)}`);
 
       const showTooltip = () => {
+        activeDot = dot;
         const author = book.author ? ` · ${book.author}` : "";
         tooltip.replaceChildren();
         const heading = document.createElement("strong");
@@ -280,13 +287,29 @@
         tooltip.append(heading, details);
         positionTooltip(dot);
       };
-      dot.addEventListener("pointerenter", showTooltip);
-      dot.addEventListener("pointerleave", hideTooltip);
+      dot.addEventListener("pointerenter", () => {
+        if (canHover.matches) showTooltip();
+      });
+      dot.addEventListener("pointerleave", () => {
+        if (canHover.matches && activeDot === dot) hideTooltip();
+      });
+      // Mobile Safari does not consistently focus a button when it is tapped,
+      // so focus alone cannot expose the book details on touch screens.
+      dot.addEventListener("click", showTooltip);
       dot.addEventListener("focus", showTooltip);
-      dot.addEventListener("blur", hideTooltip);
+      dot.addEventListener("blur", () => {
+        if (activeDot === dot) hideTooltip();
+      });
       fragment.append(dot);
     });
     plot.append(fragment);
+
+    document.addEventListener("pointerdown", (event) => {
+      if (activeDot && !event.target.closest?.(".book-dot")) hideTooltip();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && activeDot) hideTooltip();
+    });
 
     if (summary) {
       const uncertain = data.books.filter((book) => !book.read).length;
