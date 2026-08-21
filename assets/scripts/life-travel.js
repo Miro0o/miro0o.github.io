@@ -25,6 +25,14 @@
   const format = new Intl.NumberFormat("en");
   const compactTravelWidth = 900;
   const photoDetailZoom = 7.75;
+  // Administrative label layers. Source-specific minZoom values are ignored
+  // so every name at the same level enters the map together.
+  const countryLabelZoom = 0.85;
+  const provinceLabelZoom = 3.25;
+  const cityLabelZoom = 4.4;
+  const photoPlaceFullLabelZoom = 6;
+  const provincePhotoPlaceLimit = 10;
+  const cityPhotoPlaceLimit = 22;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let map = null;
   let activeYear = 0;
@@ -69,7 +77,7 @@
     if (data) return Promise.resolve(data);
     if (!assetsPromise) {
       assetsPromise = Promise.all([
-        loadScript("assets/data/world-outline.js?v=20260821-1", () => Boolean(window.WORLD_MAP || window.WORLD_OUTLINE)),
+        loadScript("assets/data/world-outline.js?v=20260821-3", () => Boolean(window.WORLD_MAP || window.WORLD_OUTLINE)),
         // Keep normal HTTP caching and validators. Published photograph URLs
         // have their own imageVersion, so gallery updates do not need a unique
         // data-script URL on every page view.
@@ -150,9 +158,33 @@
       this.lowCountryBorders = Array.isArray(this.world.countryBordersLow)
         ? this.world.countryBordersLow
         : this.countryBorders;
-      this.countryLabels = Array.isArray(this.world.countries) ? this.world.countries : [];
+      const countries = Array.isArray(this.world.countries) ? this.world.countries : [];
+      const provinceLevelTerritoryCodes = new Set(["TW", "HK", "MO"]);
+      const provinceLevelTerritories = countries.filter((country) => provinceLevelTerritoryCodes.has(country.code));
+      this.countryLabels = countries.filter((country) => !provinceLevelTerritoryCodes.has(country.code));
       this.provinceBorders = Array.isArray(this.world.provinceBorders) ? this.world.provinceBorders : [];
-      this.provinceLabels = Array.isArray(this.world.provinces) ? this.world.provinces : [];
+      const provinces = Array.isArray(this.world.provinces) ? this.world.provinces : [];
+      this.provinceLabels = provinces.map((province) => {
+        const name = province.name || "";
+        if (/^(西藏自治区|西藏)(?: ·|$)/.test(name)) {
+          return { ...province, localName: "西藏自治区", englishName: "Xizang" };
+        }
+        if (/^(黑龍江省|黑龙江省|黑龍江|黑龙江)(?: ·|$)/.test(name)) {
+          return { ...province, localName: "黑龙江", englishName: "Heilongjiang" };
+        }
+        if (/^吉林(?:省)?(?: ·|$)/.test(name)) {
+          return { ...province, localName: "吉林", englishName: "Jilin" };
+        }
+        return province;
+      });
+      for (const territory of provinceLevelTerritories) {
+        const names = territory.code === "TW"
+          ? { localName: "台湾", englishName: "Taiwan, China" }
+          : territory.code === "HK"
+            ? { localName: "香港特别行政区", englishName: "Hong Kong" }
+            : { localName: "澳门特别行政区", englishName: "Macao" };
+        this.provinceLabels.push({ ...territory, ...names });
+      }
       this.contextCities = Array.isArray(this.world.cities) ? this.world.cities : [];
       this.canvas = document.createElement("canvas");
       this.canvas.className = "travel-map-canvas";
@@ -810,7 +842,7 @@
       context.fillStyle = palette.land;
       context.strokeStyle = palette.coast;
       context.lineWidth = 0.7;
-      const outline = this.zoom < 3.15 ? this.lowOutline : this.outline;
+      const outline = this.zoom < provinceLabelZoom ? this.lowOutline : this.outline;
       for (const polygon of outline) {
         context.beginPath();
         this.traceRings(context, polygon);
@@ -823,12 +855,12 @@
     drawBorders(context, palette) {
       context.save();
       context.beginPath();
-      const borders = this.zoom < 3.15 ? this.lowCountryBorders : this.countryBorders;
+      const borders = this.zoom < provinceLabelZoom ? this.lowCountryBorders : this.countryBorders;
       for (const country of borders) this.traceRings(context, country, false);
       context.strokeStyle = palette.countryBorder;
       context.lineWidth = this.zoom < 3 ? 0.48 : 0.68;
       context.stroke();
-      if (this.zoom >= 3.15) {
+      if (this.zoom >= provinceLabelZoom) {
         context.beginPath();
         for (const province of this.provinceBorders) this.traceRings(context, [province]);
         context.strokeStyle = palette.provinceBorder;
@@ -906,14 +938,11 @@
     }
 
     drawCountryLabels(context, palette) {
-      if (this.zoom > 8.2) return;
-      const limit = this.zoom < 1.8 ? 22 : this.zoom < 2.8 ? 46 : 92;
+      if (this.zoom < countryLabelZoom || this.zoom > 8.2) return;
       const selectedCountryCodes = new Set(this.photos.map((photo) => photo.countryCode).filter(Boolean));
       const candidates = this.countryLabels
         .map((country) => ({ ...country, selected: selectedCountryCodes.has(country.code) }))
-        .filter((country) => country.minZoom <= this.zoom + (country.selected ? 1.8 : 0.85))
-        .sort((left, right) => Number(right.selected) - Number(left.selected) || left.rank - right.rank || left.minZoom - right.minZoom)
-        .slice(0, limit);
+        .sort((left, right) => Number(right.selected) - Number(left.selected) || left.rank - right.rank);
       context.save();
       for (const country of candidates) {
         const point = this.screenPoint(country.longitude, country.latitude);
@@ -944,16 +973,13 @@
     }
 
     drawProvinceLabels(context, palette) {
-      if (this.zoom < 3.25) return;
-      const limit = this.zoom < 5 ? 20 : this.zoom < 7 ? 60 : this.provinceLabels.length;
+      if (this.zoom < provinceLabelZoom) return;
       const candidates = this.provinceLabels
         .map((province) => ({
           ...province,
           selected: this.hasPhotoNear(province.longitude, province.latitude, 9, 6)
         }))
-        .filter((province) => province.minZoom <= this.zoom + (province.selected ? 3 : 2.15))
-        .sort((left, right) => Number(right.selected) - Number(left.selected) || left.rank - right.rank || left.minZoom - right.minZoom)
-        .slice(0, limit);
+        .sort((left, right) => Number(right.selected) - Number(left.selected) || left.rank - right.rank);
       context.save();
       for (const province of candidates) {
         const point = this.screenPoint(province.longitude, province.latitude);
@@ -961,10 +987,10 @@
         const parsed = splitMapName(province.name);
         const names = namePair(province.localName || parsed.local, province.englishName || parsed.english || parsed.local);
         this.bilingualLabel(context, names, point.x, point.y, {
-          englishFont: `${province.selected ? 600 : 500} ${province.selected ? 6.9 : 6.2}px system-ui, sans-serif`,
-          localFont: `${province.selected ? 640 : 540} ${province.selected ? 9 : 7.8}px system-ui, sans-serif`,
+          englishFont: "500 6.2px system-ui, sans-serif",
+          localFont: "540 7.8px system-ui, sans-serif",
           englishHeight: 7,
-          localHeight: province.selected ? 10 : 8.8,
+          localHeight: 8.8,
           fill: palette.provinceLabel, halo: palette.halo, haloWidth: 3.2
         });
       }
@@ -972,16 +998,13 @@
     }
 
     drawContextCities(context, palette) {
-      if (this.zoom < 2.15) return;
-      const limit = this.zoom < 3 ? 24 : this.zoom < 4.4 ? 60 : this.contextCities.length;
+      if (this.zoom < cityLabelZoom) return;
       const candidates = this.contextCities
         .map((city) => ({
           ...city,
           selected: this.hasPhotoNear(city.longitude, city.latitude, 4.5, 3.5)
         }))
-        .filter((city) => city.minZoom <= this.zoom + (city.selected ? 1.5 : 0.4))
-        .sort((left, right) => Number(right.selected) - Number(left.selected) || left.minZoom - right.minZoom || right.rank - left.rank)
-        .slice(0, limit);
+        .sort((left, right) => Number(right.selected) - Number(left.selected) || right.rank - left.rank);
       context.save();
       for (const city of candidates) {
         const point = this.screenPoint(city.longitude, city.latitude);
@@ -989,14 +1012,14 @@
         const parsed = splitMapName(city.name);
         const names = namePair(city.localName || parsed.local, city.englishName || parsed.english || parsed.local);
         if (!this.bilingualLabel(context, names, point.x, point.y - 7, {
-          englishFont: `${city.selected ? 600 : 500} ${city.selected ? 6.7 : 6.1}px system-ui, sans-serif`,
-          localFont: `${city.selected ? 640 : 530} ${city.selected ? 8.8 : 7.5}px system-ui, sans-serif`,
+          englishFont: "500 6.1px system-ui, sans-serif",
+          localFont: "530 7.5px system-ui, sans-serif",
           englishHeight: 6.8,
-          localHeight: city.selected ? 9.8 : 8.4,
+          localHeight: 8.4,
           fill: palette.cityLabel, halo: palette.halo, haloWidth: 3.2
         })) continue;
         context.beginPath();
-        context.arc(point.x, point.y, city.selected ? 1.5 : 1.15, 0, Math.PI * 2);
+        context.arc(point.x, point.y, 1.15, 0, Math.PI * 2);
         context.fillStyle = palette.cityLabel;
         context.fill();
       }
@@ -1004,17 +1027,28 @@
     }
 
     drawCities(context, palette) {
+      if (this.zoom < provinceLabelZoom) return;
       const visiblePlaces = new Set([...this.points, ...this.photos].map((point) => point.placeIndex).filter((index) => index >= 0));
-      const limit = this.zoom < 2 ? 10 : this.zoom < 3.4 ? 22 : this.cities.length;
+      const limit = this.zoom < cityLabelZoom
+        ? provincePhotoPlaceLimit
+        : this.zoom < photoPlaceFullLabelZoom
+          ? cityPhotoPlaceLimit
+          : this.cities.length;
       const candidates = this.cities
         .map((city, index) => ({ ...city, index }))
         .filter((city) => visiblePlaces.has(city.index))
         .sort((left, right) => right.photoCount - left.photoCount)
+        .map((city) => ({ ...city, point: this.screenPoint(city.longitude, city.latitude) }))
+        // The photo-count quota belongs to the current viewport. Off-screen
+        // places must not consume slots needed by nearby photo locations.
+        .filter((city) => (
+          city.point.x >= -30 && city.point.x <= this.width + 30
+          && city.point.y >= -12 && city.point.y <= this.height + 12
+        ))
         .slice(0, limit);
       context.save();
       for (const city of candidates) {
-        const point = this.screenPoint(city.longitude, city.latitude);
-        if (point.x < -30 || point.x > this.width + 30 || point.y < -12 || point.y > this.height + 12) continue;
+        const point = city.point;
         const names = namePair(city.localName, city.city);
         const nearbyCluster = this.hits
           .filter((hit) => Math.hypot(point.x - hit.x, point.y - hit.y) < hit.radius + 10)
@@ -1165,8 +1199,8 @@
         this.drawBackgroundPoints(context, palette);
         this.drawPhotoPins(context, palette);
 
-        // Labels intentionally render above every marker. Countries reserve
-        // collision space first so dense photo clusters cannot erase them.
+        // Countries always win. Photo places then reserve space ahead of
+        // ordinary province and city context at the current detail tier.
         this.drawCountryLabels(context, palette);
         this.drawCities(context, palette);
         this.drawProvinceLabels(context, palette);
