@@ -1,6 +1,6 @@
 # miro0o.github.io
 
-Personal meta homepage for Miro Son.
+Personal meta homepage for Yiqing Sun.
 
 This is a small static site with no runtime build step:
 

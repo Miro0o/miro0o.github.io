@@ -370,6 +370,18 @@
   50% { transform: scale(0.94); }
 }
 
+@keyframes travel-loader-reduced-wave {
+  0%, 38%, 62%, 100% {
+    background: color-mix(in srgb, var(--travel-muted) 52%, transparent);
+    opacity: 0.45;
+  }
+
+  50% {
+    background: var(--travel-accent);
+    opacity: 1;
+  }
+}
+
 .travel-viewer__content {
   position: absolute;
   top: var(--travel-preview-center-y);
@@ -895,10 +907,16 @@
   }
 
   .travel-viewer__loader-matrix {
-    animation: none;
+    animation: none !important;
   }
 
   .travel-viewer__loader-matrix i {
-    animation: none;
+    animation: travel-loader-reduced-wave 2.4s ease-in-out infinite !important;
+    animation-play-state: paused !important;
+    transform: none !important;
+  }
+
+  .travel-viewer.is-image-loading .travel-viewer__loader-matrix i {
+    animation-play-state: running !important;
   }
 }

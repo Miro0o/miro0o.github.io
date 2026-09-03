@@ -46,7 +46,7 @@
   let hoverClearTimer = 0;
   const labels = {
     universe: "The wider universe.",
-    firework: "Fireworks over Copenhagen.",
+    firework: "Fireworks over Hong Kong.",
     earth: "Planet earth. The home of all known life.",
     author: "I am here.",
     self: "Where am I?",
@@ -247,7 +247,8 @@
     };
   }).filter(Boolean));
 
-  const authorSite = { lon: 12.5683, lat: 55.6761 };
+  const authorSite = { lon: 114.1694, lat: 22.3193 };
+  rotationAngle = toRadians(authorSite.lon - 22);
   const authorPin = [
     " . ",
     "/o\\",
@@ -369,14 +370,32 @@
   const drawFireworks = (frame, time, projection) => {
     if (!projection) return;
 
-    const cycle = 9000;
-    const phase = (time + 1200) % cycle;
-    if (phase > 2100) return;
+    const cycle = 11000;
+    const launchDuration = 1800;
+    const burstDuration = 2800;
+    const phase = time % cycle;
 
     const centerX = Math.round(clamp(projection.x, 24, width - 24));
     const centerY = Math.round(clamp(projection.y - 20, 18, 20));
-    const radius = 1 + Math.floor(phase / 520);
-    const sparkle = phase % 520 < 260 ? "*" : "+";
+
+    if (phase < launchDuration) {
+      const progress = phase / launchDuration;
+      const easedProgress = 1 - (1 - progress) ** 2;
+      const launchY = Math.round(projection.y - 3);
+      const rocketY = Math.round(launchY + (centerY - launchY) * easedProgress);
+      const rocketX = Math.round(centerX + Math.sin(progress * Math.PI) * 2);
+      setCell(frame, rocketX, rocketY, "*", "firework", "firework-blue");
+      setCell(frame, rocketX, rocketY + 1, "+", "firework", "firework-gold");
+      setCell(frame, rocketX, rocketY + 2, ".", "firework", "firework-violet");
+      return;
+    }
+
+    const burstPhase = phase - launchDuration;
+    if (burstPhase > burstDuration) return;
+
+    const radius = 1 + Math.floor(burstPhase / 520);
+    const innerRadius = Math.max(1, radius - 2);
+    const sparkle = burstPhase % 520 < 260 ? "*" : "+";
     const points = [
       [0, 0, sparkle],
       [radius * 2, 0, "*"],
@@ -386,7 +405,15 @@
       [radius, radius, "."],
       [-radius, radius, "."],
       [radius, -radius, "."],
-      [-radius, -radius, "."]
+      [-radius, -radius, "."],
+      [innerRadius * 2, 0, "+"],
+      [-innerRadius * 2, 0, "+"],
+      [0, innerRadius, "*"],
+      [0, -innerRadius, "*"],
+      [innerRadius, innerRadius, "+"],
+      [-innerRadius, innerRadius, "+"],
+      [innerRadius, -innerRadius, "+"],
+      [-innerRadius, -innerRadius, "+"]
     ];
 
     points.forEach(([x, y, char], index) => {

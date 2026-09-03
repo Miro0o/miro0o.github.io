@@ -163,6 +163,21 @@ body.worldmodel-page {
   background: var(--map-link);
 }
 
+.map-source-note {
+  font-size: 0.68rem;
+  font-style: italic;
+  opacity: 0.72;
+}
+
+.map-source-note a {
+  color: inherit;
+  pointer-events: auto;
+}
+
+.map-source-note a:hover {
+  color: var(--blue);
+}
+
 .map-loading {
   position: absolute;
   inset: 0;
@@ -460,6 +475,44 @@ body.meta-home {
 
 :where(:root[data-theme="night"]) .ascii-cell.is-universe.tone-sky-violet {
   color: rgba(169, 139, 225, 0.62);
+}
+
+:root[data-theme="night"] .ascii-cell.is-firework {
+  color: #ffe082;
+  font-weight: 700;
+  opacity: 1;
+}
+
+:root[data-theme="night"] .ascii-cell.is-firework.tone-firework-gold {
+  color: #ffe082;
+  text-shadow:
+    0 0 4px rgba(255, 224, 130, 0.92),
+    0 0 12px rgba(255, 188, 66, 0.68),
+    0 0 24px rgba(255, 149, 0, 0.38);
+}
+
+:root[data-theme="night"] .ascii-cell.is-firework.tone-firework-red {
+  color: #ff6b8a;
+  text-shadow:
+    0 0 4px rgba(255, 107, 138, 0.92),
+    0 0 12px rgba(255, 71, 111, 0.66),
+    0 0 24px rgba(223, 42, 92, 0.38);
+}
+
+:root[data-theme="night"] .ascii-cell.is-firework.tone-firework-blue {
+  color: #62d9ff;
+  text-shadow:
+    0 0 4px rgba(98, 217, 255, 0.94),
+    0 0 12px rgba(48, 184, 255, 0.7),
+    0 0 24px rgba(31, 132, 255, 0.4);
+}
+
+:root[data-theme="night"] .ascii-cell.is-firework.tone-firework-violet {
+  color: #d7a2ff;
+  text-shadow:
+    0 0 4px rgba(215, 162, 255, 0.94),
+    0 0 12px rgba(183, 105, 255, 0.68),
+    0 0 24px rgba(133, 75, 255, 0.4);
 }
 
 :where(:root[data-theme="night"]) .ascii-cell.is-earth {
