@@ -61,7 +61,10 @@
     const existing = document.querySelector(`script[data-travel-source="${source}"]`);
     if (existing) {
       existing.addEventListener("load", resolve, { once: true });
-      existing.addEventListener("error", reject, { once: true });
+      existing.addEventListener("error", () => {
+        existing.remove();
+        reject(new Error(`Could not load ${source}`));
+      }, { once: true });
       return;
     }
     const script = document.createElement("script");
@@ -69,7 +72,10 @@
     script.async = true;
     script.dataset.travelSource = source;
     script.addEventListener("load", resolve, { once: true });
-    script.addEventListener("error", () => reject(new Error(`Could not load ${source}`)), { once: true });
+    script.addEventListener("error", () => {
+      script.remove();
+      reject(new Error(`Could not load ${source}`));
+    }, { once: true });
     document.head.append(script);
   });
 
@@ -88,6 +94,9 @@
         updateCount();
         locked.hidden = Boolean(data.privacyReviewed && (data.points?.length || data.photos?.length));
         return data;
+      }).catch((error) => {
+        assetsPromise = null;
+        throw error;
       });
     }
     return assetsPromise;
@@ -761,7 +770,7 @@
       context.stroke();
       context.globalAlpha = 0.28 + breath * 0.38;
       context.beginPath();
-      context.arc(activeHit.x, activeHit.y, activeHit.radius + breath * (reduced ? 0.35 : 1.35), 0, Math.PI * 2);
+      context.arc(activeHit.x, activeHit.y, activeHit.radius + breath * (reducedMotion.matches ? 0.35 : 1.35), 0, Math.PI * 2);
       context.fillStyle = palette.photo;
       context.fill();
       context.restore();
@@ -1823,16 +1832,6 @@
   panel.querySelector(".panel-tab")?.addEventListener("pointerenter", warmTravelAssets, { once: true });
   panel.querySelector(".panel-tab")?.addEventListener("pointerdown", warmTravelAssets, { once: true });
   panel.querySelector(".panel-tab")?.addEventListener("focus", warmTravelAssets, { once: true });
-
-  const prewarmTravelMap = () => {
-    if (!map && !panel.classList.contains("is-active")) void initialiseMap(true);
-  };
-  const shouldPrewarmMap = window.matchMedia("(min-width: 901px) and (hover: hover) and (pointer: fine)").matches;
-  if (shouldPrewarmMap && "requestIdleCallback" in window) {
-    window.requestIdleCallback(prewarmTravelMap, { timeout: 1800 });
-  } else if (shouldPrewarmMap) {
-    window.setTimeout(prewarmTravelMap, 900);
-  }
 
   let activationTimer = 0;
   const activationDelay = reducedMotion.matches ? 0 : 520;

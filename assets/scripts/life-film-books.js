@@ -187,15 +187,19 @@
     if (summary) summary.textContent = `${data.books.length} volumes · ${genres.length} shelves`;
   };
 
+  const addedDateFormatter = new Intl.DateTimeFormat("en", { year: "numeric", month: "short", day: "numeric" });
+  const axisDateFormatter = new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "2-digit" });
+  const axisTimeFormatter = new Intl.DateTimeFormat("en", { hour: "2-digit", minute: "2-digit", hour12: false });
+
   const formatAdded = (value) => {
     if (!value) return "Date unavailable";
-    return new Intl.DateTimeFormat("en", { year: "numeric", month: "short", day: "numeric" }).format(new Date(`${value}Z`));
+    return addedDateFormatter.format(new Date(`${value}Z`));
   };
 
   const formatAxisAdded = (value) => {
     const date = new Date(`${value}Z`);
-    const day = new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "2-digit" }).format(date);
-    const time = new Intl.DateTimeFormat("en", { hour: "2-digit", minute: "2-digit", hour12: false }).format(date);
+    const day = axisDateFormatter.format(date);
+    const time = axisTimeFormatter.format(date);
     return `${day} · ${time}`;
   };
 
@@ -260,6 +264,19 @@
       tooltip.hidden = true;
       activeDot = null;
     };
+    const showTooltip = (dot) => {
+      const book = data.books[Number(dot.dataset.bookIndex)];
+      if (!book) return;
+      activeDot = dot;
+      const author = book.author ? ` · ${book.author}` : "";
+      tooltip.replaceChildren();
+      const heading = document.createElement("strong");
+      heading.textContent = book.title;
+      const details = document.createElement("span");
+      details.textContent = `${book.language} · ${book.country}${author}\n${book.read ? "Marked read" : "Reading status uncertain"} · ${formatAdded(book.added)}`;
+      tooltip.append(heading, details);
+      positionTooltip(dot);
+    };
     const fragment = document.createDocumentFragment();
     data.books.forEach((book, sourceIndex) => {
       const genreIndex = Math.max(0, genres.findIndex(([genre]) => genre === book.genre));
@@ -272,37 +289,37 @@
       const dot = document.createElement("button");
       dot.type = "button";
       dot.className = `book-dot lang-${slug(book.language)}${book.read ? "" : " is-unread"}${book.favourite ? " is-favourite" : ""}`;
+      dot.dataset.bookIndex = sourceIndex;
       dot.style.left = `${x}%`;
       dot.style.top = `${y}%`;
       dot.setAttribute("aria-label", `${book.title}, ${book.language}, ${book.read ? "marked read" : "reading status uncertain"}, added ${formatAdded(book.added)}`);
 
-      const showTooltip = () => {
-        activeDot = dot;
-        const author = book.author ? ` · ${book.author}` : "";
-        tooltip.replaceChildren();
-        const heading = document.createElement("strong");
-        heading.textContent = book.title;
-        const details = document.createElement("span");
-        details.textContent = `${book.language} · ${book.country}${author}\n${book.read ? "Marked read" : "Reading status uncertain"} · ${formatAdded(book.added)}`;
-        tooltip.append(heading, details);
-        positionTooltip(dot);
-      };
-      dot.addEventListener("pointerenter", () => {
-        if (canHover.matches) showTooltip();
-      });
-      dot.addEventListener("pointerleave", () => {
-        if (canHover.matches && activeDot === dot) hideTooltip();
-      });
-      // Mobile Safari does not consistently focus a button when it is tapped,
-      // so focus alone cannot expose the book details on touch screens.
-      dot.addEventListener("click", showTooltip);
-      dot.addEventListener("focus", showTooltip);
-      dot.addEventListener("blur", () => {
-        if (activeDot === dot) hideTooltip();
-      });
       fragment.append(dot);
     });
     plot.append(fragment);
+
+    plot.addEventListener("pointerover", (event) => {
+      const dot = event.target.closest(".book-dot");
+      if (canHover.matches && dot && !dot.contains(event.relatedTarget)) showTooltip(dot);
+    });
+    plot.addEventListener("pointerout", (event) => {
+      const dot = event.target.closest(".book-dot");
+      if (canHover.matches && dot === activeDot && !dot.contains(event.relatedTarget)) hideTooltip();
+    });
+    // Mobile Safari does not consistently focus a button when it is tapped,
+    // so focus alone cannot expose the book details on touch screens.
+    plot.addEventListener("click", (event) => {
+      const dot = event.target.closest(".book-dot");
+      if (dot) showTooltip(dot);
+    });
+    plot.addEventListener("focusin", (event) => {
+      const dot = event.target.closest(".book-dot");
+      if (dot) showTooltip(dot);
+    });
+    plot.addEventListener("focusout", (event) => {
+      const dot = event.target.closest(".book-dot");
+      if (dot === activeDot && !dot.contains(event.relatedTarget)) hideTooltip();
+    });
 
     document.addEventListener("pointerdown", (event) => {
       if (activeDot && !event.target.closest?.(".book-dot")) hideTooltip();
@@ -319,5 +336,21 @@
 
   renderFilmWall();
   renderBookShelfPreview();
-  renderBookTimeline();
+
+  const bookPanel = document.querySelector(".module-books");
+  const bookTab = bookPanel?.querySelector(".panel-tab");
+  let bookTimelineRendered = false;
+  const ensureBookTimeline = () => {
+    if (bookTimelineRendered) return;
+    bookTimelineRendered = true;
+    renderBookTimeline();
+  };
+  bookTab?.addEventListener("pointerenter", ensureBookTimeline, { once: true });
+  bookTab?.addEventListener("pointerdown", ensureBookTimeline, { once: true });
+  bookTab?.addEventListener("focus", ensureBookTimeline, { once: true });
+  if (bookPanel) {
+    new MutationObserver(() => {
+      if (bookPanel.classList.contains("is-active")) ensureBookTimeline();
+    }).observe(bookPanel, { attributes: true, attributeFilter: ["class"] });
+  }
 })();

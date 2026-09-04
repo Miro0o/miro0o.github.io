@@ -434,6 +434,11 @@ main {
   transition: none;
 }
 
+.ascii-run {
+  width: calc(var(--ascii-run-length) * 0.61em);
+  letter-spacing: calc(0.61em - 1ch);
+}
+
 .ascii-cell.is-universe {
   color: rgba(38, 48, 78, 0.42);
 }

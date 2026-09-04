@@ -14,23 +14,6 @@
     padding-left: 10px;
   }
 
-  .module-sheet {
-    padding: 76px 42px;
-  }
-
-  .world-cup-wall {
-    left: 23%;
-  }
-
-  .soccer-intro {
-    left: 24px;
-    width: min(330px, 34vw);
-  }
-
-  .cup-poster-meta {
-    padding-right: 13px;
-    padding-left: 13px;
-  }
 }
 
 @media (max-width: 720px) {
@@ -140,42 +123,6 @@
     right: 14px;
   }
 
-  .module-sheet {
-    align-items: flex-start;
-    padding: 76px 22px 28px;
-  }
-
-  .module-copy {
-    min-width: 0;
-    width: min(88vw, 520px);
-  }
-
-  .module-copy h2 {
-    max-width: calc(100vw - 44px);
-    font-size: clamp(3rem, 14vw, 5.5rem);
-    overflow-wrap: break-word;
-  }
-
-  .module-copy > p:not(.module-kicker) {
-    max-width: 88vw;
-    margin-top: 20px;
-  }
-
-  .history-line,
-  .philosophy-question,
-  .paint-study,
-  .soccer-pitch,
-  .economics-chart {
-    right: 5vw;
-    opacity: 0.2;
-  }
-
-  .paint-study {
-    top: auto;
-    bottom: 5%;
-    grid-template-columns: repeat(3, 78px);
-  }
-
   .module-music .panel-content::after {
     background: linear-gradient(
       90deg,
@@ -195,71 +142,6 @@
     font-size: clamp(3rem, 15vw, 4.6rem);
   }
 
-  .soccer-world::before {
-    background:
-      linear-gradient(180deg, #07140f 0%, rgba(7, 20, 15, 0.98) 22%, rgba(7, 20, 15, 0.8) 34%, rgba(7, 20, 15, 0.12) 51%, transparent 66%),
-      linear-gradient(90deg, rgba(7, 20, 15, 0.52), transparent 52%);
-  }
-
-  .world-cup-wall {
-    inset: 27% 2% -5%;
-    transform: rotate(-1deg) scale(1.02);
-  }
-
-  .soccer-intro {
-    top: 21px;
-    left: 20px;
-    width: min(78vw, 500px);
-    transform: none;
-  }
-
-  .soccer-intro h2 {
-    font-size: clamp(2.9rem, 12vw, 4.5rem);
-    line-height: 0.82;
-  }
-
-  .soccer-intro > p:not(.module-kicker) {
-    max-width: min(73vw, 455px);
-    margin-top: 14px;
-    font-size: 0.82rem;
-    line-height: 1.42;
-  }
-
-  .soccer-source {
-    margin-top: 12px;
-    font-size: 0.58rem;
-  }
-
-  .cup-poster-meta {
-    min-width: 180px;
-    padding: 54px 11px 8%;
-  }
-
-  .cup-poster-meta p {
-    display: none;
-  }
-
-  .cup-poster-meta h3 {
-    font-size: 1.15rem;
-  }
-
-  .cup-edition {
-    top: 7%;
-    left: 10%;
-    font-size: 0.5rem;
-  }
-
-  .cup-chant {
-    font-size: 0.5rem;
-  }
-
-  .cup-year-mark {
-    font-size: clamp(3.3rem, 14vw, 6.5rem);
-  }
-
-  .cup-poster--2026 .cup-year-mark {
-    font-size: clamp(4.2rem, 16vw, 7rem);
-  }
 }
 
 @media (max-width: 440px) {
@@ -281,56 +163,6 @@
     font-size: 0.58rem;
   }
 
-  .module-copy h2 {
-    font-size: clamp(2.8rem, 15vw, 4.2rem);
-  }
-
-  .module-status {
-    max-width: 75vw;
-  }
-
-  .world-cup-wall {
-    top: 34%;
-  }
-
-  .soccer-intro {
-    top: 17px;
-    left: 16px;
-    width: 82vw;
-  }
-
-  .soccer-intro .module-kicker {
-    margin-bottom: 9px;
-    font-size: 0.58rem;
-  }
-
-  .soccer-intro h2 {
-    font-size: clamp(2.55rem, 13vw, 3.6rem);
-  }
-
-  .soccer-intro > p:not(.module-kicker) {
-    max-width: 77vw;
-    margin-top: 11px;
-    font-size: 0.75rem;
-  }
-
-  .soccer-source {
-    display: none;
-  }
-
-  .cup-poster-meta {
-    min-width: 150px;
-    padding-right: 9px;
-    padding-left: 9px;
-  }
-
-  .cup-poster-meta > span {
-    font-size: 0.48rem;
-  }
-
-  .cup-poster-meta h3 {
-    font-size: 1rem;
-  }
 }
 
 /* On phones, stack cards vertically with tapered horizontal fold seams. */
@@ -455,10 +287,8 @@
   }
 
   .life-page .life-accordion:not(.has-open-panel) .music-intro,
-  .life-page .life-accordion:not(.has-open-panel) .module-sheet .module-copy,
   .life-page .life-accordion:not(.has-open-panel) .module-games .game-feature__copy,
   .life-page .life-accordion:not(.has-open-panel) .module-games .games-rail,
-  .life-page .life-accordion:not(.has-open-panel) .module-soccer .soccer-wall-intro,
   .life-page .life-accordion:not(.has-open-panel) .panel-close {
     display: none;
   }
@@ -468,34 +298,6 @@
     display: none;
   }
 
-  .life-page .life-accordion:not(.has-open-panel) .module-soccer .soccer-scroll,
-  .life-page .life-accordion:not(.has-open-panel) .module-soccer .soccer-archive,
-  .life-page .life-accordion:not(.has-open-panel) .module-soccer .world-cup-stack {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-  }
-
-  .life-page .life-accordion:not(.has-open-panel) .module-soccer .world-cup-stack {
-    display: grid;
-    grid-template-rows: 1fr;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 0;
-  }
-
-  .life-page .life-accordion:not(.has-open-panel) .module-soccer .wc-banner {
-    min-height: 0;
-    height: 100%;
-    border: 0;
-  }
-
-  .life-page .module-soccer.is-active .soccer-scroll {
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-    touch-action: pan-y;
-    -webkit-overflow-scrolling: touch;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -506,37 +308,4 @@
   .panel-tab {
     transition-duration: 0.001ms !important;
   }
-
-  .cup-poster,
-  .cup-ball,
-  .cup-year-mark,
-  .cup-poster-meta,
-  .brazil-player,
-  .russia-keeper,
-  .qatar-scarf,
-  .north-shape {
-    transition-duration: 0.001ms !important;
-  }
-
-}
-
-/* Keep the soccer archive canvas and controls on the active site theme. */
-.soccer-world {
-  color: var(--ink);
-  background: var(--life-surface);
-}
-
-.soccer-world::before {
-  display: none;
-}
-
-.soccer-world .panel-close {
-  color: var(--ink);
-  border-color: color-mix(in srgb, var(--ink) 22%, transparent);
-  background: color-mix(in srgb, var(--life-surface) 94%, var(--ink));
-}
-
-.soccer-world .panel-close:hover,
-.soccer-world .panel-close:focus-visible {
-  border-color: var(--ink);
 }

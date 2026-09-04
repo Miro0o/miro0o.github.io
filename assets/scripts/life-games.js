@@ -14,6 +14,27 @@
   const visibility = new Map(sections.map((section) => [section, 0]));
   let visibleFeature = null;
 
+  const loadImages = (root) => {
+    root.querySelectorAll("img[data-src]").forEach((image) => {
+      image.src = image.dataset.src;
+      image.removeAttribute("data-src");
+    });
+  };
+
+  const loadFeatureImages = () => loadImages(world.querySelector(".games-features"));
+  const loadArchiveImages = () => {
+    archive?.querySelectorAll("[data-cover]").forEach((release) => {
+      release.style.setProperty("--cover", release.dataset.cover);
+      release.removeAttribute("data-cover");
+    });
+    if (archive) loadImages(archive);
+  };
+
+  const panelTab = panel.querySelector(".panel-tab");
+  panelTab?.addEventListener("pointerenter", loadFeatureImages, { once: true });
+  panelTab?.addEventListener("pointerdown", loadFeatureImages, { once: true });
+  panelTab?.addEventListener("focus", loadFeatureImages, { once: true });
+
   world.querySelectorAll(".game-media img").forEach((image) => {
     image.addEventListener("error", () => {
       const videoId = image.closest("[data-video-id]")?.dataset.videoId;
@@ -124,6 +145,8 @@
     wasActive = isActive;
 
     if (isActive) {
+      loadFeatureImages();
+      loadArchiveImages();
       const linkedSection = window.location.hash ? world.querySelector(window.location.hash) : null;
       const destination = panel.classList.contains("is-active") && sections.includes(linkedSection)
         ? linkedSection

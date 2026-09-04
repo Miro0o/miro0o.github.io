@@ -7,6 +7,7 @@
   const trackAngleDegrees = -10;
   const trackAngleRadians = trackAngleDegrees * Math.PI / 180;
   const tracks = [];
+  const albumDetails = new WeakMap();
 
   const greatestCommonDivisor = (left, right) => {
     let a = left;
@@ -45,16 +46,28 @@
     image.decoding = "async";
     image.addEventListener("error", () => link.classList.add("has-image-error"));
 
-    const details = document.createElement("span");
-    details.className = "album-details";
     const context = album.plays ? `${album.plays} plays · ${album.song}` : album.song;
-    details.innerHTML = `<strong></strong><span></span><small></small>`;
-    details.querySelector("strong").textContent = album.name;
-    details.querySelector("span").textContent = album.artist;
-    details.querySelector("small").textContent = context;
-
-    link.append(image, details);
+    albumDetails.set(link, { name: album.name, artist: album.artist, context });
+    link.append(image);
     return link;
+  };
+
+  const ensureAlbumDetails = (tile) => {
+    if (!tile || tile.querySelector(".album-details")) return;
+    const album = albumDetails.get(tile);
+    if (!album) return;
+    const details = document.createElement("span");
+    details.className = "album-details is-preparing";
+    const title = document.createElement("strong");
+    title.textContent = album.name;
+    const artist = document.createElement("span");
+    artist.textContent = album.artist;
+    const context = document.createElement("small");
+    context.textContent = album.context;
+    details.append(title, artist, context);
+    tile.append(details);
+    void details.offsetWidth;
+    requestAnimationFrame(() => details.classList.remove("is-preparing"));
   };
 
   const createSequence = (trackIndex, trackAlbums, duplicate = false) => {
@@ -91,6 +104,8 @@
 
   grid.append(fragment);
   grid.closest(".life-stage")?.classList.add("is-ready");
+  grid.addEventListener("pointerover", (event) => ensureAlbumDetails(event.target.closest(".album-tile")));
+  grid.addEventListener("focusin", (event) => ensureAlbumDetails(event.target.closest(".album-tile")));
 
   const updateRoll = () => {
     const sequenceWidth = tracks[0]?.querySelector(".album-sequence")?.scrollWidth || 0;

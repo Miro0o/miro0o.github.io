@@ -14,7 +14,7 @@
   };
   const cellCount = width * height;
   const spaceCode = " ".charCodeAt(0);
-  const cells = [];
+  const rows = [];
   const renderedChars = new Uint16Array(cellCount);
   const renderedRegions = new Uint8Array(cellCount);
   const renderedClasses = new Uint16Array(cellCount);
@@ -81,7 +81,6 @@
     i: "earth-ice"
   };
   let activeRegion = null;
-  let lastFrame = 0;
 
   const createFrame = () => {
     frame.chars.fill(spaceCode);
@@ -310,16 +309,13 @@
   nightLightRows = null;
   window.NIGHT_LIGHT_ROWS = null;
 
-  const buildCells = () => {
+  const buildRows = () => {
     const fragment = document.createDocumentFragment();
     for (let y = 0; y < height; y += 1) {
-      for (let x = 0; x < width; x += 1) {
-        const cell = document.createElement("span");
-        cell.className = "ascii-cell";
-        cell.appendChild(document.createTextNode(" "));
-        cells.push(cell);
-        fragment.appendChild(cell);
-      }
+      const row = document.createElement("span");
+      row.className = "ascii-row";
+      rows.push(row);
+      fragment.appendChild(row);
       fragment.appendChild(document.createTextNode("\n"));
     }
     map.appendChild(fragment);
@@ -617,34 +613,60 @@
   };
 
   const syncFrame = (frame) => {
-    for (let index = 0; index < cellCount; index += 1) {
-      const cell = cells[index];
+    const classKeyAt = (index) => {
       const charCode = frame.chars[index];
-      const regionId = frame.regions[index];
-      const toneId = frame.tones[index];
-      const regionChanged = renderedRegions[index] !== regionId;
-      const classRegionId = charCode === spaceCode ? 0 : regionId;
-      const classToneId = charCode === spaceCode ? 0 : toneId;
-      const classKey = classRegionId << 8 | classToneId;
-      if (renderedChars[index] !== charCode) {
-        renderedChars[index] = charCode;
-        cell.firstChild.data = String.fromCharCode(charCode);
-      }
-      if (regionChanged) {
-        renderedRegions[index] = regionId;
-        cell.dataset.region = regionNames[regionId];
-      }
-      if (renderedClasses[index] !== classKey) {
+      const classRegionId = charCode === spaceCode ? 0 : frame.regions[index];
+      const classToneId = charCode === spaceCode ? 0 : frame.tones[index];
+      return classRegionId << 8 | classToneId;
+    };
+
+    for (let y = 0; y < height; y += 1) {
+      const start = y * width;
+      const end = start + width;
+      let rowChanged = false;
+      for (let index = start; index < end; index += 1) {
+        const classKey = classKeyAt(index);
+        if (
+          renderedChars[index] !== frame.chars[index]
+          || renderedRegions[index] !== frame.regions[index]
+          || renderedClasses[index] !== classKey
+        ) rowChanged = true;
+        renderedChars[index] = frame.chars[index];
+        renderedRegions[index] = frame.regions[index];
         renderedClasses[index] = classKey;
+      }
+      if (!rowChanged) continue;
+
+      const fragment = document.createDocumentFragment();
+      for (let index = start; index < end;) {
+        const classKey = renderedClasses[index];
+        const regionId = renderedRegions[index];
+        let runEnd = index + 1;
+        while (
+          runEnd < end
+          && renderedClasses[runEnd] === classKey
+          && renderedRegions[runEnd] === regionId
+        ) runEnd += 1;
+
         let nextClass = classNameCache.get(classKey);
         if (!nextClass) {
+          const classRegionId = classKey >> 8;
+          const classToneId = classKey & 0xff;
           const region = regionNames[classRegionId];
           const tone = toneNames[classToneId];
           nextClass = `ascii-cell${region ? ` ${regionClass[region]}` : ""}${tone ? ` tone-${tone}` : ""}`;
           classNameCache.set(classKey, nextClass);
         }
-        cell.className = nextClass;
+
+        const run = document.createElement("span");
+        run.className = `${nextClass} ascii-run`;
+        run.dataset.region = regionNames[regionId];
+        run.style.setProperty("--ascii-run-length", runEnd - index);
+        run.textContent = String.fromCharCode(...frame.chars.subarray(index, runEnd));
+        fragment.appendChild(run);
+        index = runEnd;
       }
+      rows[y].replaceChildren(fragment);
     }
   };
 
@@ -714,6 +736,15 @@
     window.addEventListener("resize", fitAsciiMap);
   }
 
+  let animationTimer = 0;
+  const scheduleAnimation = () => {
+    if (document.hidden || animationTimer) return;
+    animationTimer = window.setTimeout(() => {
+      animationTimer = 0;
+      if (!document.hidden) window.requestAnimationFrame(animate);
+    }, 130);
+  };
+
   const animate = (time) => {
     if (!previousTime) previousTime = time;
     const delta = Math.min(time - previousTime, 600);
@@ -723,21 +754,21 @@
       rotationAngle += delta / 42000;
     }
 
-    if (time - lastFrame > 130) {
-      syncFrame(drawScene(time));
-      lastFrame = time;
-    }
-    if (!document.hidden) window.requestAnimationFrame(animate);
+    syncFrame(drawScene(time));
+    scheduleAnimation();
   };
 
-  buildCells();
+  buildRows();
   syncFrame(drawScene(0));
   fitAsciiMap();
-  window.requestAnimationFrame(animate);
+  scheduleAnimation();
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
+    if (document.hidden) {
+      window.clearTimeout(animationTimer);
+      animationTimer = 0;
+    } else {
       previousTime = 0;
-      window.requestAnimationFrame(animate);
+      scheduleAnimation();
     }
   });
 })();

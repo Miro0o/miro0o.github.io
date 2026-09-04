@@ -8,9 +8,15 @@
   <script src="assets/scripts/theme-switcher.js"></script>
   <link rel="preconnect" href="https://p1.music.126.net">
   <link rel="preconnect" href="https://i.ytimg.com">
-  <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com">
   <link rel="preconnect" href="https://m.media-amazon.com">
-  <link rel="stylesheet" href="assets/styles/main.css?v=20260902-33">
+  <link rel="stylesheet" href="assets/styles/base-home.css?v=20260903-1">
+  <link rel="stylesheet" href="assets/styles/site-shell-worldmodel.css">
+  <link rel="stylesheet" href="assets/styles/life-music.css?v=20260903-2">
+  <link rel="stylesheet" href="assets/styles/life-accordion.css?v=20260903-1">
+  <link rel="stylesheet" href="assets/styles/life-film-books.css?v=20260716-13">
+  <link rel="stylesheet" href="assets/styles/life-responsive.css?v=20260903-1">
+  <link rel="stylesheet" href="assets/styles/life-games.css?v=20260716-36">
+  <link rel="stylesheet" href="assets/styles/life-travel.css?v=20260903-1">
   <script src="assets/scripts/nav-menu.js" defer></script>
 </head>
 <body class="life-page">
@@ -42,10 +48,7 @@
     <main class="life-main">
       <section class="life-stage" aria-labelledby="personal-title">
         <div class="life-overview">
-          <!-- <p class="life-kicker">Personal life</p> -->
-          <!-- <h1 id="personal-title">What stays with me.</h1> -->
           <h1 id="personal-title">Memory Galleries.</h1>
-          <!-- <p>A gallery of memories.</p> -->
           <span class="life-instruction">Open a gallery to explore</span>
         </div>
 
@@ -161,7 +164,7 @@
 
                   <article class="game-feature game-feature--wukong" id="game-wukong" data-game-feature>
                     <div class="game-media" aria-hidden="true">
-                      <img src="assets/media/games/wukong-cover.jpg" alt="" width="1920" height="1080" loading="lazy">
+                      <img data-src="assets/media/games/wukong-cover.jpg" alt="" width="1920" height="1080">
                       <video class="game-montage" muted loop playsinline autoplay preload="none" data-src="assets/media/games/wukong-montage.mp4?v=4"></video>
                     </div>
                     <div class="game-feature__copy">
@@ -175,7 +178,7 @@
 
                   <article class="game-feature game-feature--fc26" id="game-fc26" data-game-feature data-video-id="TSi0iJYSQ24">
                     <div class="game-media" aria-hidden="true">
-                      <img src="https://i.ytimg.com/vi/TSi0iJYSQ24/maxresdefault.jpg" alt="" loading="lazy">
+                      <img data-src="https://i.ytimg.com/vi/TSi0iJYSQ24/maxresdefault.jpg" alt="">
                       <video class="game-montage" muted loop playsinline autoplay preload="none" data-src="assets/media/games/fc26-montage.mp4?v=3"></video>
                     </div>
                     <div class="game-feature__copy">
@@ -189,7 +192,7 @@
 
                   <article class="game-feature game-feature--aoe4" id="game-aoe4" data-game-feature>
                     <div class="game-media" aria-hidden="true">
-                      <img src="assets/media/games/aoe4-cover.jpg" alt="" width="1920" height="1080" loading="lazy">
+                      <img data-src="assets/media/games/aoe4-cover.jpg" alt="" width="1920" height="1080">
                       <video class="game-montage" muted loop playsinline autoplay preload="none" data-src="assets/media/games/aoe4-montage.mp4?v=2"></video>
                     </div>
                     <div class="game-feature__copy">
@@ -203,7 +206,7 @@
 
                   <article class="game-feature game-feature--minecraft" id="game-minecraft" data-game-feature>
                     <div class="game-media" aria-hidden="true">
-                      <img src="assets/media/games/minecraft-cover.jpg" alt="" width="1920" height="1080" loading="lazy">
+                      <img data-src="assets/media/games/minecraft-cover.jpg" alt="" width="1920" height="1080">
                       <video class="game-montage" muted loop playsinline autoplay preload="none" data-src="assets/media/games/minecraft-montage.mp4?v=2"></video>
                     </div>
                     <div class="game-feature__copy">
@@ -230,34 +233,34 @@
                         <span>2020—2026</span>
                       </header>
                       <ol class="game-release-list" start="1">
-                    <li class="game-release--lighter-cover" style="--cover: url('https://www.rockstargames.com/VI/_next/static/media/Jason_and_Lucia_03_landscape.0419q._86ukpt.jpg?akim=1&amp;imdensity=1&amp;imwidth=3840'); --cover-position: center 38%">
+                    <li class="game-release--lighter-cover" data-cover="url('https://www.rockstargames.com/VI/_next/static/media/Jason_and_Lucia_03_landscape.0419q._86ukpt.jpg?akim=1&amp;imdensity=1&amp;imwidth=3840')" style="--cover-position: center 38%">
                       <span class="release-year">2026</span><strong>Grand Theft Auto VI</strong><small>Rockstar Games</small><span class="release-index">01</span>
                     </li>
-                    <li class="game-release--lighter-cover" style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/library_hero_2x.jpg') 2x)">
+                    <li class="game-release--lighter-cover" data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2024</span><strong>Black Myth: Wukong</strong><small>Game Science</small><span class="release-index">02</span>
                     </li>
-                    <li class="game-release--lighter-cover" style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_hero_2x.jpg') 2x)">
+                    <li class="game-release--lighter-cover" data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2669320/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2024</span><strong>EA Sports FC 25</strong><small>EA Sports</small><span class="release-index">03</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1448440/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1448440/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1448440/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1448440/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2023</span><strong>Wo Long</strong><small>Fallen Dynasty</small><span class="release-index">04</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2023</span><strong>Baldur’s Gate 3</strong><small>Larian Studios</small><span class="release-index">05</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2195250/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2195250/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2195250/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2195250/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2023</span><strong>EA Sports FC 24</strong><small>EA Sports</small><span class="release-index">06</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1811260/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1811260/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1811260/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1811260/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2022</span><strong>FIFA 23</strong><small>EA Sports</small><span class="release-index">07</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1466860/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1466860/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1466860/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1466860/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2021</span><strong>Age of Empires IV</strong><small>Relic / World’s Edge</small><span class="release-index">08</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1551360/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1551360/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1551360/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1551360/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2021</span><strong>Forza Horizon 5</strong><small>Playground Games</small><span class="release-index">09</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2020</span><strong>Cyberpunk 2077</strong><small>CD Projekt Red</small><span class="release-index">10</span>
                     </li>
                       </ol>
@@ -270,28 +273,28 @@
                         <span>2010—2019</span>
                       </header>
                       <ol class="game-release-list" start="11">
-                    <li style="--cover: url('https://cdn.cloudflare.steamstatic.com/steam/apps/814380/library_hero.jpg')">
+                    <li data-cover="url('https://cdn.cloudflare.steamstatic.com/steam/apps/814380/library_hero.jpg')">
                       <span class="release-year">2019</span><strong>Sekiro</strong><small>Shadows Die Twice</small><span class="release-index">11</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2018</span><strong>Red Dead Redemption 2</strong><small>Rockstar Games</small><span class="release-index">12</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/289070/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/289070/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/289070/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/289070/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2016</span><strong>Civilization VI</strong><small>Firaxis Games</small><span class="release-index">13</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/236850/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/236850/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/236850/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/236850/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2013</span><strong>Europa Universalis IV</strong><small>Paradox</small><span class="release-index">14</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/271590/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/271590/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/271590/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/271590/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2013</span><strong>Grand Theft Auto V</strong><small>Rockstar Games</small><span class="release-index">15</span>
                     </li>
-                    <li style="--cover: url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/115320/ss_9f302432e700dcbef4c4826104c04f28cc5b165e.1920x1080.jpg'); --cover-position: center 35%">
+                    <li data-cover="url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/115320/ss_9f302432e700dcbef4c4826104c04f28cc5b165e.1920x1080.jpg')" style="--cover-position: center 35%">
                       <span class="release-year">2012</span><strong>Prototype 2</strong><small>Radical Entertainment</small><span class="release-index">16</span>
                     </li>
-                    <li style="--cover: url('https://hdwallsbox.com/wallpapers/l/1920x1080/42/video-games-cristiano-ronaldo-pes-2013-1920x1080-41672.jpg'); --cover-position: center 34%">
+                    <li data-cover="url('https://hdwallsbox.com/wallpapers/l/1920x1080/42/video-games-cristiano-ronaldo-pes-2013-1920x1080-41672.jpg')" style="--cover-position: center 34%">
                       <span class="release-year">2012</span><strong>Pro Evolution Soccer</strong><small>PES 2013</small><span class="release-index">17</span>
                     </li>
-                    <li style="--cover: url('https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/key-art/Vanilla_bundle_3.png'); --cover-position: center 44%">
+                    <li data-cover="url('https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/key-art/Vanilla_bundle_3.png')" style="--cover-position: center 44%">
                       <span class="release-year">2011</span><strong>Minecraft</strong><small>Mojang Studios</small><span class="release-index">18</span>
                     </li>
                       </ol>
@@ -304,26 +307,26 @@
                         <span>2000—2009</span>
                       </header>
                       <ol class="game-release-list" start="19">
-                    <li style="--cover: url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/10150/0000008853.1920x1080.jpg'); --cover-position: center 34%">
+                    <li data-cover="url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/10150/0000008853.1920x1080.jpg')" style="--cover-position: center 34%">
                       <span class="release-year">2009</span><strong>Prototype</strong><small>Radical Entertainment</small><span class="release-index">19</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/12210/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/12210/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/12210/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/12210/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2008</span><strong>Grand Theft Auto IV</strong><small>Rockstar Games</small><span class="release-index">20</span>
                     </li>
-                    <li style="--cover: url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/15100/0000003837.1920x1080.jpg'); --cover-position: center 38%">
+                    <li data-cover="url('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/15100/0000003837.1920x1080.jpg')" style="--cover-position: center 38%">
                       <span class="release-year">2007</span><strong>Assassin’s Creed</strong><small>The original</small><span class="release-index">21</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/933110/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/933110/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/933110/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/933110/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2005</span><strong>Age of Empires III</strong><small>Definitive Edition art</small><span class="release-index">22</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1547000/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1547000/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/1547000/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/1547000/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2004</span><strong>Grand Theft Auto</strong><small>San Andreas</small><span class="release-index">23</span>
                     </li>
                     <li class="game-release--image-cover">
-                      <img class="game-release__cover" src="assets/media/games/warcraft-shelf.jpg?v=20260716-2" alt="" width="2200" height="1238" loading="lazy" decoding="async">
+                      <img class="game-release__cover" data-src="assets/media/games/warcraft-shelf.jpg?v=20260716-2" alt="" width="2200" height="1238" decoding="async">
                       <span class="release-year">2003</span><strong>Warcraft III</strong><small>The Frozen Throne</small><span class="release-index">24</span>
                     </li>
-                    <li style="--cover: image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2229850/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2229850/library_hero_2x.jpg') 2x)">
+                    <li data-cover="image-set(url('https://cdn.cloudflare.steamstatic.com/steam/apps/2229850/library_hero.jpg') 1x, url('https://cdn.cloudflare.steamstatic.com/steam/apps/2229850/library_hero_2x.jpg') 2x)">
                       <span class="release-year">2000</span><strong>Command &amp; Conquer</strong><small>Red Alert 2</small><span class="release-index">25</span>
                     </li>
                       </ol>
@@ -352,14 +355,7 @@
               <div class="travel-layout">
                 <figure class="travel-map" aria-label="Zoomable map of photographs taken while travelling">
                   <div class="travel-map__preview" data-travel-preview aria-hidden="true">
-                    <picture class="travel-map__preview-image travel-map__preview-image--day">
-                      <source media="(max-width: 900px)" srcset="assets/images/travel/map-preview-mobile.webp?v=20260821-1">
-                      <img src="assets/images/travel/map-preview.webp?v=20260821-1" width="1440" height="721" alt="" decoding="async">
-                    </picture>
-                    <picture class="travel-map__preview-image travel-map__preview-image--night">
-                      <source media="(max-width: 900px)" srcset="assets/images/travel/map-preview-night-mobile.webp?v=20260821-1">
-                      <img src="assets/images/travel/map-preview-night.webp?v=20260821-1" width="1440" height="721" alt="" decoding="async">
-                    </picture>
+                    <div class="travel-map__preview-image"></div>
                   </div>
                   <div class="travel-map__canvas" data-travel-map></div>
                   <span class="travel-map__attribution">Map: <a href="https://www.naturalearthdata.com/">Natural Earth</a> · Places: <a href="https://www.geonames.org/">GeoNames</a></span>
@@ -424,10 +420,10 @@
   </div>
   <script src="assets/data/music-wall-data.js"></script>
   <script src="assets/data/life-library-data.js?v=20260716-5"></script>
-  <script src="assets/scripts/music-wall.js?v=20260820-5"></script>
-  <script src="assets/scripts/life-film-books.js?v=20260821-6"></script>
-  <script src="assets/scripts/life-games.js?v=20260820-5"></script>
-  <script src="assets/scripts/life-travel.js?v=20260821-36"></script>
+  <script src="assets/scripts/music-wall.js?v=20260903-2"></script>
+  <script src="assets/scripts/life-film-books.js?v=20260903-1"></script>
+  <script src="assets/scripts/life-games.js?v=20260903-1"></script>
+  <script src="assets/scripts/life-travel.js?v=20260903-1"></script>
   <script src="assets/scripts/life-accordion.js?v=20260820-5"></script>
 </body>
 </html>

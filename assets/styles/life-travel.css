@@ -48,20 +48,14 @@
     visibility 0s linear;
 }
 
-.travel-map__preview picture,
-.travel-map__preview img {
+.travel-map__preview-image {
   display: block;
   width: 100%;
   height: 100%;
-}
-
-.travel-map__preview img {
-  object-fit: cover;
-  object-position: center;
-}
-
-.travel-map__preview .travel-map__preview-image--night {
-  display: none;
+  background-image: url("../images/travel/map-preview.webp?v=20260821-1");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .module-travel.is-map-loaded .travel-map__preview {
@@ -766,12 +760,18 @@
   background: var(--life-surface);
 }
 
-:root[data-theme="night"] .travel-map__preview-image--day {
-  display: none;
+:root[data-theme="night"] .travel-map__preview-image {
+  background-image: url("../images/travel/map-preview-night.webp?v=20260821-1");
 }
 
-:root[data-theme="night"] .travel-map__preview .travel-map__preview-image--night {
-  display: block;
+@media (max-width: 900px) {
+  .travel-map__preview-image {
+    background-image: url("../images/travel/map-preview-mobile.webp?v=20260821-1");
+  }
+
+  :root[data-theme="night"] .travel-map__preview-image {
+    background-image: url("../images/travel/map-preview-night-mobile.webp?v=20260821-1");
+  }
 }
 
 :root[data-theme="night"] .travel-map-controls {

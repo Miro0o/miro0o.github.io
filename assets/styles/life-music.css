@@ -196,6 +196,11 @@
   transition: opacity 240ms ease, transform 300ms ease;
 }
 
+.album-details.is-preparing {
+  opacity: 0 !important;
+  transform: translateY(8px) !important;
+}
+
 .album-details strong,
 .album-details span,
 .album-details small {
