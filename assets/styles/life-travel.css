@@ -560,9 +560,10 @@
     0 1px 2px var(--travel-paper),
     0 0 7px var(--travel-paper),
     0 0 12px var(--travel-paper);
+  /* layoutViewerImage() measures caption height immediately after setting
+     its width. Animating width would measure the initial 1px or previous photo. */
   transition:
     top 360ms cubic-bezier(0.2, 0.72, 0.25, 1),
-    width 360ms cubic-bezier(0.2, 0.72, 0.25, 1),
     opacity 160ms ease;
 }
 
