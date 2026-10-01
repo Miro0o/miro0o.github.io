@@ -1507,9 +1507,57 @@
     viewer.dataset.photoId = photo.id;
   }
 
+  function geographicDistanceSquared(first, second) {
+    const firstLongitude = Number(first?.longitude);
+    const firstLatitude = Number(first?.latitude);
+    const secondLongitude = Number(second?.longitude);
+    const secondLatitude = Number(second?.latitude);
+    if (![firstLongitude, firstLatitude, secondLongitude, secondLatitude].every(Number.isFinite)) {
+      return Number.POSITIVE_INFINITY;
+    }
+    const latitudeDifference = secondLatitude - firstLatitude;
+    const rawLongitudeDifference = Math.abs(secondLongitude - firstLongitude) % 360;
+    const longitudeDifference = Math.min(rawLongitudeDifference, 360 - rawLongitudeDifference);
+    const longitudeScale = Math.cos((firstLatitude + secondLatitude) * Math.PI / 360);
+    return latitudeDifference ** 2 + (longitudeDifference * longitudeScale) ** 2;
+  }
+
+  function orderPhotoIndexesByProximity(photoIndexes, location, preferredPhotoIndexes = []) {
+    const remaining = [...new Set(photoIndexes)].filter((index) => data.photos?.[index]);
+    if (remaining.length < 2) return remaining;
+
+    const preferred = preferredPhotoIndexes.filter((index) => remaining.includes(index));
+    const startCandidates = preferred.length ? preferred : remaining;
+    let currentIndex = startCandidates.reduce((closestIndex, candidateIndex) => (
+      geographicDistanceSquared(data.photos[candidateIndex], location)
+        < geographicDistanceSquared(data.photos[closestIndex], location)
+        ? candidateIndex
+        : closestIndex
+    ), startCandidates[0]);
+    const ordered = [currentIndex];
+    remaining.splice(remaining.indexOf(currentIndex), 1);
+
+    while (remaining.length) {
+      const currentPhoto = data.photos[currentIndex];
+      let closestPosition = 0;
+      let closestDistance = geographicDistanceSquared(currentPhoto, data.photos[remaining[0]]);
+      for (let position = 1; position < remaining.length; position += 1) {
+        const distance = geographicDistanceSquared(currentPhoto, data.photos[remaining[position]]);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestPosition = position;
+        }
+      }
+      [currentIndex] = remaining.splice(closestPosition, 1);
+      ordered.push(currentIndex);
+    }
+    return ordered;
+  }
+
   function openViewer(photoIndexes, location) {
     const selectedPhotos = [...new Set(photoIndexes)].filter((index) => data.photos?.[index]);
     const usePlaceScope = map?.isPhotoDetailZoom() ?? true;
+    let candidatePhotos;
     if (usePlaceScope) {
       const selectedPlaceIndex = data.photos?.[selectedPhotos[0]]?.placeIndex;
       const selectedPlacePhotos = Number.isInteger(selectedPlaceIndex)
@@ -1525,17 +1573,18 @@
           ))
           .map(({ index }) => index)
         : selectedPhotos;
-      viewerPhotos = [
+      candidatePhotos = [
         ...selectedPlacePhotos,
         ...placePhotos.filter((index) => !selectedPlacePhotoSet.has(index))
       ];
     } else {
       const visiblePhotos = map?.visiblePhotoIndexes() || [];
-      viewerPhotos = [
+      candidatePhotos = [
         ...selectedPhotos,
         ...visiblePhotos.filter((index) => !selectedPhotos.includes(index))
       ];
     }
+    viewerPhotos = orderPhotoIndexesByProximity(candidatePhotos, location, selectedPhotos);
     if (!viewerPhotos.length) return;
     if (!panel.classList.contains("is-photo-open")) viewerCamera = map?.cameraState() || null;
     viewerPosition = 0;
