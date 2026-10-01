@@ -44,6 +44,8 @@
   let previousTime = 0;
   let isAuthorHovered = false;
   let hoverClearTimer = 0;
+  let fireworkCellAspect = 2;
+  let fireworkGlyphScale = 1;
   const labels = {
     universe: "The wider universe.",
     firework: "Fireworks over Hong Kong.",
@@ -338,6 +340,14 @@
     const scaleX = Math.min(1.12, (availableWidth * 0.998) / mapWidth);
     const scaleY = Math.min(1.12, (clientHeight * 0.96) / mapHeight);
     map.style.transform = `scale(${scaleX}, ${scaleY})`;
+
+    // Use the rendered cell proportions so bursts stay round as the scene stretches.
+    const firstRow = rows[0].getBoundingClientRect();
+    const cellWidth = firstRow.width / width;
+    const cellHeight = rows[1].getBoundingClientRect().top - firstRow.top;
+    fireworkCellAspect = cellHeight / cellWidth;
+    fireworkGlyphScale = scaleY / scaleX;
+    map.style.setProperty("--firework-glyph-scale", fireworkGlyphScale);
   };
 
   const drawSky = (frame, time) => {
@@ -369,9 +379,12 @@
     const cycle = 11000;
     const launchDuration = 1800;
     const burstDuration = 2800;
+    const burstStep = 520;
     const phase = time % cycle;
 
-    const centerX = Math.round(clamp(projection.x, 24, width - 24));
+    const maxRadius = 1 + Math.floor(burstDuration / burstStep);
+    const edgePadding = Math.max(24, Math.ceil(maxRadius * fireworkCellAspect + fireworkGlyphScale / 2));
+    const centerX = Math.round(clamp(projection.x, edgePadding, width - 1 - edgePadding));
     const centerY = Math.round(clamp(projection.y - 20, 18, 20));
 
     if (phase < launchDuration) {
@@ -389,9 +402,9 @@
     const burstPhase = phase - launchDuration;
     if (burstPhase > burstDuration) return;
 
-    const radius = 1 + Math.floor(burstPhase / 520);
+    const radius = 1 + Math.floor(burstPhase / burstStep);
     const innerRadius = Math.max(1, radius - 2);
-    const sparkle = burstPhase % 520 < 260 ? "*" : "+";
+    const sparkle = burstPhase % burstStep < burstStep / 2 ? "*" : "+";
     const points = [
       [0, 0, sparkle],
       [radius * 2, 0, "*"],
@@ -415,7 +428,7 @@
     points.forEach(([x, y, char], index) => {
       setCell(
         frame,
-        centerX + x,
+        centerX + Math.round(x * fireworkCellAspect / 2),
         centerY + y,
         char,
         "firework",

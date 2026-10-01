@@ -462,6 +462,7 @@ main {
 
 .ascii-cell.is-firework {
   color: #d38a18;
+  transform: scaleX(var(--firework-glyph-scale, 1));
 }
 
 .ascii-cell.is-firework.tone-firework-gold {
