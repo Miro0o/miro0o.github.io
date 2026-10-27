@@ -46,8 +46,12 @@
 
     <main class="worldmodel-main">
       <figure class="knowledge-map" data-worldmodel-map aria-label="Interactive 2D atlas of miniWorldModel">
+        <figcaption class="map-intro" id="map-intro">
+          <p>A visualization of my evolving understanding of the world, based on my study notes. Outer rings represent increasingly specific concepts, while paths through the hierarchy trace their conceptual lineage. Cross-links connect related notes.</p>
+          <p class="map-source-note">This is an example map · <a href="https://github.com/Miro0o/miniWorldModel">View the full map on GitHub</a></p>
+        </figcaption>
         <div class="map-viewport">
-          <canvas tabindex="0" aria-label="Interactive radial map of the miniWorldModel knowledge base. Drag to pan, scroll or pinch to zoom, hover nodes to highlight their hierarchy, and click a node to keep its branch highlighted."></canvas>
+          <canvas tabindex="0" aria-describedby="map-intro" aria-label="Interactive radial map of the miniWorldModel knowledge base. Drag to pan, scroll or pinch to zoom, hover nodes to highlight their hierarchy, and click a node to keep its branch highlighted."></canvas>
           <div class="map-key">
             <div class="map-legend" aria-label="Map legend">
               <span><i class="is-folder"></i>Folder</span>
@@ -56,7 +60,6 @@
               <span><i class="is-note-link"></i>Note link</span>
             </div>
             <span data-map-count>Loading map…</span>
-            <span class="map-source-note">(Example map · <a href="https://github.com/Miro0o/miniWorldModel">View the full map on GitHub</a>)</span>
           </div>
           <div class="map-loading" aria-hidden="true">
             <span></span>
