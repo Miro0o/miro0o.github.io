@@ -74,7 +74,7 @@
   const playMontage = (feature) => {
     if (!feature || !panelIsActive()) return;
     const video = feature.querySelector(".game-montage");
-    if (!video?.dataset.src) return;
+    if (!video?.dataset.src || !video.paused) return;
     if (!video.hasAttribute("src")) {
       video.src = video.dataset.src;
       video.load();
@@ -92,13 +92,15 @@
   };
 
   const selectFeature = (feature) => {
-    if (visibleFeature === feature) return;
-    world.classList.toggle("is-archive-current", feature === archive);
-    features.forEach((candidate) => {
-      candidate.classList.toggle("is-current", candidate === feature);
-    });
-    jumpLinks.forEach((link) => link.classList.toggle("is-current", link.hash === `#${feature.id}`));
-    visibleFeature = feature;
+    if (visibleFeature !== feature) {
+      world.classList.toggle("is-archive-current", feature === archive);
+      features.forEach((candidate) => {
+        candidate.classList.toggle("is-current", candidate === feature);
+      });
+      jumpLinks.forEach((link) => link.classList.toggle("is-current", link.hash === `#${feature.id}`));
+      visibleFeature = feature;
+    }
+    // Opening the panel can briefly hide and pause the same selected game.
     if (features.includes(feature)) playMontage(feature);
   };
 
